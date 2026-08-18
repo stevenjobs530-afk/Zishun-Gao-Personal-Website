@@ -38,12 +38,19 @@ function protectedReplace(contents, rootPath, prefixedPath, token) {
     .replaceAll(token, prefixedPath);
 }
 
-function prefixRootPaths(contents) {
+function rootsForExtension(extension) {
+  // Component-authored URLs in JS/RSC already use NEXT_PUBLIC_BASE_PATH at
+  // runtime. Rewriting those source literals as well would apply the prefix
+  // twice. HTML and CSS contain final URLs and still need full rewriting.
+  return extension === ".html" || extension === ".css" ? pathRoots : ["assets"];
+}
+
+function prefixRootPaths(contents, extension) {
   if (!basePath) return contents;
 
   let updated = contents;
 
-  for (const root of pathRoots) {
+  for (const root of rootsForExtension(extension)) {
     updated = protectedReplace(
       updated,
       `/${root}/`,
@@ -52,7 +59,7 @@ function prefixRootPaths(contents) {
     );
   }
 
-  for (const file of rootFiles) {
+  for (const file of extension === ".html" || extension === ".css" ? rootFiles : []) {
     updated = protectedReplace(
       updated,
       `/${file}`,
@@ -70,9 +77,10 @@ function prefixRootPaths(contents) {
 let files = await collectFiles(outputDirectory);
 
 for (const file of files) {
-  if (!textExtensions.has(extname(file))) continue;
+  const extension = extname(file);
+  if (!textExtensions.has(extension)) continue;
   const contents = await readFile(file, "utf8");
-  const updated = prefixRootPaths(contents);
+  const updated = prefixRootPaths(contents, extension);
   if (updated !== contents) await writeFile(file, updated);
 }
 
@@ -100,14 +108,23 @@ files = await collectFiles(outputDirectory);
 const unresolved = [];
 
 for (const file of files) {
-  if (!textExtensions.has(extname(file))) continue;
+  const extension = extname(file);
+  if (!textExtensions.has(extension)) continue;
   const contents = await readFile(file, "utf8");
 
   if (basePath && contents.includes(`${basePath}${basePath}`)) {
     unresolved.push(`${file}: duplicated base path`);
   }
 
-  for (const root of pathRoots) {
+  if (extension === ".js" && basePath) {
+    for (const root of pathRoots.filter((entry) => entry !== "assets")) {
+      if (contents.includes(`${basePath}/${root}/`)) {
+        unresolved.push(`${file}: runtime public path was prefixed before hydration (${root})`);
+      }
+    }
+  }
+
+  for (const root of rootsForExtension(extension)) {
     const rootPath = `/${root}/`;
     const withoutPrefixedPaths = basePath
       ? contents.replaceAll(`${basePath}${rootPath}`, "")

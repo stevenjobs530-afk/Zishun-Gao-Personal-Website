@@ -152,15 +152,18 @@
 
 .backgroundVideo {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100vw;
-  height: 56.25vw;
-  min-width: 177.77vh;
-  min-height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border: 0;
+  object-fit: cover;
+  opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -50%);
+  transition: opacity 360ms ease;
+}
+
+.heroMedia[data-video-state="playing"] .backgroundVideo {
+  opacity: 1;
 }
 
 .loadingShade {
@@ -169,6 +172,43 @@
   background:
     linear-gradient(90deg, rgba(5, 8, 10, 0.5), transparent 62%),
     linear-gradient(180deg, rgba(4, 7, 9, 0.16), transparent 42%, rgba(4, 7, 9, 0.62));
+}
+
+.videoPlayFallback {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 20px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(6, 15, 21, 0.5);
+  color: #fff;
+  cursor: pointer;
+  font: 650 10px/1 "Inter", system-ui, sans-serif;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.videoPlayFallback:hover,
+.videoPlayFallback:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.videoPlayFallback:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.videoPlayFallback span {
+  font-size: 12px;
 }
 
 .heroMediaFooter {
@@ -880,7 +920,8 @@
   }
 
   .background { transform: none; }
-  .backgroundVideo { visibility: hidden; }
+  .backgroundVideo,
+  .videoPlayFallback { display: none; }
   .heroTitle > *,
   .heroEyebrow,
   .heroDescription {

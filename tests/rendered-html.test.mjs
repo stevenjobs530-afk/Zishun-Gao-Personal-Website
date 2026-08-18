@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 const projectRoot = new URL("../", import.meta.url);
@@ -436,8 +436,10 @@ test("server-renders the complete English-only Personal Training project route",
   assert.match(html, /FOR STRENGTH AND/);
   assert.match(html, /CARDIO RECORDS/);
   assert.match(html, /A mobile-first personal project for recording user-named strength exercises and machines/);
-  assert.match(html, /player\.vimeo\.com\/video\/1184061018/);
-  assert.match(html, /controls=0&amp;autoplay=1&amp;loop=1&amp;muted=1/);
+  assert.match(html, /ocean-hero-720p\.mp4/);
+  assert.match(html, /<video/);
+  assert.match(html, /playsInline=""/);
+  assert.doesNotMatch(html, /player\.vimeo\.com|1184061018/);
   assert.match(html, /Back to Portfolio/);
   assert.match(html, /\?lang=en#personal-training-project/);
   assert.match(html, /data-portfolio-back-link/);
@@ -494,11 +496,15 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /READ THE TREND/);
   assert.match(component, /event\.key === "Escape"/);
   assert.match(component, /scrollIntoView/);
-  assert.match(component, /for \(const delay of \[0, 500, 1500\]\)/);
-  assert.match(component, /player\.on\("loaded", handlePlayerLoaded\)/);
+  assert.match(component, /HERO_PLAYBACK_TIMEOUT_MS = 2500/);
+  assert.match(component, /video\.paused \|\| video\.currentTime < 0\.1/);
+  assert.match(component, /if \(video\?\.error\) video\.load\(\)/);
+  assert.match(component, /Play animation/);
+  assert.match(component, /autoPlay=\{prefersReducedMotion === false\}/);
+  assert.match(component, /preload=\{prefersReducedMotion \? "none" : "auto"\}/);
   assert.match(component, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
   assert.match(component, /window\.addEventListener\("pageshow", handlePageShow\)/);
-  assert.match(component, /if \(!hero \|\| !iframe \|\| prefersReducedMotion\) return/);
+  assert.doesNotMatch(component, /@vimeo\/player|player\.vimeo\.com|1184061018/);
   assert.doesNotMatch(component, /RippleField|StaggeredMenu|feDisplacementMap|from "gsap"/);
   assert.match(demo, /useReducer/);
   assert.match(demo, /Studio Cable Row — Demo/);
@@ -510,6 +516,9 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(stylesheet, /overflow-x:\s*clip/);
   assert.match(stylesheet, /background:\s*var\(--paper,\s*#f0ece4\)/);
   assert.match(stylesheet, /\.heroMedia\s*\{[\s\S]*border-radius:\s*28px/s);
+  assert.match(stylesheet, /\.heroMedia\[data-video-state="playing"\] \.backgroundVideo\s*\{[^}]*opacity:\s*1/s);
+  assert.match(stylesheet, /\.videoPlayFallback\s*\{[^}]*position:\s*absolute[^}]*z-index:\s*3/s);
+  assert.match(stylesheet, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.backgroundVideo,[\s\S]*\.videoPlayFallback\s*\{\s*display:\s*none;/s);
   assert.match(stylesheet, /\.story\s*\{[\s\S]*gap:\s*32px;[\s\S]*background:\s*var\(--paper,\s*#f0ece4\)/s);
   assert.match(stylesheet, /\.storySection::before[\s\S]*background-image:\s*var\(--story-section-image\)[\s\S]*background-attachment:\s*scroll[\s\S]*filter:\s*var\(--story-section-filter,\s*none\)/s);
   assert.match(stylesheet, /\.motivationSection\s*\{[^}]*--story-section-filter:\s*brightness\(1\.14\) saturate\(1\.06\)/s);
@@ -521,12 +530,16 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(stylesheet, /personal-training-custom-demo\.webp/);
   assert.match(stylesheet, /personal-training-models\.webp/);
   assert.match(stylesheet, /personal-training-architecture\.webp/);
+  const heroVideo = new URL("../public/personal-projects/personal-training/video/ocean-hero-720p.mp4", import.meta.url);
   await Promise.all([
     access(new URL("../public/personal-projects/personal-training/backgrounds/personal-training-motivation.webp", import.meta.url)),
     access(new URL("../public/personal-projects/personal-training/backgrounds/personal-training-custom-demo.webp", import.meta.url)),
     access(new URL("../public/personal-projects/personal-training/backgrounds/personal-training-models.webp", import.meta.url)),
     access(new URL("../public/personal-projects/personal-training/backgrounds/personal-training-architecture.webp", import.meta.url)),
+    access(heroVideo),
   ]);
+  const heroVideoStats = await stat(heroVideo);
+  assert.ok(heroVideoStats.size >= 3_700_000 && heroVideoStats.size <= 3_800_000);
   assert.match(stylesheet, /@media \(max-width:\s*760px\)[\s\S]*\.heroTitle\s*\{[^}]*line-height:\s*0\.88/s);
 });
 

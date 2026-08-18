@@ -8,8 +8,11 @@ import StrengthDemo from "./strength-demo";
 
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-const VIMEO_URL =
-  "https://player.vimeo.com/video/1184061018?controls=0&autoplay=1&loop=1&muted=1&byline=0&title=0&playsinline=1";
+const HERO_VIDEO_URL = `${appBasePath}/personal-projects/personal-training/video/ocean-hero-720p.mp4`;
+const HERO_VIDEO_POSTER = `${appBasePath}/personal-projects/personal-training/backgrounds/personal-training-motivation.webp`;
+const HERO_PLAYBACK_TIMEOUT_MS = 2500;
+
+type HeroVideoState = "loading" | "playing" | "fallback";
 
 const MENU_ITEMS = [
   { label: "Overview", target: "top" },
@@ -270,9 +273,11 @@ function ProjectStory() {
 
 export default function PersonalTrainingHero() {
   const [isFleetOpen, setIsFleetOpen] = useState(false);
+  const [heroVideoState, setHeroVideoState] = useState<HeroVideoState>("loading");
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
-  const backgroundVideoRef = useRef<HTMLIFrameElement>(null);
+  const backgroundVideoRef = useRef<HTMLVideoElement>(null);
+  const heroPlaybackTimerRef = useRef<number | null>(null);
   const exploreButtonRef = useRef<HTMLButtonElement>(null);
   const fleetCloseRef = useRef<HTMLButtonElement>(null);
   const fleetOverlayRef = useRef<HTMLElement>(null);
@@ -286,117 +291,99 @@ export default function PersonalTrainingHero() {
     }
   }, []);
 
+  const clearHeroPlaybackTimer = useCallback(() => {
+    if (heroPlaybackTimerRef.current === null) return;
+    window.clearTimeout(heroPlaybackTimerRef.current);
+    heroPlaybackTimerRef.current = null;
+  }, []);
+
+  const scheduleHeroPlaybackFallback = useCallback(() => {
+    clearHeroPlaybackTimer();
+    if (prefersReducedMotion) return;
+
+    heroPlaybackTimerRef.current = window.setTimeout(() => {
+      heroPlaybackTimerRef.current = null;
+      const video = backgroundVideoRef.current;
+      if (video && (video.paused || video.currentTime < 0.1)) {
+        setHeroVideoState("fallback");
+      }
+    }, HERO_PLAYBACK_TIMEOUT_MS);
+  }, [clearHeroPlaybackTimer, prefersReducedMotion]);
+
+  const requestHeroPlayback = useCallback(async () => {
+    const video = backgroundVideoRef.current;
+    if (!video || prefersReducedMotion) return;
+
+    video.muted = true;
+    scheduleHeroPlaybackFallback();
+    try {
+      await video.play();
+    } catch {
+      // The watchdog reveals a user-controlled fallback if autoplay is denied.
+    }
+  }, [prefersReducedMotion, scheduleHeroPlaybackFallback]);
+
+  const handleHeroVideoPlaying = useCallback(() => {
+    clearHeroPlaybackTimer();
+    setHeroVideoState("playing");
+  }, [clearHeroPlaybackTimer]);
+
+  const handleHeroVideoError = useCallback(() => {
+    clearHeroPlaybackTimer();
+    if (!prefersReducedMotion) setHeroVideoState("fallback");
+  }, [clearHeroPlaybackTimer, prefersReducedMotion]);
+
+  const handleHeroFallbackClick = useCallback(() => {
+    const video = backgroundVideoRef.current;
+    if (video?.error) video.load();
+    setHeroVideoState("loading");
+    void requestHeroPlayback();
+  }, [requestHeroPlayback]);
+
   useEffect(() => {
     const hero = heroRef.current;
-    const iframe = backgroundVideoRef.current;
-    if (!hero || !iframe || prefersReducedMotion) return;
+    const video = backgroundVideoRef.current;
+    if (!hero || !video) return;
 
-    let disposed = false;
+    if (prefersReducedMotion) {
+      clearHeroPlaybackTimer();
+      video.pause();
+      return;
+    }
+
     const heroRect = hero.getBoundingClientRect();
     let isHeroVisible = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
-    let observer: IntersectionObserver | null = null;
-    let player: import("@vimeo/player").default | null = null;
-    let playbackRevision = 0;
-    const retryTimers = new Set<number>();
-
-    const clearPlaybackRetries = () => {
-      for (const timer of retryTimers) window.clearTimeout(timer);
-      retryTimers.clear();
-    };
-
-    const canPlay = () => (
-      !disposed
-      && isHeroVisible
-      && document.visibilityState === "visible"
-    );
-
-    const updatePlayback = (shouldPlay: boolean) => {
-      const revision = ++playbackRevision;
-      clearPlaybackRetries();
-
-      if (!shouldPlay || !canPlay()) {
-        if (player) void player.pause().catch(() => undefined);
-        return;
-      }
-
-      for (const delay of [0, 500, 1500]) {
-        const timer = window.setTimeout(() => {
-          retryTimers.delete(timer);
-          void (async () => {
-            if (revision !== playbackRevision || !player || !canPlay()) return;
-            try {
-              await player.setMuted(true);
-              await player.play();
-              clearPlaybackRetries();
-              if (revision !== playbackRevision || !canPlay()) {
-                await player.pause();
-              }
-            } catch {
-              // Muted autoplay remains subject to browser and device policy.
-              // The remaining bounded retries keep the static fallback visible.
-            }
-          })();
-        }, delay);
-        retryTimers.add(timer);
+    const updatePlayback = () => {
+      if (isHeroVisible && document.visibilityState === "visible") {
+        void requestHeroPlayback();
+      } else {
+        clearHeroPlaybackTimer();
+        video.pause();
       }
     };
 
-    const handleVisibilityChange = () => {
-      updatePlayback(document.visibilityState === "visible");
-    };
-    const handlePageShow = () => updatePlayback(true);
-    const handlePlayerLoaded = () => updatePlayback(true);
+    const handleVisibilityChange = () => updatePlayback();
+    const handlePageShow = () => updatePlayback();
 
-    observer = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         isHeroVisible = entry.isIntersecting && entry.intersectionRatio >= 0.05;
-        updatePlayback(isHeroVisible);
+        updatePlayback();
       },
       { threshold: [0, 0.05, 0.25] },
     );
     observer.observe(hero);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("pageshow", handlePageShow);
-
-    void import("@vimeo/player").then(async ({ default: Player }) => {
-      if (disposed) return;
-      player = new Player(iframe);
-      player.on("loaded", handlePlayerLoaded);
-      try {
-        await player.ready();
-        if (disposed) return;
-        await Promise.allSettled([
-          player.setMuted(true),
-          player.setLoop(true),
-        ]);
-        updatePlayback(true);
-      } catch {
-        if (player) {
-          player.off("loaded", handlePlayerLoaded);
-        }
-      }
-    }).catch(() => undefined);
+    updatePlayback();
 
     return () => {
-      disposed = true;
-      playbackRevision += 1;
-      clearPlaybackRetries();
-      observer?.disconnect();
+      clearHeroPlaybackTimer();
+      observer.disconnect();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pageshow", handlePageShow);
-
-      const mountedPlayer = player;
-      if (mountedPlayer) {
-        mountedPlayer.off("loaded", handlePlayerLoaded);
-        void mountedPlayer.pause().catch(() => undefined);
-      }
-      window.setTimeout(() => {
-        if (!iframe.isConnected && mountedPlayer) {
-          void mountedPlayer.destroy().catch(() => undefined);
-        }
-      }, 0);
     };
-  }, [prefersReducedMotion]);
+  }, [clearHeroPlaybackTimer, prefersReducedMotion, requestHeroPlayback]);
 
   useEffect(() => {
     if (!isFleetOpen) return;
@@ -480,20 +467,42 @@ export default function PersonalTrainingHero() {
 
         <motion.div
           className={styles.heroMedia}
+          data-video-state={heroVideoState}
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className={styles.background}>
-            <iframe
+            <video
               ref={backgroundVideoRef}
-              src={VIMEO_URL}
+              src={HERO_VIDEO_URL}
+              poster={HERO_VIDEO_POSTER}
               className={styles.backgroundVideo}
-              title="Ocean background film"
-              allow="autoplay; fullscreen; picture-in-picture"
+              autoPlay={prefersReducedMotion === false}
+              muted
+              loop
+              playsInline
+              preload={prefersReducedMotion ? "none" : "auto"}
+              aria-hidden="true"
+              onCanPlay={() => void requestHeroPlayback()}
+              onPlaying={handleHeroVideoPlaying}
+              onWaiting={scheduleHeroPlaybackFallback}
+              onStalled={scheduleHeroPlaybackFallback}
+              onError={handleHeroVideoError}
             />
           </div>
           <div className={styles.loadingShade} />
+          {!prefersReducedMotion && heroVideoState === "fallback" ? (
+            <button
+              type="button"
+              className={styles.videoPlayFallback}
+              onClick={handleHeroFallbackClick}
+              aria-label="Play the ocean background animation"
+            >
+              <span aria-hidden="true">▶</span>
+              Play animation
+            </button>
+          ) : null}
           <div className={styles.heroMediaFooter}>
             <p className={styles.heroDescription}>
               A mobile-first personal project for recording user-named strength exercises and machines, structured sets, cardio sessions, rest days and simple summaries based on saved records.

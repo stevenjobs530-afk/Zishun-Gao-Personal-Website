@@ -386,16 +386,18 @@ export default function UkRetailCaseStudy({ initialLanguage }: { initialLanguage
         </section>
 
         <section className="uk-retail-code uk-retail-section uk-retail-section-dark" aria-labelledby="code-title">
-          <div className="uk-retail-code-copy">
-            <div className="uk-retail-section-heading">
-              <p>{t.sections.code.label}</p>
-              <h2 id="code-title">{t.sections.code.title}</h2>
+          <div className="uk-retail-code-inner">
+            <div className="uk-retail-code-copy">
+              <div className="uk-retail-section-heading">
+                <p>{t.sections.code.label}</p>
+                <h2 id="code-title">{t.sections.code.title}</h2>
+              </div>
+              <p>{t.sections.code.body}</p>
             </div>
-            <p>{t.sections.code.body}</p>
+            <pre aria-label={t.sections.code.label}>
+              <code>{t.sections.code.snippet}</code>
+            </pre>
           </div>
-          <pre aria-label={t.sections.code.label}>
-            <code>{t.sections.code.snippet}</code>
-          </pre>
         </section>
 
         <section id="decisions" className="uk-retail-decisions uk-retail-section" aria-labelledby="decisions-title">

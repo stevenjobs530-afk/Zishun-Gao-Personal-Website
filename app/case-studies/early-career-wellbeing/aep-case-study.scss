@@ -1,5 +1,5 @@
 @import "@fontsource/newsreader/400.css";
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
 
 $ink: #102023;
 $night: #061317;
@@ -11,6 +11,7 @@ $mist: #e5eeea;
 $line: rgba($ink, 0.12);
 
 .aep-page {
+  --aep-display-font: "Newsreader", "Source Serif 4", Georgia, serif;
   min-height: 100vh;
   overflow-x: hidden;
   background: $paper;
@@ -156,7 +157,7 @@ $line: rgba($ink, 0.12);
   h1 {
     max-width: 980px;
     margin: 18px auto 0;
-    font-family: "Instrument Serif", Georgia, serif;
+    font-family: var(--aep-display-font);
     font-size: clamp(64px, 7.2vw, 112px);
     font-weight: 400;
     letter-spacing: -0.055em;
@@ -249,7 +250,7 @@ $line: rgba($ink, 0.12);
   }
 
   dt {
-    font-family: "Instrument Serif", Georgia, serif;
+    font-family: var(--aep-display-font);
     font-size: clamp(30px, 2.8vw, 44px);
     letter-spacing: -0.04em;
     line-height: 0.95;
@@ -300,7 +301,7 @@ $line: rgba($ink, 0.12);
 
   h2 {
     max-width: 1040px;
-    font-family: "Instrument Serif", Georgia, serif;
+    font-family: var(--aep-display-font);
     font-size: clamp(46px, 5.8vw, 82px);
     font-weight: 400;
     letter-spacing: -0.05em;
@@ -323,6 +324,10 @@ $line: rgba($ink, 0.12);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   letter-spacing: -0.025em;
   line-height: 1.12;
+}
+
+.aep-page[lang="zh-CN"] {
+  --aep-display-font: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 .aep-purpose {
@@ -359,7 +364,7 @@ $line: rgba($ink, 0.12);
 
     p {
       margin-top: 40px;
-      font-family: "Instrument Serif", Georgia, serif;
+      font-family: var(--aep-display-font);
       font-size: clamp(28px, 3vw, 43px);
       letter-spacing: -0.03em;
       line-height: 1.12;
@@ -460,7 +465,7 @@ $line: rgba($ink, 0.12);
 
     h3 {
       margin-top: auto;
-      font-family: "Instrument Serif", Georgia, serif;
+      font-family: var(--aep-display-font);
       font-size: clamp(31px, 3vw, 44px);
       font-weight: 400;
       letter-spacing: -0.04em;
@@ -494,7 +499,7 @@ $line: rgba($ink, 0.12);
 
   p {
     color: rgba(255, 255, 255, 0.7);
-    font-family: "Instrument Serif", Georgia, serif;
+    font-family: var(--aep-display-font);
     font-size: clamp(23px, 2.5vw, 34px);
     line-height: 1.16;
   }
@@ -540,7 +545,7 @@ $line: rgba($ink, 0.12);
 
     h3 {
       margin-top: 42px;
-      font-family: "Instrument Serif", Georgia, serif;
+      font-family: var(--aep-display-font);
       font-size: clamp(27px, 2.8vw, 39px);
       font-weight: 400;
       letter-spacing: -0.04em;
@@ -570,14 +575,15 @@ $line: rgba($ink, 0.12);
 
   ol {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 12px;
-    margin-top: clamp(64px, 8vw, 104px);
+    margin: clamp(64px, 8vw, 104px) auto 0;
     padding: 0;
     list-style: none;
   }
 
   li {
+    min-width: 0;
     min-height: 360px;
     display: flex;
     flex-direction: column;
@@ -615,10 +621,12 @@ $line: rgba($ink, 0.12);
 
     h3 {
       margin-top: 32px;
-      font-family: "Instrument Serif", Georgia, serif;
+      min-width: 0;
+      font-family: var(--aep-display-font);
       font-size: clamp(27px, 2.4vw, 36px);
       font-weight: 400;
       letter-spacing: -0.035em;
+      overflow-wrap: break-word;
     }
 
     p {
@@ -628,6 +636,12 @@ $line: rgba($ink, 0.12);
       line-height: 1.7;
     }
   }
+}
+
+.aep-page[lang="en"] .aep-flow li:first-child h3 {
+  font-size: clamp(21px, 1.65vw, 26px);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .aep-safeguards {
@@ -666,7 +680,7 @@ $line: rgba($ink, 0.12);
 
     h3 {
       margin-top: 42px;
-      font-family: "Instrument Serif", Georgia, serif;
+      font-family: var(--aep-display-font);
       font-size: clamp(30px, 3vw, 43px);
       font-weight: 400;
       letter-spacing: -0.04em;
@@ -785,7 +799,7 @@ $line: rgba($ink, 0.12);
     }
 
     h3 {
-      font-family: "Instrument Serif", Georgia, serif;
+      font-family: var(--aep-display-font);
       font-size: clamp(29px, 3vw, 43px);
       font-weight: 400;
       letter-spacing: -0.04em;
@@ -846,7 +860,7 @@ $line: rgba($ink, 0.12);
   h2 {
     max-width: 1040px;
     margin-top: 22px;
-    font-family: "Instrument Serif", Georgia, serif;
+    font-family: var(--aep-display-font);
     font-size: clamp(52px, 6.8vw, 98px);
     font-weight: 400;
     letter-spacing: -0.055em;
@@ -939,6 +953,11 @@ $line: rgba($ink, 0.12);
   .aep-flow li:last-child {
     grid-column: span 2;
     min-height: 250px;
+  }
+
+  .aep-page[lang="en"] .aep-flow li:first-child h3 {
+    font-size: clamp(27px, 2.4vw, 36px);
+    white-space: normal;
   }
 
   .aep-code {

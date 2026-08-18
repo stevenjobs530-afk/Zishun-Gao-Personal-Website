@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { access, readdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
 const outputDirectory = resolve("dist/client");
@@ -31,11 +31,25 @@ const pathRoots = [
 ];
 const rootFiles = publicEntries.filter((entry) => entry.isFile()).map((entry) => entry.name);
 
-function protectedReplace(contents, rootPath, prefixedPath, token) {
-  return contents
-    .replaceAll(prefixedPath, token)
-    .replaceAll(rootPath, prefixedPath)
-    .replaceAll(token, prefixedPath);
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function prefixOriginRoot(contents, rootPath, prefixedPath, isFile = false) {
+  const terminalBoundary = isFile ? `(?=[?#"'\\s)]|$)` : "";
+  const pattern = new RegExp(
+    `(^|[("'=:\\s])${escapeRegExp(rootPath)}${terminalBoundary}`,
+    "g",
+  );
+  return contents.replace(pattern, `$1${prefixedPath}`);
+}
+
+function containsOriginRoot(contents, rootPath, isFile = false) {
+  const terminalBoundary = isFile ? `(?=[?#"'\\s)]|$)` : "";
+  const pattern = new RegExp(
+    `(^|[("'=:\\s])${escapeRegExp(rootPath)}${terminalBoundary}`,
+  );
+  return pattern.test(contents);
 }
 
 function rootsForExtension(extension) {
@@ -51,20 +65,19 @@ function prefixRootPaths(contents, extension) {
   let updated = contents;
 
   for (const root of rootsForExtension(extension)) {
-    updated = protectedReplace(
+    updated = prefixOriginRoot(
       updated,
       `/${root}/`,
       `${basePath}/${root}/`,
-      `__STATIC_ROOT_${root.toUpperCase().replaceAll("-", "_")}__`,
     );
   }
 
   for (const file of extension === ".html" || extension === ".css" ? rootFiles : []) {
-    updated = protectedReplace(
+    updated = prefixOriginRoot(
       updated,
       `/${file}`,
       `${basePath}/${file}`,
-      `__STATIC_FILE_${file.toUpperCase().replaceAll(/[^A-Z0-9]/g, "_")}__`,
+      true,
     );
   }
 
@@ -106,6 +119,11 @@ for (const page of requiredPages) {
 
 files = await collectFiles(outputDirectory);
 const unresolved = [];
+const publicRootSet = new Set(pathRoots);
+const publicFileSet = new Set(rootFiles);
+const absolutePathPattern = basePath
+  ? new RegExp(`${escapeRegExp(basePath)}/[^\\s"'()<>\\\\]+`, "g")
+  : null;
 
 for (const file of files) {
   const extension = extname(file);
@@ -114,6 +132,28 @@ for (const file of files) {
 
   if (basePath && contents.includes(`${basePath}${basePath}`)) {
     unresolved.push(`${file}: duplicated base path`);
+  }
+
+  if (absolutePathPattern) {
+    for (const match of contents.matchAll(absolutePathPattern)) {
+      const rawPath = match[0];
+      if (rawPath.indexOf(basePath, basePath.length) !== -1) {
+        unresolved.push(`${file}: base path appears more than once in ${rawPath}`);
+        continue;
+      }
+
+      const pathWithoutQuery = rawPath.split(/[?#]/, 1)[0];
+      const relativePath = pathWithoutQuery.slice(basePath.length + 1);
+      const [firstSegment] = relativePath.split("/");
+      if (!publicRootSet.has(firstSegment) && !publicFileSet.has(relativePath)) continue;
+      if (!extname(relativePath)) continue;
+
+      try {
+        await access(join(outputDirectory, decodeURI(relativePath)));
+      } catch {
+        unresolved.push(`${file}: missing local asset ${rawPath}`);
+      }
+    }
   }
 
   if (extension === ".js" && basePath) {
@@ -126,10 +166,7 @@ for (const file of files) {
 
   for (const root of rootsForExtension(extension)) {
     const rootPath = `/${root}/`;
-    const withoutPrefixedPaths = basePath
-      ? contents.replaceAll(`${basePath}${rootPath}`, "")
-      : contents;
-    if (basePath && withoutPrefixedPaths.includes(rootPath)) {
+    if (basePath && containsOriginRoot(contents, rootPath)) {
       unresolved.push(`${file}: unresolved ${rootPath}`);
     }
   }

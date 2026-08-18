@@ -654,10 +654,16 @@ $warm-paper: #f5f3ef;
 }
 
 .uk-retail-code {
+  display: block;
+}
+
+.uk-retail-code-inner {
+  width: min(1120px, 100%);
   display: grid;
   grid-template-columns: minmax(0, 0.75fr) minmax(480px, 1fr);
   gap: clamp(60px, 9vw, 140px);
   align-items: start;
+  margin: 0 auto;
 
   > * {
     width: auto;
@@ -775,7 +781,32 @@ $warm-paper: #f5f3ef;
 }
 
 .uk-retail-results {
+  width: 100%;
+  max-width: none;
   background: #ebe8e3;
+
+  > * {
+    width: min(1120px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .uk-retail-section-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+
+    > p {
+      padding-top: 0;
+    }
+
+    h2 {
+      margin-right: auto;
+      margin-left: auto;
+    }
+  }
 
   &::before {
     background-image: url("/case-studies/uk-retail/results-background.png");
@@ -792,16 +823,17 @@ $warm-paper: #f5f3ef;
 
 .uk-retail-results-body {
   max-width: 670px;
-  margin: clamp(48px, 7vw, 88px) 0 0 auto !important;
+  margin: clamp(48px, 7vw, 88px) auto 0 !important;
   color: rgba($ink, 0.66);
   font-size: clamp(16px, 1.6vw, 21px);
   line-height: 1.75;
+  text-align: center;
 }
 
 .uk-retail-results dl {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin: clamp(64px, 8vw, 104px) 0 0;
+  margin: clamp(64px, 8vw, 104px) auto 0;
   border-top: 1px solid #cecbc7;
   border-bottom: 1px solid #cecbc7;
   background: rgba(#ebe8e3, 0.84);
@@ -1012,7 +1044,7 @@ $warm-paper: #f5f3ef;
 
   .uk-retail-output-intro,
   .uk-retail-chart-grid,
-  .uk-retail-code {
+  .uk-retail-code-inner {
     grid-template-columns: 1fr;
   }
 

@@ -100,6 +100,19 @@ test("keeps the user-owned hero background and responsive language controls", as
   ]);
 });
 
+test("keeps UK Results full-bleed and aligns the SQL content shell", async () => {
+  const [component, stylesheet] = await Promise.all([
+    readFile(new URL("../app/case-studies/uk-retail/uk-retail-case-study.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/uk-retail/uk-retail-hero.scss", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(component, /className="uk-retail-code-inner"/);
+  assert.match(stylesheet, /\.uk-retail-code-inner\s*\{[^}]*width:\s*min\(1120px, 100%\)[^}]*display:\s*grid[^}]*margin:\s*0 auto/s);
+  assert.match(stylesheet, /\.uk-retail-results\s*\{[^}]*width:\s*100%[^}]*max-width:\s*none/s);
+  assert.match(stylesheet, /\.uk-retail-results\s*\{[\s\S]*?> \*\s*\{[^}]*width:\s*min\(1120px, 100%\)[^}]*margin-right:\s*auto[^}]*margin-left:\s*auto/s);
+  assert.match(stylesheet, /\.uk-retail-results-body\s*\{[^}]*margin:\s*clamp\(48px, 7vw, 88px\) auto 0 !important[^}]*text-align:\s*center/s);
+});
+
 test("server-renders the redesigned English Apple case study", async () => {
   const response = await render("/case-studies/apple-app-store?lang=en");
   assert.equal(response.status, 200);
@@ -140,6 +153,30 @@ test("hydrates the static Apple route from the requested Chinese language", asyn
   assert.match(component, /2021 年 10 月/);
   assert.match(component, /requestedLanguage/);
   assert.match(component, /Apple App Store 数据分析 — 高子舜/);
+});
+
+test("centers the Apple and AEP five-step grids with equal-width tracks", async () => {
+  const [appleStyles, aepStyles] = await Promise.all([
+    readFile(new URL("../app/case-studies/apple-app-store/apple-case-study.scss", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.scss", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(appleStyles, /\.apple-pipeline\s*\{[\s\S]*?ol\s*\{[\s\S]*?grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)[\s\S]*?margin:\s*clamp\(64px, 8vw, 104px\) auto 0/s);
+  assert.match(appleStyles, /\.apple-pipeline\s*\{[\s\S]*?li\s*\{[^}]*min-width:\s*0/s);
+  assert.match(aepStyles, /\.aep-flow\s*\{[\s\S]*?ol\s*\{[\s\S]*?grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)[\s\S]*?margin:\s*clamp\(64px, 8vw, 104px\) auto 0/s);
+  assert.match(aepStyles, /\.aep-flow\s*\{[\s\S]*?li\s*\{[^}]*min-width:\s*0/s);
+});
+
+test("uses the AEP Hero display font throughout English display copy", async () => {
+  const stylesheet = await readFile(
+    new URL("../app/case-studies/early-career-wellbeing/aep-case-study.scss", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(stylesheet, /--aep-display-font:\s*"Newsreader", "Source Serif 4", Georgia, serif/);
+  assert.match(stylesheet, /\.aep-page\[lang="zh-CN"\]\s*\{[^}]*--aep-display-font:\s*"Inter"/s);
+  assert.doesNotMatch(stylesheet, /Instrument Serif/);
+  assert.ok((stylesheet.match(/font-family:\s*var\(--aep-display-font\)/g) ?? []).length >= 10);
 });
 
 test("routes the Apple and AEP cards to their local case studies", async () => {
@@ -457,6 +494,11 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /READ THE TREND/);
   assert.match(component, /event\.key === "Escape"/);
   assert.match(component, /scrollIntoView/);
+  assert.match(component, /for \(const delay of \[0, 500, 1500\]\)/);
+  assert.match(component, /player\.on\("loaded", handlePlayerLoaded\)/);
+  assert.match(component, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
+  assert.match(component, /window\.addEventListener\("pageshow", handlePageShow\)/);
+  assert.match(component, /if \(!hero \|\| !iframe \|\| prefersReducedMotion\) return/);
   assert.doesNotMatch(component, /RippleField|StaggeredMenu|feDisplacementMap|from "gsap"/);
   assert.match(demo, /useReducer/);
   assert.match(demo, /Studio Cable Row — Demo/);

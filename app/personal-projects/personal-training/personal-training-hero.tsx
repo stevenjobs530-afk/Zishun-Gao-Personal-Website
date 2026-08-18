@@ -289,87 +289,114 @@ export default function PersonalTrainingHero() {
   useEffect(() => {
     const hero = heroRef.current;
     const iframe = backgroundVideoRef.current;
-    if (!hero || !iframe) return;
+    if (!hero || !iframe || prefersReducedMotion) return;
 
     let disposed = false;
-    let isHeroVisible = false;
+    const heroRect = hero.getBoundingClientRect();
+    let isHeroVisible = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
     let observer: IntersectionObserver | null = null;
     let player: import("@vimeo/player").default | null = null;
     let playbackRevision = 0;
+    const retryTimers = new Set<number>();
+
+    const clearPlaybackRetries = () => {
+      for (const timer of retryTimers) window.clearTimeout(timer);
+      retryTimers.clear();
+    };
+
+    const canPlay = () => (
+      !disposed
+      && isHeroVisible
+      && document.visibilityState === "visible"
+    );
 
     const updatePlayback = (shouldPlay: boolean) => {
       const revision = ++playbackRevision;
-      void (async () => {
-        if (disposed || revision !== playbackRevision || !player) return;
-        try {
-          if (!shouldPlay || !isHeroVisible || document.visibilityState !== "visible") {
-            await player.pause();
-            return;
-          }
+      clearPlaybackRetries();
 
-          void player.setMuted(true).catch(() => undefined);
-          await player.play();
-          if (disposed || revision !== playbackRevision || !isHeroVisible || document.visibilityState !== "visible") {
-            await player.pause();
-          }
-        } catch {
-          // Autoplay can still be declined by browser or device policy. A later
-          // visibility, pageshow, or intersection event will safely retry.
-        }
-      })();
+      if (!shouldPlay || !canPlay()) {
+        if (player) void player.pause().catch(() => undefined);
+        return;
+      }
+
+      for (const delay of [0, 500, 1500]) {
+        const timer = window.setTimeout(() => {
+          retryTimers.delete(timer);
+          void (async () => {
+            if (revision !== playbackRevision || !player || !canPlay()) return;
+            try {
+              await player.setMuted(true);
+              await player.play();
+              clearPlaybackRetries();
+              if (revision !== playbackRevision || !canPlay()) {
+                await player.pause();
+              }
+            } catch {
+              // Muted autoplay remains subject to browser and device policy.
+              // The remaining bounded retries keep the static fallback visible.
+            }
+          })();
+        }, delay);
+        retryTimers.add(timer);
+      }
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        updatePlayback(true);
-      } else {
-        updatePlayback(false);
-      }
+      updatePlayback(document.visibilityState === "visible");
     };
     const handlePageShow = () => updatePlayback(true);
+    const handlePlayerLoaded = () => updatePlayback(true);
+
+    observer = new IntersectionObserver(
+      ([entry]) => {
+        isHeroVisible = entry.isIntersecting && entry.intersectionRatio >= 0.05;
+        updatePlayback(isHeroVisible);
+      },
+      { threshold: [0, 0.05, 0.25] },
+    );
+    observer.observe(hero);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pageshow", handlePageShow);
 
     void import("@vimeo/player").then(async ({ default: Player }) => {
       if (disposed) return;
       player = new Player(iframe);
+      player.on("loaded", handlePlayerLoaded);
       try {
         await player.ready();
+        if (disposed) return;
+        await Promise.allSettled([
+          player.setMuted(true),
+          player.setLoop(true),
+        ]);
+        updatePlayback(true);
       } catch {
-        return;
+        if (player) {
+          player.off("loaded", handlePlayerLoaded);
+        }
       }
-      if (disposed) return;
-      void player.setMuted(true).catch(() => undefined);
-      void player.setLoop(true).catch(() => undefined);
-
-      observer = new IntersectionObserver(
-        ([entry]) => {
-          isHeroVisible = entry.isIntersecting && entry.intersectionRatio >= 0.05;
-          if (isHeroVisible) {
-            updatePlayback(true);
-          } else {
-            updatePlayback(false);
-          }
-        },
-        { threshold: [0, 0.05, 0.25] },
-      );
-      observer.observe(hero);
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-      window.addEventListener("pageshow", handlePageShow);
     }).catch(() => undefined);
 
     return () => {
       disposed = true;
+      playbackRevision += 1;
+      clearPlaybackRetries();
       observer?.disconnect();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pageshow", handlePageShow);
 
       const mountedPlayer = player;
+      if (mountedPlayer) {
+        mountedPlayer.off("loaded", handlePlayerLoaded);
+        void mountedPlayer.pause().catch(() => undefined);
+      }
       window.setTimeout(() => {
         if (!iframe.isConnected && mountedPlayer) {
           void mountedPlayer.destroy().catch(() => undefined);
         }
       }, 0);
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     if (!isFleetOpen) return;

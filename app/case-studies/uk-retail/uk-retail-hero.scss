@@ -1,0 +1,1359 @@
+@import url("https://db.onlinewebfonts.com/c/9d4d074c9335825a23cce178ee03b498?family=P22+Mackinac+W01+Book");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
+
+$ink: #191919;
+$paper: #ffffff;
+$soft: #f4f3f3;
+$line: #d7d5d2;
+$warm-paper: #f5f3ef;
+
+.uk-retail-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: $paper;
+  color: $ink;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  a,
+  button {
+    outline-offset: 4px;
+  }
+
+  button {
+    font: inherit;
+  }
+}
+
+.uk-retail-hero {
+  position: relative;
+  isolation: isolate;
+  height: 100svh;
+  min-height: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background: #ecebea;
+}
+
+.uk-retail-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba($paper, 0.12) 0%, rgba($paper, 0) 48%, rgba($paper, 0.08) 100%),
+    url("/case-studies/uk-retail/uk-retail-hero-clean-data.png") 68% 54% / cover no-repeat;
+  filter: saturate(0.94) contrast(1.12) brightness(0.97);
+}
+
+.uk-retail-nav {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 28px;
+  padding: 16px 56px;
+  color: $ink;
+
+  a,
+  button {
+    transition: color 200ms ease, background-color 200ms ease, transform 200ms ease;
+  }
+}
+
+.uk-retail-nav-links {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 13px 24px;
+  border: 1px solid rgba($paper, 0.76);
+  border-radius: 999px;
+  background: rgba($paper, 0.52);
+  box-shadow: 0 8px 28px rgba($ink, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  a,
+  button {
+    border: 0;
+    background: transparent;
+    color: rgba($ink, 0.7);
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover,
+    &:focus-visible {
+      color: $ink;
+    }
+  }
+}
+
+.uk-retail-nav-cta,
+.uk-retail-hero-copy > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: $ink;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba($ink, 0.9);
+  }
+}
+
+.uk-retail-nav-cta {
+  grid-column: 3;
+  justify-self: end;
+  min-height: 42px;
+  padding: 0 20px;
+}
+
+.uk-retail-mobile-language {
+  display: none;
+}
+
+.uk-retail-hero-copy {
+  position: relative;
+  z-index: 10;
+  width: min(900px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: clamp(94px, 12.5vh, 128px);
+  text-align: center;
+
+  > p {
+    margin-bottom: 12px;
+    color: rgba($ink, 0.64);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    color: $ink;
+    font-family: "P22 Mackinac W01 Book", Georgia, serif;
+    font-size: clamp(56px, 7vw, 112px);
+    font-weight: 400;
+    letter-spacing: -0.06em;
+    line-height: 0.96;
+    text-wrap: balance;
+
+    span {
+      display: block;
+
+      &:last-child {
+        font-style: italic;
+      }
+    }
+  }
+
+  > span {
+    max-width: 540px;
+    margin-top: clamp(18px, 2.5vh, 30px);
+    color: rgba($ink, 0.7);
+    font-size: clamp(13px, 1.1vw, 16px);
+    line-height: 1.65;
+    text-wrap: balance;
+  }
+
+  > a {
+    min-height: 48px;
+    margin-top: clamp(20px, 3vh, 34px);
+    padding: 0 30px;
+  }
+}
+
+.uk-retail-panel-wrap {
+  position: relative;
+  z-index: 10;
+  width: min(1024px, calc(100% - 32px));
+  margin-top: auto;
+}
+
+.uk-retail-panel {
+  padding: 0;
+  border: 1px solid rgba($paper, 0.82);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: rgba($paper, 0.78);
+  box-shadow: 0 18px 60px rgba($ink, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.uk-retail-panel-items {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  > div {
+    min-height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 clamp(20px, 3vw, 36px);
+    border-right: 1px solid rgba($ink, 0.1);
+    color: $ink;
+
+    strong {
+      font-family: "P22 Mackinac W01 Book", Georgia, serif;
+      font-size: clamp(24px, 2.5vw, 36px);
+      font-weight: 400;
+      letter-spacing: -0.04em;
+    }
+
+    span {
+      color: rgba($ink, 0.58);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+}
+
+.uk-retail-story {
+  background: $paper;
+
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  section + section {
+    border-top: 1px solid rgba($ink, 0.08);
+  }
+}
+
+.uk-retail-section {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+  padding: clamp(96px, 10vw, 152px) clamp(24px, 6vw, 80px);
+}
+
+.uk-retail-section-heading {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.36fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(32px, 8vw, 120px);
+
+  > p {
+    padding-top: 10px;
+    color: rgba($ink, 0.62);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    max-width: 850px;
+    font-family: "P22 Mackinac W01 Book", Georgia, serif;
+    font-size: clamp(38px, 5vw, 72px);
+    font-weight: 400;
+    letter-spacing: -0.052em;
+    line-height: 1.03;
+    text-wrap: balance;
+  }
+}
+
+.uk-retail-section-dark {
+  width: 100%;
+  max-width: none;
+  background: $ink;
+  color: $paper;
+
+  > * {
+    width: min(1120px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .uk-retail-section-heading > p {
+    color: rgba($paper, 0.68);
+  }
+}
+
+.uk-retail-method,
+.uk-retail-evidence,
+.uk-retail-outputs,
+.uk-retail-decisions,
+.uk-retail-results {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  &::before,
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+  }
+
+  &::before {
+    z-index: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  &::after {
+    z-index: 1;
+  }
+}
+
+.uk-retail-overview {
+  .uk-retail-section-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+
+    > p {
+      padding-top: 0;
+    }
+
+    h2 {
+      margin: 0 auto;
+    }
+  }
+}
+
+.uk-retail-evidence {
+  &::before {
+    background-image: url("/case-studies/uk-retail/evidence-trail-background.png");
+    background-position: 86% 45%;
+    filter: blur(0.7px) contrast(1.06);
+    opacity: 0.56;
+    transform: scale(1.002);
+  }
+
+  &::after {
+    background: linear-gradient(90deg, rgba($paper, 0.92) 0%, rgba($paper, 0.82) 62%, rgba($paper, 0.42) 100%);
+  }
+
+  .uk-retail-evidence-list {
+    border-radius: 18px;
+    background: rgba($paper, 0.82);
+    box-shadow: 0 24px 70px rgba($ink, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+}
+
+.uk-retail-overview-copy {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.64fr);
+  gap: clamp(48px, 8vw, 104px);
+  margin: clamp(64px, 8vw, 104px) auto 0;
+  text-align: left;
+
+  > p {
+    max-width: 38ch;
+    color: rgba($ink, 0.72);
+    font-size: clamp(17px, 1.6vw, 22px);
+    line-height: 1.72;
+  }
+
+  aside {
+    width: 100%;
+    max-width: 34rem;
+    padding: 24px 0 0 24px;
+    border-top: 1px solid $line;
+    border-left: 1px solid $line;
+    text-align: left;
+
+    span {
+      display: block;
+      margin-bottom: 18px;
+      color: rgba($ink, 0.62);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: rgba($ink, 0.68);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+  }
+}
+
+.uk-retail-method {
+  background: $ink;
+
+  &::before {
+    background-image: url("/case-studies/uk-retail/method-background.png");
+    background-position: 72% 55%;
+    filter: blur(0.8px) grayscale(0.16) contrast(1.12) brightness(0.62);
+    opacity: 0.58;
+    transform: scale(1.004);
+  }
+
+  &::after {
+    background: linear-gradient(90deg, rgba($ink, 0.95) 0%, rgba($ink, 0.82) 48%, rgba($ink, 0.6) 100%);
+  }
+
+  .uk-retail-section-heading {
+    width: min(1120px, 100%);
+  }
+}
+
+.uk-retail-method-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: clamp(64px, 8vw, 104px);
+  padding: 0;
+  border-top: 1px solid rgba($paper, 0.2);
+  list-style: none;
+
+  li {
+    position: relative;
+    min-height: 310px;
+    padding: 24px clamp(20px, 2.5vw, 34px) 30px;
+    border-right: 1px solid rgba($paper, 0.2);
+    background: rgba($ink, 0.34);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: background-color 220ms ease;
+
+    &::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: rgba($paper, 0.72);
+      content: "";
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 220ms ease;
+    }
+
+    &:first-child {
+      border-left: 1px solid rgba($paper, 0.2);
+    }
+
+    > span {
+      color: rgba($paper, 0.64);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+    }
+
+    h3 {
+      margin-top: clamp(74px, 8vw, 112px);
+      font-family: "P22 Mackinac W01 Book", Georgia, serif;
+      font-size: clamp(28px, 2.5vw, 38px);
+      font-weight: 400;
+      letter-spacing: -0.04em;
+    }
+
+    p {
+      margin-top: 16px;
+      color: rgba($paper, 0.72);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    &:hover {
+      background: rgba($ink, 0.48);
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+.uk-retail-evidence-list,
+.uk-retail-decisions ol {
+  margin: clamp(64px, 9vw, 112px) 0 0;
+  padding: 0;
+  border-top: 1px solid $line;
+  list-style: none;
+}
+
+.uk-retail-evidence-list li {
+  display: grid;
+  grid-template-columns: 70px minmax(170px, 0.55fr) minmax(0, 1fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: center;
+  min-height: 168px;
+  border-bottom: 1px solid $line;
+
+  > span,
+  div > p {
+    color: rgba($ink, 0.6);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin-top: 7px;
+    font-family: "P22 Mackinac W01 Book", Georgia, serif;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+  }
+
+  > p {
+    max-width: 480px;
+    color: rgba($ink, 0.66);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  > span {
+    width: 36px;
+    height: 36px;
+    margin-left: 14px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba($ink, 0.18);
+    border-radius: 50%;
+  }
+}
+
+.uk-retail-outputs {
+  width: 100%;
+  max-width: none;
+  padding-right: clamp(24px, 6vw, 80px);
+  padding-left: clamp(24px, 6vw, 80px);
+  background: $warm-paper;
+
+  > * {
+    width: min(1280px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+.uk-retail-output-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.38fr);
+  gap: clamp(40px, 7vw, 100px);
+  align-items: end;
+
+  .uk-retail-section-heading {
+    display: block;
+
+    h2 {
+      margin-top: 20px;
+    }
+  }
+
+  > p {
+    color: rgba($ink, 0.64);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+}
+
+.uk-retail-chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 3.5vw, 52px);
+  margin-top: clamp(56px, 7vw, 96px);
+
+  figure {
+    margin: 0;
+  }
+
+  .uk-retail-chart-frame {
+    position: relative;
+    display: grid;
+    min-height: clamp(270px, 31vw, 440px);
+    place-items: center;
+    padding: clamp(18px, 2.2vw, 32px);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba($ink, 0.07);
+
+    &::after {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba($ink, 0.08);
+      content: "";
+      pointer-events: none;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      filter: saturate(0.76) contrast(0.96);
+    }
+  }
+
+  figcaption {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 16px;
+    padding: 24px 20px 20px;
+    border-radius: 0 0 16px 16px;
+    background: rgba($warm-paper, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    > span {
+      padding-top: 7px;
+      color: rgba($ink, 0.52);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+    }
+
+    h3 {
+      font-family: "P22 Mackinac W01 Book", Georgia, serif;
+      font-size: clamp(25px, 2.4vw, 34px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+    }
+
+    p {
+      max-width: 520px;
+      margin-top: 10px;
+      color: rgba($ink, 0.68);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+  }
+}
+
+.uk-retail-code {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(480px, 1fr);
+  gap: clamp(60px, 9vw, 140px);
+  align-items: start;
+
+  > * {
+    width: auto;
+    margin: 0;
+  }
+
+  .uk-retail-section-heading {
+    display: block;
+
+    h2 {
+      margin-top: 20px;
+    }
+  }
+
+  .uk-retail-code-copy > p {
+    max-width: 480px;
+    margin-top: 28px;
+    color: rgba($paper, 0.72);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  pre {
+    position: relative;
+    margin: 0;
+    padding: clamp(62px, 6vw, 82px) clamp(24px, 4vw, 52px) clamp(30px, 4vw, 52px);
+    overflow-x: auto;
+    border: 1px solid rgba($paper, 0.16);
+    background: #121212;
+    color: rgba($paper, 0.82);
+    font: 400 clamp(11px, 1.15vw, 14px) / 1.9 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba($paper, 0.12);
+      color: rgba($paper, 0.48);
+      content: "SQL";
+      font-family: "Inter", sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+    }
+  }
+}
+
+.uk-retail-decisions ol {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.uk-retail-decisions {
+  &::before {
+    background-image: url("/case-studies/uk-retail/cleaning-decisions-background.png");
+    background-position: 84% 42%;
+    filter: blur(0.7px) contrast(1.06);
+    opacity: 0.52;
+    transform: scale(1.002);
+  }
+
+  &::after {
+    background: rgba($paper, 0.66);
+  }
+}
+
+.uk-retail-decisions li {
+  position: relative;
+  min-height: 300px;
+  padding: 24px clamp(20px, 3vw, 38px) 32px;
+  border-right: 1px solid #d7d5d2;
+  border-bottom: 1px solid #d7d5d2;
+  background: rgba($paper, 0.84);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  &::before {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 48px;
+    height: 2px;
+    background: $ink;
+    content: "";
+  }
+
+  &:first-child {
+    border-left: 1px solid #d7d5d2;
+  }
+
+  span {
+    color: rgba($ink, 0.58);
+    font-size: 11px;
+  }
+
+  h3 {
+    margin-top: 82px;
+    font-family: "P22 Mackinac W01 Book", Georgia, serif;
+    font-size: clamp(25px, 2.3vw, 34px);
+    font-weight: 400;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    margin-top: 16px;
+    color: rgba($ink, 0.62);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+}
+
+.uk-retail-results {
+  background: #ebe8e3;
+
+  &::before {
+    background-image: url("/case-studies/uk-retail/results-background.png");
+    background-position: 18% 54%;
+    filter: blur(0.8px) contrast(1.06);
+    opacity: 0.5;
+    transform: scale(1.002);
+  }
+
+  &::after {
+    background: rgba(#ebe8e3, 0.66);
+  }
+}
+
+.uk-retail-results-body {
+  max-width: 670px;
+  margin: clamp(48px, 7vw, 88px) 0 0 auto !important;
+  color: rgba($ink, 0.66);
+  font-size: clamp(16px, 1.6vw, 21px);
+  line-height: 1.75;
+}
+
+.uk-retail-results dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: clamp(64px, 8vw, 104px) 0 0;
+  border-top: 1px solid #cecbc7;
+  border-bottom: 1px solid #cecbc7;
+  background: rgba(#ebe8e3, 0.84);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  div {
+    padding: clamp(28px, 4vw, 54px) clamp(16px, 3vw, 38px);
+    border-right: 1px solid #cecbc7;
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+
+  dt {
+    font-family: "P22 Mackinac W01 Book", Georgia, serif;
+    font-size: clamp(38px, 5vw, 68px);
+    letter-spacing: -0.055em;
+  }
+
+  dd {
+    margin: 14px 0 0;
+    color: rgba($ink, 0.62);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+}
+
+.uk-retail-closing {
+  position: relative;
+  display: flex;
+  min-height: min(760px, 86svh);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: $warm-paper;
+  color: $ink;
+  text-align: center;
+
+  &::before {
+    position: absolute;
+    top: 11%;
+    width: min(1180px, 84vw);
+    aspect-ratio: 1;
+    border: 1px solid rgba($ink, 0.1);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+  }
+
+  > p {
+    color: rgba($ink, 0.58);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    max-width: 850px;
+    margin-top: 24px;
+    font-family: "P22 Mackinac W01 Book", Georgia, serif;
+    font-size: clamp(44px, 7vw, 94px);
+    font-weight: 400;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    text-wrap: balance;
+  }
+
+  > span {
+    max-width: 550px;
+    margin-top: 28px;
+    color: rgba($ink, 0.66);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  > a {
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 36px;
+    padding: 0 26px;
+    border-radius: 10px;
+    background: $ink;
+    color: $paper;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background-color 200ms ease, transform 200ms ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: rgba($ink, 0.9);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.uk-retail-page:lang(zh) {
+  .uk-retail-hero-copy h1,
+  .uk-retail-section-heading h2,
+  .uk-retail-closing h2 {
+    letter-spacing: -0.04em;
+    line-height: 1.12;
+  }
+
+  .uk-retail-hero-copy h1 span:last-child {
+    font-style: normal;
+  }
+
+  .uk-retail-hero-copy > span,
+  .uk-retail-overview-copy > p,
+  .uk-retail-section-heading h2,
+  .uk-retail-output-intro > p,
+  .uk-retail-closing > span {
+    word-break: keep-all;
+  }
+
+  .uk-retail-hero-copy > span {
+    max-width: 500px;
+  }
+
+  .uk-retail-output-intro > p {
+    max-width: 32em;
+  }
+}
+
+@media (max-width: 800px) {
+  .uk-retail-nav {
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    padding: 16px 24px;
+  }
+
+  .uk-retail-nav-links {
+    display: none;
+  }
+
+  .uk-retail-mobile-language {
+    grid-column: 2;
+    min-width: 42px;
+    min-height: 42px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba($ink, 0.24);
+    border-radius: 10px;
+    background: rgba($paper, 0.72);
+    color: $ink;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    &:hover,
+    &:focus-visible {
+      background: $paper;
+    }
+  }
+
+  .uk-retail-hero-copy h1 {
+    font-size: clamp(52px, 11vw, 80px);
+  }
+
+  .uk-retail-section-heading {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .uk-retail-overview-copy {
+    grid-template-columns: 1fr;
+    margin-left: 0;
+
+    aside {
+      padding-left: 20px;
+    }
+  }
+
+  .uk-retail-method-grid {
+    grid-template-columns: 1fr 1fr;
+
+    li:nth-child(3) {
+      border-left: 1px solid rgba($paper, 0.2);
+    }
+  }
+
+  .uk-retail-evidence-list li {
+    grid-template-columns: 50px minmax(140px, 0.48fr) minmax(0, 1fr);
+
+    > span {
+      margin-left: 8px;
+    }
+  }
+
+  .uk-retail-output-intro,
+  .uk-retail-chart-grid,
+  .uk-retail-code {
+    grid-template-columns: 1fr;
+  }
+
+  .uk-retail-code pre {
+    width: 100%;
+  }
+}
+
+@media (max-height: 760px) {
+  .uk-retail-hero {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
+  .uk-retail-hero-copy {
+    padding-top: 88px;
+
+    > span {
+      margin-top: 16px;
+    }
+
+    > a {
+      margin-top: 18px;
+    }
+  }
+
+  .uk-retail-panel-wrap {
+    margin-top: auto;
+  }
+
+  .uk-retail-panel {
+    padding: 0;
+  }
+}
+
+@media (max-width: 580px) {
+  .uk-retail-hero {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .uk-retail-hero-bg {
+    background-position: center, 66% 50%;
+  }
+
+  .uk-retail-nav {
+    min-height: 64px;
+    padding: 12px 16px;
+  }
+
+  .uk-retail-nav-cta {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+
+  .uk-retail-mobile-language {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .uk-retail-hero-copy {
+    padding-top: 98px;
+    padding-bottom: 34px;
+
+    > p {
+      font-size: 9px;
+    }
+
+    h1 {
+      font-size: clamp(48px, 15vw, 66px);
+    }
+
+    > span {
+      max-width: 360px;
+      font-size: 13px;
+    }
+
+    > a {
+      min-height: 44px;
+      margin-top: 22px;
+      padding: 0 24px;
+      font-size: 13px;
+    }
+  }
+
+  .uk-retail-panel-wrap {
+    width: calc(100% - 20px);
+  }
+
+  .uk-retail-panel {
+    padding: 0;
+  }
+
+  .uk-retail-panel-items {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+
+    > div {
+      min-height: 72px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      padding: 0 6px;
+      border-right: 1px solid rgba($ink, 0.1);
+      border-bottom: 0;
+      text-align: center;
+
+      &:last-child {
+        border-right: 0;
+      }
+
+      strong {
+        font-size: clamp(18px, 5.5vw, 24px);
+      }
+
+      span {
+        font-size: 8px;
+        letter-spacing: 0.1em;
+      }
+    }
+  }
+
+  .uk-retail-section {
+    padding: 80px 20px;
+  }
+
+  .uk-retail-section-heading h2 {
+    font-size: 39px;
+  }
+
+  .uk-retail-method {
+    &::before {
+      background-position: 62% 50%;
+      opacity: 0.36;
+    }
+
+    &::after {
+      background: rgba($ink, 0.8);
+    }
+  }
+
+  .uk-retail-evidence {
+    &::before {
+      background-position: 74% 44%;
+      opacity: 0.34;
+    }
+
+    &::after {
+      background: rgba($paper, 0.8);
+    }
+  }
+
+  .uk-retail-decisions {
+    &::before {
+      background-position: 70% 28%;
+      opacity: 0.32;
+    }
+
+    &::after {
+      background: rgba($paper, 0.76);
+    }
+  }
+
+  .uk-retail-results {
+    &::before {
+      background-position: 32% 50%;
+      opacity: 0.3;
+    }
+
+    &::after {
+      background: rgba(#ebe8e3, 0.74);
+    }
+  }
+
+  .uk-retail-overview-copy {
+    gap: 36px;
+    margin-top: 48px;
+  }
+
+  .uk-retail-method-grid {
+    grid-template-columns: 1fr;
+    margin-top: 52px;
+
+    li,
+    li:nth-child(3) {
+      min-height: 0;
+      padding: 22px 8px 36px;
+      border-right: 0;
+      border-bottom: 1px solid rgba($paper, 0.2);
+      border-left: 0;
+      background: rgba($ink, 0.52);
+
+      &:first-child {
+        border-left: 0;
+      }
+
+      h3 {
+        margin-top: 44px;
+      }
+    }
+  }
+
+  .uk-retail-evidence-list {
+    margin-top: 52px;
+
+    li {
+      grid-template-columns: 34px 1fr;
+      gap: 18px;
+      padding: 26px 0;
+
+      > p {
+        grid-column: 2;
+      }
+
+      > span {
+        width: 32px;
+        height: 32px;
+        margin-left: 2px;
+      }
+    }
+  }
+
+  .uk-retail-output-intro > p {
+    margin-top: 4px;
+  }
+
+  .uk-retail-chart-grid {
+    margin-top: 46px;
+  }
+
+  .uk-retail-chart-grid .uk-retail-chart-frame {
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .uk-retail-code {
+    gap: 44px;
+
+    pre {
+      padding: 58px 18px 24px;
+      font-size: 10px;
+    }
+  }
+
+  .uk-retail-decisions ol {
+    grid-template-columns: 1fr;
+    margin-top: 52px;
+  }
+
+  .uk-retail-decisions li,
+  .uk-retail-decisions li:first-child {
+    min-height: 0;
+    padding: 24px 8px 34px;
+    border-right: 0;
+    border-left: 0;
+
+    h3 {
+      margin-top: 46px;
+    }
+  }
+
+  .uk-retail-results-body {
+    margin-top: 42px !important;
+  }
+
+  .uk-retail-results dl {
+    grid-template-columns: 1fr;
+    margin-top: 48px;
+
+    div {
+      border-right: 0;
+      border-bottom: 1px solid #cecbc7;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
+
+  .uk-retail-closing {
+    min-height: 620px;
+
+    h2 {
+      font-size: clamp(44px, 13vw, 58px);
+    }
+  }
+
+  .uk-retail-page:lang(zh) {
+    .uk-retail-section-heading h2,
+    .uk-retail-closing h2 {
+      font-size: 38px;
+    }
+
+    .uk-retail-hero-copy h1 {
+      font-size: clamp(45px, 14vw, 62px);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uk-retail-page *,
+  .uk-retail-page *::before,
+  .uk-retail-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 580px) and (max-height: 720px) {
+  .uk-retail-hero-copy {
+    padding-top: 76px;
+    padding-bottom: 18px;
+
+    > p {
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 13vw, 56px);
+    }
+
+    > span {
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    > a {
+      min-height: 40px;
+      margin-top: 14px;
+    }
+  }
+
+  .uk-retail-panel-wrap {
+    margin-top: auto;
+  }
+
+  .uk-retail-panel {
+    padding: 0;
+  }
+}

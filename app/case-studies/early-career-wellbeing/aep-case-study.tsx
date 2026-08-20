@@ -296,7 +296,6 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
           videoClassName="aep-hero-video"
           src={heroVideo}
           poster={heroPoster}
-          playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
           priority
         />
         <div className="aep-hero-shade" aria-hidden="true" />

@@ -12,9 +12,8 @@ const mediaBasePath = `${appBasePath}/media`;
 
 const HERO_VIDEO_URL = `${appBasePath}/personal-projects/personal-training/video/ocean-hero-720p.mp4`;
 const HERO_VIDEO_POSTER = `${appBasePath}/personal-projects/personal-training/backgrounds/personal-training-motivation.webp`;
-const HERO_PLAYBACK_TIMEOUT_MS = 2500;
 
-type HeroVideoState = "loading" | "playing" | "fallback";
+type HeroVideoState = "loading" | "playing" | "poster" | "reduced-motion";
 
 const MENU_ITEMS = [
   { label: "Overview", target: "top" },
@@ -342,7 +341,6 @@ export default function PersonalTrainingHero() {
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const backgroundVideoRef = useRef<HTMLVideoElement>(null);
-  const heroPlaybackTimerRef = useRef<number | null>(null);
   const exploreButtonRef = useRef<HTMLButtonElement>(null);
   const fleetCloseRef = useRef<HTMLButtonElement>(null);
   const fleetOverlayRef = useRef<HTMLElement>(null);
@@ -356,58 +354,41 @@ export default function PersonalTrainingHero() {
     }
   }, []);
 
-  const clearHeroPlaybackTimer = useCallback(() => {
-    if (heroPlaybackTimerRef.current === null) return;
-    window.clearTimeout(heroPlaybackTimerRef.current);
-    heroPlaybackTimerRef.current = null;
-  }, []);
-
-  const scheduleHeroPlaybackFallback = useCallback(() => {
-    clearHeroPlaybackTimer();
-    if (prefersReducedMotion) return;
-
-    heroPlaybackTimerRef.current = window.setTimeout(() => {
-      heroPlaybackTimerRef.current = null;
-      const video = backgroundVideoRef.current;
-      if (video && (video.paused || video.currentTime < 0.1)) {
-        setHeroVideoState("fallback");
-      }
-    }, HERO_PLAYBACK_TIMEOUT_MS);
-  }, [clearHeroPlaybackTimer, prefersReducedMotion]);
-
   const requestHeroPlayback = useCallback(async () => {
     const video = backgroundVideoRef.current;
-    if (!video || prefersReducedMotion) return;
+    if (!video || prefersReducedMotion || document.visibilityState !== "visible") return;
+
+    if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      setHeroVideoState("playing");
+      return;
+    }
 
     video.muted = true;
-    scheduleHeroPlaybackFallback();
+    video.defaultMuted = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    if (video.error) video.load();
+    setHeroVideoState("loading");
     try {
       await video.play();
-      if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-        clearHeroPlaybackTimer();
-        setHeroVideoState("playing");
-      }
+      if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setHeroVideoState("playing");
     } catch {
-      // The watchdog reveals a user-controlled fallback if autoplay is denied.
+      setHeroVideoState("poster");
     }
-  }, [clearHeroPlaybackTimer, prefersReducedMotion, scheduleHeroPlaybackFallback]);
+  }, [prefersReducedMotion]);
 
   const handleHeroVideoPlaying = useCallback(() => {
-    clearHeroPlaybackTimer();
-    setHeroVideoState("playing");
-  }, [clearHeroPlaybackTimer]);
+    if (prefersReducedMotion) {
+      backgroundVideoRef.current?.pause();
+      setHeroVideoState("reduced-motion");
+    } else {
+      setHeroVideoState("playing");
+    }
+  }, [prefersReducedMotion]);
 
-  const handleHeroVideoError = useCallback(() => {
-    clearHeroPlaybackTimer();
-    if (!prefersReducedMotion) setHeroVideoState("fallback");
-  }, [clearHeroPlaybackTimer, prefersReducedMotion]);
-
-  const handleHeroFallbackClick = useCallback(() => {
-    const video = backgroundVideoRef.current;
-    if (video?.error) video.load();
-    setHeroVideoState("loading");
-    void requestHeroPlayback();
-  }, [requestHeroPlayback]);
+  const showHeroPoster = useCallback(() => {
+    if (!prefersReducedMotion) setHeroVideoState("poster");
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -415,9 +396,9 @@ export default function PersonalTrainingHero() {
     if (!hero || !video) return;
 
     if (prefersReducedMotion) {
-      clearHeroPlaybackTimer();
       video.pause();
-      return;
+      const frame = window.requestAnimationFrame(() => setHeroVideoState("reduced-motion"));
+      return () => window.cancelAnimationFrame(frame);
     }
 
     const heroRect = hero.getBoundingClientRect();
@@ -426,13 +407,17 @@ export default function PersonalTrainingHero() {
       if (isHeroVisible && document.visibilityState === "visible") {
         void requestHeroPlayback();
       } else {
-        clearHeroPlaybackTimer();
         video.pause();
+        setHeroVideoState("poster");
       }
     };
 
     const handleVisibilityChange = () => updatePlayback();
     const handlePageShow = () => updatePlayback();
+    const retryFromUserGesture = () => {
+      if (!isHeroVisible || !video.paused) return;
+      void requestHeroPlayback();
+    };
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -443,16 +428,24 @@ export default function PersonalTrainingHero() {
     );
     observer.observe(hero);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("touchend", retryFromUserGesture, { capture: true, passive: true });
+    document.addEventListener("click", retryFromUserGesture, true);
+    document.addEventListener("keydown", retryFromUserGesture, true);
     window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("focus", updatePlayback);
     updatePlayback();
 
     return () => {
-      clearHeroPlaybackTimer();
       observer.disconnect();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("touchend", retryFromUserGesture, true);
+      document.removeEventListener("click", retryFromUserGesture, true);
+      document.removeEventListener("keydown", retryFromUserGesture, true);
       window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("focus", updatePlayback);
+      video.pause();
     };
-  }, [clearHeroPlaybackTimer, prefersReducedMotion, requestHeroPlayback]);
+  }, [prefersReducedMotion, requestHeroPlayback]);
 
   useEffect(() => {
     if (!isFleetOpen) return;
@@ -551,27 +544,17 @@ export default function PersonalTrainingHero() {
               muted
               loop
               playsInline
-              preload={prefersReducedMotion ? "none" : "auto"}
+              preload="auto"
               aria-hidden="true"
+              onLoadedData={() => void requestHeroPlayback()}
               onCanPlay={() => void requestHeroPlayback()}
               onPlaying={handleHeroVideoPlaying}
-              onWaiting={scheduleHeroPlaybackFallback}
-              onStalled={scheduleHeroPlaybackFallback}
-              onError={handleHeroVideoError}
+              onWaiting={showHeroPoster}
+              onStalled={showHeroPoster}
+              onError={showHeroPoster}
             />
           </div>
           <div className={styles.loadingShade} />
-          {!prefersReducedMotion && heroVideoState === "fallback" ? (
-            <button
-              type="button"
-              className={styles.videoPlayFallback}
-              onClick={handleHeroFallbackClick}
-              aria-label="Play the ocean background animation"
-            >
-              <span aria-hidden="true">▶</span>
-              Play animation
-            </button>
-          ) : null}
           <div className={styles.heroMediaFooter}>
             <p className={styles.heroDescription}>
               A mobile-first personal project for recording user-named strength exercises and machines, structured sets, cardio sessions, rest days and simple summaries based on saved records.

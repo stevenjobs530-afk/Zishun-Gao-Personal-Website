@@ -451,7 +451,6 @@ function Hero({ language }: { language: Language }) {
         videoClassName="personal-hero-video"
         src={`${mediaBasePath}/video/homepage-hero.mp4`}
         poster={`${mediaBasePath}/posters/homepage-hero.jpg`}
-        playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
         priority
       />
       <div className="hero-nav-spacer" aria-hidden="true" />
@@ -673,7 +672,6 @@ function ContactSection({ language }: { language: Language }) {
         videoClassName="contact-flower-video"
         src={`${mediaBasePath}/video/homepage-contact.mp4`}
         poster={`${mediaBasePath}/posters/homepage-contact.jpg`}
-        playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
       />
       <div className="contact-topline"><span>07</span><a href="#home">{t.top}</a></div>
       <div className="contact-content">

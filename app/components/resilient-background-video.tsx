@@ -4,17 +4,13 @@ import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./resilient-background-video.module.css";
 
-const PLAYBACK_TIMEOUT_MS = 2500;
-
-type VideoState = "loading" | "playing" | "fallback" | "reduced-motion";
+type VideoState = "loading" | "playing" | "poster" | "reduced-motion";
 
 type ResilientBackgroundVideoProps = {
   src: string;
   poster: string;
-  playLabel: string;
   className?: string;
   videoClassName?: string;
-  controlClassName?: string;
   priority?: boolean;
 };
 
@@ -25,71 +21,57 @@ type PosterStyle = CSSProperties & {
 export default function ResilientBackgroundVideo({
   src,
   poster,
-  playLabel,
   className,
   videoClassName,
-  controlClassName,
   priority = false,
 }: ResilientBackgroundVideoProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playbackTimerRef = useRef<number | null>(null);
   const isVisibleRef = useRef(priority);
   const reducedMotionRef = useRef(false);
   const [videoState, setVideoState] = useState<VideoState>("loading");
 
-  const clearPlaybackTimer = useCallback(() => {
-    if (playbackTimerRef.current === null) return;
-    window.clearTimeout(playbackTimerRef.current);
-    playbackTimerRef.current = null;
-  }, []);
-
-  const scheduleFallback = useCallback(() => {
-    clearPlaybackTimer();
-    if (reducedMotionRef.current) return;
-    playbackTimerRef.current = window.setTimeout(() => {
-      playbackTimerRef.current = null;
-      const video = videoRef.current;
-      if (video && (video.paused || video.currentTime < 0.1)) setVideoState("fallback");
-    }, PLAYBACK_TIMEOUT_MS);
-  }, [clearPlaybackTimer]);
-
-  const requestPlayback = useCallback(async (fromUserGesture = false) => {
+  const requestPlayback = useCallback(async () => {
     const video = videoRef.current;
-    if (!video || reducedMotionRef.current || document.visibilityState !== "visible") return;
-    if (!fromUserGesture && !isVisibleRef.current) return;
+    if (!video || reducedMotionRef.current || !isVisibleRef.current || document.visibilityState !== "visible") return;
+
+    if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      setVideoState("playing");
+      return;
+    }
 
     video.muted = true;
     video.defaultMuted = true;
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
-    setVideoState((current) => current === "playing" ? current : "loading");
-    scheduleFallback();
+    if (video.error) video.load();
+    setVideoState("loading");
 
     try {
       await video.play();
-      if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-        clearPlaybackTimer();
-        setVideoState("playing");
-      }
+      if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setVideoState("playing");
     } catch {
-      clearPlaybackTimer();
-      setVideoState("fallback");
+      setVideoState("poster");
     }
-  }, [clearPlaybackTimer, scheduleFallback]);
+  }, []);
 
   useEffect(() => {
     const media = mediaRef.current;
     const video = videoRef.current;
     if (!media || !video) return;
 
-    const updateVisibility = () => {
+    const updatePlayback = () => {
       if (isVisibleRef.current && document.visibilityState === "visible") {
         void requestPlayback();
       } else {
-        clearPlaybackTimer();
         video.pause();
+        if (!reducedMotionRef.current) setVideoState("poster");
       }
+    };
+
+    const retryFromUserGesture = () => {
+      if (!isVisibleRef.current || reducedMotionRef.current || !video.paused) return;
+      void requestPlayback();
     };
 
     const bounds = media.getBoundingClientRect();
@@ -98,20 +80,30 @@ export default function ResilientBackgroundVideo({
     const observer = new IntersectionObserver(
       ([entry]) => {
         isVisibleRef.current = entry.isIntersecting && entry.intersectionRatio >= 0.05;
-        updateVisibility();
+        updatePlayback();
       },
       { threshold: [0, 0.05, 0.5] },
     );
     observer.observe(media);
-    document.addEventListener("visibilitychange", updateVisibility);
+    document.addEventListener("visibilitychange", updatePlayback);
+    document.addEventListener("touchend", retryFromUserGesture, { capture: true, passive: true });
+    document.addEventListener("click", retryFromUserGesture, true);
+    document.addEventListener("keydown", retryFromUserGesture, true);
+    window.addEventListener("pageshow", updatePlayback);
+    window.addEventListener("focus", updatePlayback);
+    updatePlayback();
 
     return () => {
       observer.disconnect();
-      document.removeEventListener("visibilitychange", updateVisibility);
-      clearPlaybackTimer();
+      document.removeEventListener("visibilitychange", updatePlayback);
+      document.removeEventListener("touchend", retryFromUserGesture, true);
+      document.removeEventListener("click", retryFromUserGesture, true);
+      document.removeEventListener("keydown", retryFromUserGesture, true);
+      window.removeEventListener("pageshow", updatePlayback);
+      window.removeEventListener("focus", updatePlayback);
       video.pause();
     };
-  }, [clearPlaybackTimer, requestPlayback]);
+  }, [requestPlayback]);
 
   useEffect(() => {
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -119,12 +111,10 @@ export default function ResilientBackgroundVideo({
 
     const updateMotionPreference = () => {
       reducedMotionRef.current = motionPreference.matches;
-      clearPlaybackTimer();
       if (motionPreference.matches) {
         video?.pause();
         setVideoState("reduced-motion");
       } else {
-        setVideoState("loading");
         void requestPlayback();
       }
     };
@@ -132,58 +122,48 @@ export default function ResilientBackgroundVideo({
     updateMotionPreference();
     motionPreference.addEventListener("change", updateMotionPreference);
     return () => motionPreference.removeEventListener("change", updateMotionPreference);
-  }, [clearPlaybackTimer, requestPlayback]);
+  }, [requestPlayback]);
 
   const posterStyle: PosterStyle = { "--background-video-poster": `url(${poster})` };
+  const showPoster = () => {
+    if (!reducedMotionRef.current) setVideoState("poster");
+  };
+  const handlePlaying = () => {
+    if (reducedMotionRef.current) {
+      videoRef.current?.pause();
+      setVideoState("reduced-motion");
+    } else {
+      setVideoState("playing");
+    }
+  };
 
   return (
-    <>
-      <div
-        ref={mediaRef}
-        className={`${styles.media}${className ? ` ${className}` : ""}`}
-        data-video-state={videoState}
-        data-resilient-background-video
-        style={posterStyle}
-        aria-hidden="true"
+    <div
+      ref={mediaRef}
+      className={`${styles.media}${className ? ` ${className}` : ""}`}
+      data-video-state={videoState}
+      data-resilient-background-video
+      style={posterStyle}
+      aria-hidden="true"
+    >
+      <video
+        ref={videoRef}
+        className={`${styles.video}${videoClassName ? ` ${videoClassName}` : ""}`}
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload={priority ? "auto" : "metadata"}
+        onLoadedData={() => void requestPlayback()}
+        onCanPlay={() => void requestPlayback()}
+        onPlaying={handlePlaying}
+        onWaiting={showPoster}
+        onStalled={showPoster}
+        onError={showPoster}
       >
-        <video
-          ref={videoRef}
-          className={`${styles.video}${videoClassName ? ` ${videoClassName}` : ""}`}
-          poster={poster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload={priority ? "auto" : "metadata"}
-          onCanPlay={() => void requestPlayback()}
-          onPlaying={() => {
-            clearPlaybackTimer();
-            setVideoState("playing");
-          }}
-          onWaiting={scheduleFallback}
-          onStalled={scheduleFallback}
-          onError={() => {
-            clearPlaybackTimer();
-            setVideoState("fallback");
-          }}
-        >
-          <source src={src} type="video/mp4" />
-        </video>
-      </div>
-      {videoState === "fallback" ? (
-        <button
-          type="button"
-          className={`${styles.playControl}${controlClassName ? ` ${controlClassName}` : ""}`}
-          onClick={() => {
-            const video = videoRef.current;
-            if (video?.error) video.load();
-            void requestPlayback(true);
-          }}
-        >
-          <span aria-hidden="true">▶</span>
-          {playLabel}
-        </button>
-      ) : null}
-    </>
+        <source src={src} type="video/mp4" />
+      </video>
+    </div>
   );
 }

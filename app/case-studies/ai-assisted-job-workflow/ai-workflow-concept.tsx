@@ -12,14 +12,15 @@ import {
   UserCheck,
 } from "lucide-react";
 import PortfolioBackLink from "../../components/portfolio-back-link";
+import ResilientBackgroundVideo from "../../components/resilient-background-video";
 import "./ai-workflow-concept.scss";
 
 type Language = "en" | "zh";
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const stageIcons = [Search, FileSearch, Scale, Table2];
-const heroVideo =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_113714_92f54685-af06-4020-8f35-dbb8871b9d32.mp4";
+const heroVideo = `${appBasePath}/media/video/ai-workflow-hero.mp4`;
+const heroPoster = `${appBasePath}/media/posters/ai-workflow-hero.jpg`;
 
 const copy = {
   en: {
@@ -296,7 +297,14 @@ export default function AiWorkflowConcept({ initialLanguage }: { initialLanguage
     <main className="ai-concept-page" lang={language === "zh" ? "zh-CN" : "en"}>
       <PortfolioBackLink href={portfolioHref} language={language} ariaLabel={t.backLabel} />
       <section className="ai-concept-hero">
-        <video className="ai-concept-hero-video" src={heroVideo} autoPlay muted loop playsInline aria-hidden="true" />
+        <ResilientBackgroundVideo
+          className="ai-concept-hero-media"
+          videoClassName="ai-concept-hero-video"
+          src={heroVideo}
+          poster={heroPoster}
+          playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
+          priority
+        />
         <div className="ai-concept-frame">
           <nav className="ai-concept-nav" aria-label={t.navLabel}>
             <div className="ai-concept-nav-links">

@@ -590,14 +590,13 @@ a {
   isolation: isolate;
 }
 
+.personal-hero-media {
+  z-index: 0;
+  --background-video-position: center;
+}
+
 .personal-hero-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1;
-  pointer-events: none;
+  display: block;
 }
 
 .personal-navbar {
@@ -777,12 +776,16 @@ a {
 }
 
 .hero-nav-spacer {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 58px;
   flex: 0 0 58px;
 }
 
 .personal-hero-content {
+  position: relative;
+  z-index: 1;
   max-width: 960px;
   display: flex;
   flex-direction: column;
@@ -866,6 +869,8 @@ main[lang="en"] .personal-serif {
 }
 
 .personal-hero-footer {
+  position: relative;
+  z-index: 1;
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -2394,16 +2399,14 @@ main[lang="en"] .ai-feature-copy h2 em {
   pointer-events: none;
 }
 
-.contact-flower-video {
-  position: absolute;
-  inset: 0;
+.contact-flower-media {
   z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  pointer-events: none;
+  --background-video-position: center;
   animation: flower-drift 26s ease-in-out infinite alternate;
+}
+
+.contact-flower-video {
+  display: block;
 }
 
 .contact-topline,
@@ -3114,8 +3117,8 @@ main[lang="zh-CN"] .contact-content h2 em {
     padding: 96px 20px 30px;
   }
 
-  .contact-flower-video {
-    object-position: center top;
+  .contact-flower-media {
+    --background-video-position: center top;
   }
 
   .contact-content {
@@ -3190,5 +3193,5 @@ main[lang="zh-CN"] .contact-content h2 em {
   .honour-art-frame,
   .certificate-plane { transform: none !important; }
   .honour-explore-arrow { animation: none; }
-  .contact-flower-video { animation: none; transform: scaleX(-1) scale(1.12); }
+  .contact-flower-media { animation: none; transform: scaleX(-1) scale(1.12); }
 }

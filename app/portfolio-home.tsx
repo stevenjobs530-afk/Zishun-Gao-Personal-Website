@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import HonoursExhibition from "./honours-exhibition";
+import ResilientBackgroundVideo from "./components/resilient-background-video";
 
 type Language = "en" | "zh";
 type ViewportMode = "compact" | "medium" | "wide";
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const mediaBasePath = `${appBasePath}/media`;
 
 const COMPACT_VIEWPORT_QUERY = "(max-width: 768px)";
 const MEDIUM_VIEWPORT_QUERY = "(max-width: 1100px)";
@@ -444,7 +446,14 @@ function Hero({ language }: { language: Language }) {
   const cvFilename = language === "zh" ? "Zishun_Gao_CV_CN_2026.pdf" : "Zishun_Gao_CV_UK_2026.pdf";
   return (
     <section id="home" className="personal-hero">
-      <video className="personal-hero-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260503_162107_3cd240af-dff4-4396-b8b7-22e25c9adb1c.mp4" autoPlay loop muted playsInline aria-hidden="true" />
+      <ResilientBackgroundVideo
+        className="personal-hero-media"
+        videoClassName="personal-hero-video"
+        src={`${mediaBasePath}/video/homepage-hero.mp4`}
+        poster={`${mediaBasePath}/posters/homepage-hero.jpg`}
+        playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
+        priority
+      />
       <div className="hero-nav-spacer" aria-hidden="true" />
       <div className="personal-hero-content">
         <p className="personal-eyebrow">{t.eyebrow}</p>
@@ -659,7 +668,13 @@ function ContactSection({ language }: { language: Language }) {
   return (
     <section id="contact" className="contact-section">
       <SectionBlend />
-      <video className="contact-flower-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260604_125109_19424216-4e2a-4560-b9f2-f1b5f6eb2c2e.mp4" autoPlay muted loop playsInline aria-hidden="true" />
+      <ResilientBackgroundVideo
+        className="contact-flower-media"
+        videoClassName="contact-flower-video"
+        src={`${mediaBasePath}/video/homepage-contact.mp4`}
+        poster={`${mediaBasePath}/posters/homepage-contact.jpg`}
+        playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
+      />
       <div className="contact-topline"><span>07</span><a href="#home">{t.top}</a></div>
       <div className="contact-content">
         <p className="contact-eyebrow">{t.eyebrow}</p>

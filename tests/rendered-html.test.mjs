@@ -338,7 +338,8 @@ test("server-renders the English AI workflow concept without outcome overclaims"
   const html = await response.text();
   assert.match(html, /<title>AI-Assisted Job Workflow Concept — Zishun Gao<\/title>/);
   assert.match(html, /A structured process for UK job research/);
-  assert.match(html, /hf_20260808_113714_92f54685-af06-4020-8f35-dbb8871b9d32\.mp4/);
+  assert.match(html, /media\/video\/ai-workflow-hero\.mp4/);
+  assert.match(html, /media\/posters\/ai-workflow-hero\.jpg/);
   assert.match(html, /AI may support/);
   assert.match(html, /I retain control/);
   assert.match(html, /Read-only discovery/);
@@ -374,12 +375,71 @@ test("keeps the AI case-study Hero focused on the supplied video composition", a
     "utf8",
   );
 
-  assert.match(component, /className="ai-concept-hero-video"/);
+  assert.match(component, /videoClassName="ai-concept-hero-video"/);
   assert.match(component, /className="ai-concept-nav-cta"/);
   assert.match(component, /className="ai-concept-primary"/);
   assert.doesNotMatch(component, /className="ai-concept-grid"/);
   assert.doesNotMatch(component, /className="ai-concept-orbits"/);
   assert.doesNotMatch(component, /className="ai-concept-hero-stages"/);
+});
+
+test("uses resilient local background videos and posters across the portfolio", async () => {
+  const [shared, sharedStyles, home, apple, aep, aiWorkflow, personalTraining, homeStyles, appleStyles, aepStyles] = await Promise.all([
+    readFile(new URL("../app/components/resilient-background-video.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/resilient-background-video.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/apple-app-store/apple-case-study.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/ai-assisted-job-workflow/ai-workflow-concept.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/personal-projects/personal-training/personal-training-hero.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/apple-app-store/apple-case-study.scss", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.scss", import.meta.url), "utf8"),
+  ]);
+
+  for (const component of [home, apple, aep, aiWorkflow]) assert.match(component, /<ResilientBackgroundVideo/);
+  for (const source of [home, apple, aep, aiWorkflow, personalTraining]) {
+    assert.doesNotMatch(source, /d8j0ntlcm91z4\.cloudfront\.net|app-uploads\.krea\.ai/);
+  }
+
+  assert.match(shared, /type VideoState = "loading" \| "playing" \| "fallback" \| "reduced-motion"/);
+  assert.match(shared, /poster=\{poster\}/);
+  assert.match(shared, /<source src=\{src\} type="video\/mp4"/);
+  assert.match(shared, /video\.defaultMuted = true/);
+  assert.match(shared, /video\.setAttribute\("playsinline", ""\)/);
+  assert.match(shared, /video\.readyState >= HTMLMediaElement\.HAVE_CURRENT_DATA/);
+  assert.match(shared, /PLAYBACK_TIMEOUT_MS = 2500/);
+  assert.match(shared, /IntersectionObserver/);
+  assert.match(shared, /prefers-reduced-motion: reduce/);
+  assert.match(sharedStyles, /background-image:\s*var\(--background-video-poster\)/);
+  assert.match(sharedStyles, /data-video-state="playing"/);
+
+  assert.match(homeStyles, /\.personal-hero-media\s*\{[^}]*z-index:\s*0/s);
+  assert.match(homeStyles, /\.hero-nav-spacer\s*\{[^}]*z-index:\s*1/s);
+  assert.match(appleStyles, /\.apple-hero-media\s*\{[^}]*z-index:\s*0/s);
+  assert.match(appleStyles, /\.apple-hero-shade\s*\{[^}]*z-index:\s*1/s);
+  assert.match(aepStyles, /\.aep-hero-media\s*\{[^}]*z-index:\s*0/s);
+  assert.match(aepStyles, /\.aep-hero-shade\s*\{[^}]*z-index:\s*1/s);
+
+  const assetNames = [
+    "homepage-hero",
+    "homepage-contact",
+    "apple-app-store-hero",
+    "early-career-wellbeing-hero",
+    "ai-workflow-hero",
+    "training-strength",
+    "training-cardio",
+    "training-progress",
+  ];
+
+  for (const name of assetNames) {
+    const video = new URL(`../public/media/video/${name}.mp4`, import.meta.url);
+    const poster = new URL(`../public/media/posters/${name}.jpg`, import.meta.url);
+    await Promise.all([access(video), access(poster)]);
+    const [videoStats, posterStats] = await Promise.all([stat(video), stat(poster)]);
+    assert.ok(videoStats.size >= 100_000 && videoStats.size <= 3_000_000);
+    assert.ok(posterStats.size >= 20_000 && posterStats.size <= 300_000);
+  }
 });
 
 test("keeps all case-study cards in the current tab and provides exact return targets", async () => {
@@ -498,13 +558,19 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /scrollIntoView/);
   assert.match(component, /HERO_PLAYBACK_TIMEOUT_MS = 2500/);
   assert.match(component, /video\.paused \|\| video\.currentTime < 0\.1/);
+  assert.match(component, /video\.readyState >= HTMLMediaElement\.HAVE_CURRENT_DATA/);
   assert.match(component, /if \(video\?\.error\) video\.load\(\)/);
   assert.match(component, /Play animation/);
-  assert.match(component, /autoPlay=\{prefersReducedMotion === false\}/);
+  assert.match(component, /\n\s+autoPlay\n/);
   assert.match(component, /preload=\{prefersReducedMotion \? "none" : "auto"\}/);
   assert.match(component, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
   assert.match(component, /window\.addEventListener\("pageshow", handlePageShow\)/);
   assert.doesNotMatch(component, /@vimeo\/player|player\.vimeo\.com|1184061018/);
+  assert.doesNotMatch(component, /app-uploads\.krea\.ai/);
+  assert.match(component, /video\/training-strength\.mp4/);
+  assert.match(component, /posters\/training-progress\.jpg/);
+  assert.match(component, /intersectionRatio >= 0\.55/);
+  assert.match(component, /poster=\{item\.poster\}/);
   assert.doesNotMatch(component, /RippleField|StaggeredMenu|feDisplacementMap|from "gsap"/);
   assert.match(demo, /useReducer/);
   assert.match(demo, /Studio Cable Row — Demo/);
@@ -695,13 +761,15 @@ test("uses one persistent Back to Portfolio control across every detail route", 
 });
 
 test("keeps AEP motion preferences and local navigation explicit", async () => {
-  const [component, stylesheet, home] = await Promise.all([
+  const [component, stylesheet, home, shared] = await Promise.all([
     readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.scss", import.meta.url), "utf8"),
     readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/resilient-background-video.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(component, /prefers-reduced-motion: reduce/);
+  assert.match(component, /<ResilientBackgroundVideo/);
+  assert.match(shared, /prefers-reduced-motion: reduce/);
   assert.match(component, /\?lang=\$\{language\}#project-early-career-wellbeing/);
   assert.match(component, /aep-hero-video/);
   assert.doesNotMatch(component, /portfolio-v3-public/i);
@@ -715,13 +783,15 @@ test("keeps AEP motion preferences and local navigation explicit", async () => {
 });
 
 test("keeps Apple motion preferences and local navigation explicit", async () => {
-  const [component, stylesheet, home] = await Promise.all([
+  const [component, stylesheet, home, shared] = await Promise.all([
     readFile(new URL("../app/case-studies/apple-app-store/apple-case-study.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/case-studies/apple-app-store/apple-case-study.scss", import.meta.url), "utf8"),
     readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/resilient-background-video.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(component, /prefers-reduced-motion: reduce/);
+  assert.match(component, /<ResilientBackgroundVideo/);
+  assert.match(shared, /prefers-reduced-motion: reduce/);
   assert.match(component, /\?lang=\$\{language\}#project-apple-app-store/);
   assert.match(component, /apple-construction-grid\.png[^>]+unoptimized/);
   assert.match(component, /View repository/);

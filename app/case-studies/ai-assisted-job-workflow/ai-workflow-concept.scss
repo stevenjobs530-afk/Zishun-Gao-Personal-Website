@@ -275,15 +275,13 @@ $line: rgba($ink, 0.14);
   color: white;
 }
 
-.ai-concept-hero-video {
-  position: absolute;
+.ai-concept-hero-media {
   z-index: 0;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  pointer-events: none;
+  --background-video-position: center;
+}
+
+.ai-concept-hero-video {
+  display: block;
 }
 
 .ai-concept-frame {
@@ -820,7 +818,7 @@ $line: rgba($ink, 0.14);
     height: 100svh;
   }
 
-  .ai-concept-hero-video { object-position: center; }
+  .ai-concept-hero-media { --background-video-position: center; }
 
   .ai-concept-frame {
     top: 0;

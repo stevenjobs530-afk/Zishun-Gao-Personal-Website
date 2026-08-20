@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BarChart3, Database, ExternalLink, FileText, Search, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import PortfolioBackLink from "../../components/portfolio-back-link";
+import ResilientBackgroundVideo from "../../components/resilient-background-video";
 import "./apple-case-study.scss";
 
 type Language = "en" | "zh";
@@ -12,8 +13,8 @@ const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const repositoryUrl =
   "https://github.com/stevenjobs530-afk/Apple-App-Store-Data-Cleaning-Analysis";
 
-const heroVideo =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_140751_abc85684-bfd2-459d-b87b-ce808ede692b.mp4";
+const heroVideo = `${appBasePath}/media/video/apple-app-store-hero.mp4`;
+const heroPoster = `${appBasePath}/media/posters/apple-app-store-hero.jpg`;
 
 const pipelineIcons = [FileText, Search, ShieldCheck, Database, BarChart3];
 
@@ -237,7 +238,6 @@ const copy = {
 export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const [activePipelineStep, setActivePipelineStep] = useState<number | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const resolvedUrlLanguage = useRef(false);
   const t = copy[language];
   const portfolioHref = `${appBasePath}/?lang=${language}#project-apple-app-store`;
@@ -265,25 +265,6 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
     return () => { document.documentElement.lang = previousLanguage; };
   }, [language]);
 
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const video = videoRef.current;
-    if (!video) return;
-
-    const updateMotion = () => {
-      if (media.matches) {
-        video.pause();
-        if (video.readyState >= 1) video.currentTime = 1;
-      } else {
-        void video.play().catch(() => undefined);
-      }
-    };
-
-    updateMotion();
-    media.addEventListener("change", updateMotion);
-    return () => media.removeEventListener("change", updateMotion);
-  }, []);
-
   function toggleLanguage() {
     const next: Language = language === "en" ? "zh" : "en";
     setLanguage(next);
@@ -296,7 +277,14 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
     <main className="apple-page" lang={language === "zh" ? "zh-CN" : "en"}>
       <PortfolioBackLink href={portfolioHref} language={language} ariaLabel={t.backLabel} />
       <section className="apple-hero" aria-labelledby="apple-title">
-        <video ref={videoRef} className="apple-hero-video" src={heroVideo} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+        <ResilientBackgroundVideo
+          className="apple-hero-media"
+          videoClassName="apple-hero-video"
+          src={heroVideo}
+          poster={heroPoster}
+          playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
+          priority
+        />
         <div className="apple-hero-shade" aria-hidden="true" />
 
         <header className="apple-nav">

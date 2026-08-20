@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import PortfolioBackLink from "../../components/portfolio-back-link";
+import ResilientBackgroundVideo from "../../components/resilient-background-video";
 import "./aep-case-study.scss";
 
 type Language = "en" | "zh";
@@ -24,8 +25,8 @@ const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const repositoryUrl = "https://github.com/stevenjobs530-afk/AEP-Workplace-Wellbeing-Questionnaire-Formal";
 const questionnaireUrl = "https://stevenjobs530-afk.github.io/AEP-Workplace-Wellbeing-Questionnaire-Formal/";
-const heroVideo =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4";
+const heroVideo = `${appBasePath}/media/video/early-career-wellbeing-hero.mp4`;
+const heroPoster = `${appBasePath}/media/posters/early-career-wellbeing-hero.jpg`;
 
 const flowIcons = [ClipboardCheck, ShieldCheck, LockKeyhole, FileCheck2, Database];
 
@@ -251,7 +252,6 @@ if (payload.route !== expectedRoute(payload.situation as string)) {
 
 export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const resolvedUrlLanguage = useRef(false);
   const t = copy[language];
   const portfolioHref = `${appBasePath}/?lang=${language}#project-early-career-wellbeing`;
@@ -279,25 +279,6 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
     return () => { document.documentElement.lang = previousLanguage; };
   }, [language]);
 
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const video = videoRef.current;
-    if (!video) return;
-
-    const updateMotion = () => {
-      if (media.matches) {
-        video.pause();
-        if (video.readyState >= 1) video.currentTime = 1;
-      } else {
-        void video.play().catch(() => undefined);
-      }
-    };
-
-    updateMotion();
-    media.addEventListener("change", updateMotion);
-    return () => media.removeEventListener("change", updateMotion);
-  }, []);
-
   function toggleLanguage() {
     const next: Language = language === "en" ? "zh" : "en";
     setLanguage(next);
@@ -310,7 +291,14 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
     <main className="aep-page" lang={language === "zh" ? "zh-CN" : "en"}>
       <PortfolioBackLink href={portfolioHref} language={language} ariaLabel={t.backLabel} />
       <section className="aep-hero" aria-labelledby="aep-title">
-        <video ref={videoRef} className="aep-hero-video" src={heroVideo} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+        <ResilientBackgroundVideo
+          className="aep-hero-media"
+          videoClassName="aep-hero-video"
+          src={heroVideo}
+          poster={heroPoster}
+          playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
+          priority
+        />
         <div className="aep-hero-shade" aria-hidden="true" />
 
         <header className="aep-nav">

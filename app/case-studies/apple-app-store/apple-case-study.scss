@@ -49,7 +49,7 @@ $line: rgba($ink, 0.14);
   color: white;
 }
 
-.apple-hero-video,
+.apple-hero-media,
 .apple-hero-shade {
   position: absolute;
   inset: 0;
@@ -57,15 +57,18 @@ $line: rgba($ink, 0.14);
   height: 100%;
 }
 
-.apple-hero-video {
-  z-index: -3;
-  object-fit: cover;
-  object-position: 50% 50%;
+.apple-hero-media {
+  z-index: 0;
+  --background-video-position: 50% 50%;
   filter: saturate(0.9) contrast(1.08) brightness(0.84);
 }
 
+.apple-hero-video {
+  display: block;
+}
+
 .apple-hero-shade {
-  z-index: -2;
+  z-index: 1;
   background:
     radial-gradient(circle at 67% 54%, rgba(37, 105, 188, 0.1), transparent 32%),
     linear-gradient(90deg, rgba(5, 7, 12, 0.98) 0%, rgba(5, 7, 12, 0.94) 25%, rgba(5, 7, 12, 0.52) 52%, rgba(5, 7, 12, 0.12) 78%),
@@ -1052,8 +1055,8 @@ $line: rgba($ink, 0.14);
     justify-content: flex-start;
   }
 
-  .apple-hero-video {
-    object-position: 62% 50%;
+  .apple-hero-media {
+    --background-video-position: 62% 50%;
   }
 
   .apple-hero-shade {

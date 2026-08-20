@@ -402,14 +402,20 @@ test("uses resilient local background videos and posters across the portfolio", 
     assert.doesNotMatch(source, /d8j0ntlcm91z4\.cloudfront\.net|app-uploads\.krea\.ai/);
   }
 
-  assert.match(shared, /type VideoState = "loading" \| "playing" \| "fallback" \| "reduced-motion"/);
+  assert.match(shared, /type VideoState = "loading" \| "playing" \| "poster" \| "reduced-motion"/);
   assert.match(shared, /poster=\{poster\}/);
   assert.match(shared, /<source src=\{src\} type="video\/mp4"/);
   assert.match(shared, /video\.defaultMuted = true/);
   assert.match(shared, /video\.setAttribute\("playsinline", ""\)/);
   assert.match(shared, /video\.readyState >= HTMLMediaElement\.HAVE_CURRENT_DATA/);
-  assert.match(shared, /PLAYBACK_TIMEOUT_MS = 2500/);
   assert.match(shared, /IntersectionObserver/);
+  assert.match(shared, /document\.addEventListener\("touchend", retryFromUserGesture/);
+  assert.match(shared, /document\.addEventListener\("click", retryFromUserGesture/);
+  assert.match(shared, /document\.addEventListener\("keydown", retryFromUserGesture/);
+  assert.match(shared, /window\.addEventListener\("pageshow", updatePlayback\)/);
+  assert.match(shared, /onLoadedData=\{\(\) => void requestPlayback\(\)\}/);
+  assert.match(shared, /onPlaying=\{handlePlaying\}/);
+  assert.match(shared, /if \(reducedMotionRef\.current\)[\s\S]*setVideoState\("reduced-motion"\)/);
   assert.match(shared, /prefers-reduced-motion: reduce/);
   assert.match(sharedStyles, /background-image:\s*var\(--background-video-poster\)/);
   assert.match(sharedStyles, /data-video-state="playing"/);
@@ -420,6 +426,10 @@ test("uses resilient local background videos and posters across the portfolio", 
   assert.match(appleStyles, /\.apple-hero-shade\s*\{[^}]*z-index:\s*1/s);
   assert.match(aepStyles, /\.aep-hero-media\s*\{[^}]*z-index:\s*0/s);
   assert.match(aepStyles, /\.aep-hero-shade\s*\{[^}]*z-index:\s*1/s);
+
+  for (const source of [shared, sharedStyles, home, apple, aep, aiWorkflow, personalTraining]) {
+    assert.doesNotMatch(source, /Play animation|播放动画|playControl|videoPlayFallback|playLabel|PLAYBACK_TIMEOUT_MS/);
+  }
 
   const assetNames = [
     "homepage-hero",
@@ -556,15 +566,17 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /READ THE TREND/);
   assert.match(component, /event\.key === "Escape"/);
   assert.match(component, /scrollIntoView/);
-  assert.match(component, /HERO_PLAYBACK_TIMEOUT_MS = 2500/);
-  assert.match(component, /video\.paused \|\| video\.currentTime < 0\.1/);
   assert.match(component, /video\.readyState >= HTMLMediaElement\.HAVE_CURRENT_DATA/);
-  assert.match(component, /if \(video\?\.error\) video\.load\(\)/);
-  assert.match(component, /Play animation/);
+  assert.match(component, /if \(prefersReducedMotion\)[\s\S]*setHeroVideoState\("reduced-motion"\)/);
+  assert.match(component, /if \(video\.error\) video\.load\(\)/);
   assert.match(component, /\n\s+autoPlay\n/);
-  assert.match(component, /preload=\{prefersReducedMotion \? "none" : "auto"\}/);
+  assert.match(component, /preload="auto"/);
   assert.match(component, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
+  assert.match(component, /document\.addEventListener\("touchend", retryFromUserGesture/);
+  assert.match(component, /document\.addEventListener\("click", retryFromUserGesture/);
+  assert.match(component, /document\.addEventListener\("keydown", retryFromUserGesture/);
   assert.match(component, /window\.addEventListener\("pageshow", handlePageShow\)/);
+  assert.doesNotMatch(component, /Play animation|videoPlayFallback|HERO_PLAYBACK_TIMEOUT_MS|heroPlaybackTimerRef/);
   assert.doesNotMatch(component, /@vimeo\/player|player\.vimeo\.com|1184061018/);
   assert.doesNotMatch(component, /app-uploads\.krea\.ai/);
   assert.match(component, /video\/training-strength\.mp4/);
@@ -583,8 +595,8 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(stylesheet, /background:\s*var\(--paper,\s*#f0ece4\)/);
   assert.match(stylesheet, /\.heroMedia\s*\{[\s\S]*border-radius:\s*28px/s);
   assert.match(stylesheet, /\.heroMedia\[data-video-state="playing"\] \.backgroundVideo\s*\{[^}]*opacity:\s*1/s);
-  assert.match(stylesheet, /\.videoPlayFallback\s*\{[^}]*position:\s*absolute[^}]*z-index:\s*3/s);
-  assert.match(stylesheet, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.backgroundVideo,[\s\S]*\.videoPlayFallback\s*\{\s*display:\s*none;/s);
+  assert.doesNotMatch(stylesheet, /videoPlayFallback/);
+  assert.match(stylesheet, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.backgroundVideo\s*\{\s*display:\s*none;/s);
   assert.match(stylesheet, /\.story\s*\{[\s\S]*gap:\s*32px;[\s\S]*background:\s*var\(--paper,\s*#f0ece4\)/s);
   assert.match(stylesheet, /\.storySection::before[\s\S]*background-image:\s*var\(--story-section-image\)[\s\S]*background-attachment:\s*scroll[\s\S]*filter:\s*var\(--story-section-filter,\s*none\)/s);
   assert.match(stylesheet, /\.motivationSection\s*\{[^}]*--story-section-filter:\s*brightness\(1\.14\) saturate\(1\.06\)/s);

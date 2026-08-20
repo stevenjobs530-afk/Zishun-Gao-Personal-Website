@@ -174,43 +174,6 @@
     linear-gradient(180deg, rgba(4, 7, 9, 0.16), transparent 42%, rgba(4, 7, 9, 0.62));
 }
 
-.videoPlayFallback {
-  position: absolute;
-  z-index: 3;
-  top: 50%;
-  left: 50%;
-  min-height: 50px;
-  display: inline-flex;
-  align-items: center;
-  gap: 11px;
-  padding: 0 20px;
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 999px;
-  background: rgba(6, 15, 21, 0.5);
-  color: #fff;
-  cursor: pointer;
-  font: 650 10px/1 "Inter", system-ui, sans-serif;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  transform: translate(-50%, -50%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.videoPlayFallback:hover,
-.videoPlayFallback:focus-visible {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.videoPlayFallback:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 4px;
-}
-
-.videoPlayFallback span {
-  font-size: 12px;
-}
-
 .heroMediaFooter {
   position: absolute;
   z-index: 2;
@@ -924,8 +887,7 @@
   }
 
   .background { transform: none; }
-  .backgroundVideo,
-  .videoPlayFallback { display: none; }
+  .backgroundVideo { display: none; }
   .heroTitle > *,
   .heroEyebrow,
   .heroDescription {

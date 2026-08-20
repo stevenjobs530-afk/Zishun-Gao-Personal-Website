@@ -25,32 +25,6 @@
   opacity: 1;
 }
 
-.playControl {
-  position: absolute;
-  z-index: 30;
-  top: calc(env(safe-area-inset-top, 0px) + 88px);
-  right: calc(env(safe-area-inset-right, 0px) + 20px);
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 999px;
-  background: rgba(5, 10, 14, 0.68);
-  color: white;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-  font: 600 12px/1 system-ui, sans-serif;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  cursor: pointer;
-}
-
-.playControl:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 3px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .video {
     display: none;

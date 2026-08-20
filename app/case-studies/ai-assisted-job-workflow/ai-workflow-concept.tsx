@@ -302,7 +302,6 @@ export default function AiWorkflowConcept({ initialLanguage }: { initialLanguage
           videoClassName="ai-concept-hero-video"
           src={heroVideo}
           poster={heroPoster}
-          playLabel={language === "zh" ? "播放背景动画" : "Play background animation"}
           priority
         />
         <div className="ai-concept-frame">

@@ -259,6 +259,15 @@ $line: rgba($ink, 0.14);
   background: $paper;
 }
 
+.apple-heading > *,
+.apple-history-feature > *,
+.apple-issue-grid > *,
+.apple-principle > *,
+.apple-story-grid > *,
+.apple-code > * {
+  min-width: 0;
+}
+
 .apple-section {
   width: min(1240px, 100%);
   margin: 0 auto;

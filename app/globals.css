@@ -986,6 +986,8 @@ main[lang="en"] .personal-serif {
 .education-photo {
   --section-image: url("/backgrounds/education.jpg");
   --section-position: center;
+  justify-content: flex-start;
+  gap: clamp(44px, 6vh, 84px);
 }
 
 .honours-photo {
@@ -2654,6 +2656,7 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 
   .personal-brand {
+    flex: 0 0 auto;
     min-height: 50px;
     padding: 5px;
     border-radius: 999px;
@@ -2674,8 +2677,10 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 
   .personal-nav-main {
-    width: auto;
-    max-width: calc(100vw - 76px);
+    width: 0;
+    min-width: 0;
+    max-width: none;
+    flex: 1 1 auto;
     min-height: 50px;
     justify-content: flex-start;
     gap: 18px;
@@ -2815,7 +2820,10 @@ main[lang="zh-CN"] .contact-content h2 em {
 
   main[lang="zh-CN"] .framework-heading h2 > span,
   main[lang="zh-CN"] .framework-heading h2 > em {
-    white-space: nowrap;
+    display: block;
+    margin-left: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .education-layout,
@@ -2824,8 +2832,9 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 
   .honours-carousel {
-    width: calc(100% + 40px);
-    margin-left: -20px;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
     --honour-card-width: min(86vw, 420px);
     --honour-track-gap: 0px;
   }

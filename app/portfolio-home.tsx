@@ -562,7 +562,7 @@ function ProjectsSection({ language }: { language: Language }) {
           <p className="fitness-description">{t.fitness.description}</p>
           <div className="fitness-flow" aria-label={t.fitness.flowLabel}>{t.fitness.flow.map((step, index) => <span key={step}>{step}{index < t.fitness.flow.length - 1 ? <i>→</i> : null}</span>)}</div>
           <div className="fitness-links">
-            <a href={`${appBasePath}/personal-projects/personal-training/?lang=en`}>{t.fitness.view} <ArrowIcon /></a>
+            <a href={`${appBasePath}/personal-projects/personal-training/?lang=${language}`}>{t.fitness.view} <ArrowIcon /></a>
             <a href="https://github.com/stevenjobs530-afk/personal-training-website-v2" target="_blank" rel="noreferrer">GitHub <ArrowIcon /></a>
           </div>
         </article>

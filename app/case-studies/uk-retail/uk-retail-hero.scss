@@ -583,6 +583,14 @@ $warm-paper: #f5f3ef;
   }
 }
 
+.uk-retail-section-heading > *,
+.uk-retail-overview-copy > *,
+.uk-retail-output-intro > *,
+.uk-retail-chart-grid > *,
+.uk-retail-code-inner > * {
+  min-width: 0;
+}
+
 .uk-retail-chart-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -963,7 +971,8 @@ $warm-paper: #f5f3ef;
   .uk-retail-section-heading h2,
   .uk-retail-output-intro > p,
   .uk-retail-closing > span {
-    word-break: keep-all;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .uk-retail-hero-copy > span {
@@ -1046,6 +1055,12 @@ $warm-paper: #f5f3ef;
   .uk-retail-chart-grid,
   .uk-retail-code-inner {
     grid-template-columns: 1fr;
+  }
+
+  .uk-retail-overview-copy > p,
+  .uk-retail-output-intro > p,
+  .uk-retail-code-copy > p {
+    max-width: none;
   }
 
   .uk-retail-code pre {

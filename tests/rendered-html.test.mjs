@@ -113,6 +113,30 @@ test("keeps UK Results full-bleed and aligns the SQL content shell", async () =>
   assert.match(stylesheet, /\.uk-retail-results-body\s*\{[^}]*margin:\s*clamp\(48px, 7vw, 88px\) auto 0 !important[^}]*text-align:\s*center/s);
 });
 
+test("keeps bilingual case-study grids shrinkable and long content scrollable", async () => {
+  const [ukRetailStyles, homeStyles, trainingStyles, aepStyles] = await Promise.all([
+    readFile(new URL("../app/case-studies/uk-retail/uk-retail-hero.scss", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/personal-projects/personal-training/personal-training.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.scss", import.meta.url), "utf8"),
+  ]);
+
+  assert.doesNotMatch(ukRetailStyles, /word-break:\s*keep-all/);
+  assert.match(ukRetailStyles, /\.uk-retail-section-heading > \*,[\s\S]*\.uk-retail-code-inner > \*\s*\{[^}]*min-width:\s*0;/s);
+  assert.match(ukRetailStyles, /\.uk-retail-page:lang\(zh\)[\s\S]*overflow-wrap:\s*anywhere;[^}]*word-break:\s*normal;/s);
+  assert.match(ukRetailStyles, /@media \(max-width: 800px\)[\s\S]*\.uk-retail-output-intro,[\s\S]*\.uk-retail-code-inner\s*\{[^}]*grid-template-columns:\s*1fr;/s);
+
+  assert.match(homeStyles, /\.education-photo\s*\{[^}]*justify-content:\s*flex-start;[^}]*gap:\s*clamp\(44px, 6vh, 84px\);/s);
+
+  assert.match(trainingStyles, /@media \(max-width:\s*760px\)[\s\S]*\.projectNavigation\s*\{[^}]*top:\s*calc\(env\(safe-area-inset-top, 0px\) \+ 72px\);/s);
+  assert.match(trainingStyles, /@media \(max-width:\s*760px\)[\s\S]*\.sectionNavigation\s*\{[^}]*min-width:\s*0;[^}]*max-width:\s*none;[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*contain;[^}]*scroll-padding-inline:\s*16px;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
+  assert.match(trainingStyles, /\.sectionNavigation::-webkit-scrollbar\s*\{\s*display:\s*none;\s*\}/s);
+
+  assert.match(aepStyles, /\.aep-code > \*,[\s\S]*\{[^}]*min-width:\s*0;/s);
+  assert.match(aepStyles, /\.aep-code\s*\{[\s\S]*pre\s*\{[^}]*max-width:\s*100%;[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*contain;/s);
+  assert.match(aepStyles, /pre\s*\{[\s\S]*> span\s*\{[^}]*overflow-x:\s*auto;[^}]*white-space:\s*nowrap;/s);
+});
+
 test("server-renders the redesigned English Apple case study", async () => {
   const response = await render("/case-studies/apple-app-store?lang=en");
   assert.equal(response.status, 200);
@@ -262,7 +286,7 @@ test("keeps paired homepage headings optically consistent in both languages", as
   assert.match(stylesheet, /main\[lang="zh-CN"\] \.contact-content h2 em\s*\{[^}]*margin-top:\s*0\.16em[^}]*font-family:\s*inherit[^}]*font-size:\s*1em[^}]*font-style:\s*normal[^}]*line-height:\s*1/s);
   assert.match(stylesheet, /main\[lang="zh-CN"\] \.framework-heading h2 em\s*\{[^}]*font-family:\s*"Inter"[^}]*font-style:\s*normal[^}]*font-weight:\s*400/s);
   assert.match(stylesheet, /main\[lang="zh-CN"\] \.framework-heading h2\s*\{[^}]*font-size:\s*clamp\(44px, 13\.2vw, 62px\)[^}]*line-height:\s*0\.94/s);
-  assert.match(stylesheet, /main\[lang="zh-CN"\] \.framework-heading h2 > span,[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > em\s*\{[^}]*white-space:\s*nowrap/s);
+  assert.match(stylesheet, /@media \(max-width: 768px\)[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > span,[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > em\s*\{[^}]*display:\s*block;[^}]*margin-left:\s*0;[^}]*overflow-wrap:\s*anywhere;[^}]*white-space:\s*normal;/s);
 });
 
 test("keeps bilingual display titles free of punctuation", async () => {
@@ -282,10 +306,9 @@ test("keeps bilingual display titles free of punctuation", async () => {
   }
 
   const personalTraining = await readFile(new URL("../app/personal-projects/personal-training/personal-training-hero.tsx", import.meta.url), "utf8");
-  const strengthDemo = await readFile(new URL("../app/personal-projects/personal-training/strength-demo.tsx", import.meta.url), "utf8");
-  const literalHeadings = [...`${personalTraining}\n${strengthDemo}`.matchAll(/<h[1-3][^>]*>([^<{]+)<\/h[1-3]>/g)].map((match) => match[1].trim());
-  assert.ok(literalHeadings.length > 0);
-  for (const heading of literalHeadings) assert.doesNotMatch(heading, /[.!?,;:。！？；：，]/);
+  const copyHeadings = [...personalTraining.matchAll(/\btitle:\s*"([^"]+)"/g)].map((match) => match[1]);
+  assert.ok(copyHeadings.length > 0);
+  for (const heading of copyHeadings) assert.doesNotMatch(heading, /[.!?,;:。！？；：，]/);
 });
 
 test("keeps experience cards inside the available responsive width", async () => {
@@ -493,7 +516,7 @@ test("uses the supplied runner image and a compact AEP-to-personal-project gap",
   await access(new URL("../public/backgrounds/apple-park-card.png", import.meta.url));
 });
 
-test("server-renders the complete English-only Personal Training project route", async () => {
+test("server-renders the complete English Personal Training project route", async () => {
   const response = await render("/personal-projects/personal-training?lang=en");
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -527,22 +550,66 @@ test("server-renders the complete English-only Personal Training project route",
   assert.match(html, /Next\.js 16\.2\.9/);
   assert.match(html, /React 19\.2\.7/);
   assert.match(html, /owner-scoped RLS/i);
-  assert.doesNotMatch(html, /登录|中文/);
 });
 
-test("normalizes any direct Personal Training language request to English", async () => {
+test("hydrates Personal Training from the requested language and keeps bilingual page metadata", async () => {
   const response = await render("/personal-projects/personal-training?lang=zh");
   assert.equal(response.status, 200);
-  const html = await response.text();
-  assert.match(html, /A PERSONAL/);
-  assert.doesNotMatch(html, /切换|返回作品集|中文/);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
-  const component = await readFile(
-    new URL("../app/personal-projects/personal-training/personal-training-hero.tsx", import.meta.url),
-    "utf8",
-  );
-  assert.match(component, /searchParams\.set\("lang", "en"\)/);
+  const html = await response.text();
+  // The route is force-static, so query-language selection is completed during hydration.
+  assert.match(html, /A PERSONAL/);
+
+  const [page, component, demo] = await Promise.all([
+    readFile(new URL("../app/personal-projects/personal-training/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/personal-projects/personal-training/personal-training-hero.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/personal-projects/personal-training/strength-demo.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(component, /type Language = "en" \| "zh"/);
+  assert.match(component, /const COPY\s*=\s*\{/);
+  assert.match(component, /\ben:\s*\{/);
+  assert.match(component, /\bzh:\s*\{/);
+  assert.match(component, /url\.searchParams\.get\("lang"\) === "zh"/);
+  assert.match(component, /url\.searchParams\.set\("lang", nextLanguage\)/);
   assert.match(component, /history\.replaceState/);
+  assert.match(component, /document\.documentElement\.lang/);
+  assert.match(component, /document\.title\s*=/);
+  assert.match(component, /meta\[name=["']description["']\]/);
+  assert.match(component, /\?lang=\$\{language\}#personal-training-project/);
+  assert.match(component, /language=\{language\}/);
+  assert.match(component, /个人训练项目导航/);
+  assert.match(component, /返回作品集中的个人训练项目/);
+  assert.match(component, /训练模型概览/);
+  assert.match(component, /关闭训练模型浏览器/);
+
+  assert.match(page, /title:\s*"Personal Training — Zishun Gao"/);
+  assert.match(page, /description:/);
+  assert.match(page, /<PersonalTrainingHero initialLanguage="en" \/>/);
+  assert.match(component, /高子舜/);
+
+  assert.match(demo, /import type \{ Language \}/);
+  assert.match(demo, /export type StrengthDemoCopy/);
+  assert.match(demo, /\{ language, copy \}: \{ language: Language; copy: StrengthDemoCopy \}/);
+  assert.match(demo, /aria-label=\{copy\.setTypeLabel\(index \+ 1\)\}/);
+  assert.match(demo, /aria-label=\{copy\.setWeightLabel\(index \+ 1\)\}/);
+  assert.match(demo, /aria-label=\{copy\.setRepsLabel\(index \+ 1\)\}/);
+  assert.match(demo, /aria-label=\{copy\.removeSetLabel\(index \+ 1\)\}/);
+  assert.match(demo, /role="status" aria-live="polite">\{copy\.status\[statusKey\]\}/);
+  assert.match(component, /setTypeLabel:/);
+  assert.match(component, /setWeightLabel:/);
+  assert.match(component, /setRepsLabel:/);
+  assert.match(component, /removeSetLabel:/);
+  assert.match(component, /status:\s*\{[\s\S]*ready:[\s\S]*added:[\s\S]*removed:[\s\S]*reset:/s);
+  assert.match(component, /`第 \$\{index\} 组的类型`/);
+  assert.match(component, /`第 \$\{index\} 组的重量（公斤）`/);
+  assert.match(component, /`第 \$\{index\} 组的次数`/);
+  assert.match(component, /`移除第 \$\{index\} 个演示训练组`/);
+  assert.match(component, /示例训练记录已准备就绪。/);
+  assert.match(component, /已添加临时演示训练组。/);
+  assert.match(component, /已移除临时演示训练组。/);
+  assert.match(component, /演示已重置为虚构的初始值。/);
 });
 
 test("keeps the project interaction and demo privacy boundaries explicit", async () => {
@@ -569,13 +636,13 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /video\.readyState >= HTMLMediaElement\.HAVE_CURRENT_DATA/);
   assert.match(component, /if \(prefersReducedMotion\)[\s\S]*setHeroVideoState\("reduced-motion"\)/);
   assert.match(component, /if \(video\.error\) video\.load\(\)/);
-  assert.match(component, /\n\s+autoPlay\n/);
+  assert.match(component, /\bautoPlay\b/);
   assert.match(component, /preload="auto"/);
-  assert.match(component, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
+  assert.match(component, /document\.addEventListener\("visibilitychange", updatePlayback\)/);
   assert.match(component, /document\.addEventListener\("touchend", retryFromUserGesture/);
   assert.match(component, /document\.addEventListener\("click", retryFromUserGesture/);
   assert.match(component, /document\.addEventListener\("keydown", retryFromUserGesture/);
-  assert.match(component, /window\.addEventListener\("pageshow", handlePageShow\)/);
+  assert.match(component, /window\.addEventListener\("pageshow", updatePlayback\)/);
   assert.doesNotMatch(component, /Play animation|videoPlayFallback|HERO_PLAYBACK_TIMEOUT_MS|heroPlaybackTimerRef/);
   assert.doesNotMatch(component, /@vimeo\/player|player\.vimeo\.com|1184061018/);
   assert.doesNotMatch(component, /app-uploads\.krea\.ai/);
@@ -585,9 +652,9 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /poster=\{item\.poster\}/);
   assert.doesNotMatch(component, /RippleField|StaggeredMenu|feDisplacementMap|from "gsap"/);
   assert.match(demo, /useReducer/);
-  assert.match(demo, /Studio Cable Row — Demo/);
-  assert.match(demo, /Nothing is saved/);
-  assert.match(demo, /Refreshing this page resets the demo/);
+  assert.match(component, /Studio Cable Row — Demo/);
+  assert.match(component, /Nothing is saved/);
+  assert.match(component, /Refreshing this page resets the demo/);
   assert.doesNotMatch(demo, /\bfetch\s*\(|localStorage|sessionStorage|document\.cookie|supabase/i);
   assert.match(stylesheet, /prefers-reduced-motion: reduce/);
   assert.match(stylesheet, /height:\s*100svh/);

@@ -450,6 +450,18 @@ $line: rgba($ink, 0.14);
 
 .ai-concept-article { background: $paper; }
 
+.ai-concept-section > header > *,
+.ai-concept-framing-grid > *,
+.ai-concept-loop-grid > *,
+.ai-concept-role-grid > *,
+.ai-concept-evidence-grid > *,
+.ai-concept-safeguard-grid > *,
+.ai-concept-tracker-rules > *,
+.ai-concept-results dl > *,
+.ai-concept-results aside > * {
+  min-width: 0;
+}
+
 .ai-concept-section {
   padding: 116px 40px;
   border-bottom: 1px solid $line;

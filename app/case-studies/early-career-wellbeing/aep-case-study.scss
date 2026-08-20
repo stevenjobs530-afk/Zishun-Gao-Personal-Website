@@ -279,6 +279,18 @@ $line: rgba($ink, 0.12);
     linear-gradient(180deg, $paper 0%, #eef4f1 42%, $paper 100%);
 }
 
+.aep-heading > *,
+.aep-purpose-grid > *,
+.aep-route-grid > *,
+.aep-consent-note > *,
+.aep-theme-field > *,
+.aep-flow ol > *,
+.aep-safeguard-grid > *,
+.aep-code > *,
+.aep-outcomes aside > * {
+  min-width: 0;
+}
+
 .aep-section {
   position: relative;
   z-index: 1;
@@ -740,9 +752,11 @@ $line: rgba($ink, 0.12);
   pre {
     position: relative;
     width: auto;
+    max-width: 100%;
     margin: 0;
     padding: 68px 32px 34px;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 24px;
     background: #071014;
@@ -758,12 +772,15 @@ $line: rgba($ink, 0.12);
       display: flex;
       align-items: center;
       padding: 0 18px;
+      overflow-x: auto;
       border-bottom: 1px solid rgba(255, 255, 255, 0.11);
       color: rgba(255, 255, 255, 0.4);
       font-family: "Inter", sans-serif;
       font-size: 9px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
+      white-space: nowrap;
+      scrollbar-width: thin;
     }
   }
 }

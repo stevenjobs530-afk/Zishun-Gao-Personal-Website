@@ -1,12 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PortfolioBackLink from "../../components/portfolio-back-link";
 import styles from "./personal-training.module.css";
 import StrengthDemo from "./strength-demo";
 
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const mediaBasePath = `${appBasePath}/media`;
 
 const HERO_VIDEO_URL = `${appBasePath}/personal-projects/personal-training/video/ocean-hero-720p.mp4`;
 const HERO_VIDEO_POSTER = `${appBasePath}/personal-projects/personal-training/backgrounds/personal-training-motivation.webp`;
@@ -25,7 +27,8 @@ const MENU_ITEMS = [
 
 const FLEET = [
   {
-    src: "https://app-uploads.krea.ai/wan-videos/08006647-1c55-4823-b35d-e40d57c66bf8.mp4",
+    src: `${mediaBasePath}/video/training-strength.mp4`,
+    poster: `${mediaBasePath}/posters/training-strength.jpg`,
     title: "STRENGTH",
     target: "customisation",
     action: "TRY THE DEMO",
@@ -38,7 +41,8 @@ const FLEET = [
     ],
   },
   {
-    src: "https://app-uploads.krea.ai/wan-videos/91fd9932-6194-4d58-ada0-955692853019.mp4",
+    src: `${mediaBasePath}/video/training-cardio.mp4`,
+    poster: `${mediaBasePath}/posters/training-cardio.jpg`,
     title: "CARDIO",
     target: "training-models",
     action: "SEE THE MODEL",
@@ -52,7 +56,8 @@ const FLEET = [
     ],
   },
   {
-    src: "https://app-uploads.krea.ai/wan-videos/95fb3282-d7cf-448e-9202-ef0662541c83.mp4",
+    src: `${mediaBasePath}/video/training-progress.mp4`,
+    poster: `${mediaBasePath}/posters/training-progress.jpg`,
     title: "PROGRESS",
     target: "progress",
     action: "READ THE TREND",
@@ -65,6 +70,8 @@ const FLEET = [
     ],
   },
 ] as const;
+
+type FleetStyle = CSSProperties & { "--fleet-poster": string };
 
 const titleVariants = {
   hidden: { opacity: 0, y: 40, transition: { duration: 0.48 } },
@@ -98,24 +105,66 @@ function ProjectNavigation({ onNavigate }: { onNavigate: (target: string) => voi
 }
 
 function FleetVideo({ item, index, onNavigate }: { item: (typeof FLEET)[number]; index: number; onNavigate: (target: string) => void }) {
+  const articleRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isActive, setIsActive] = useState(false);
+  const [videoState, setVideoState] = useState<"poster" | "loading" | "playing">("poster");
   const prefersReducedMotion = useReducedMotion();
 
   const play = useCallback(() => {
     setIsActive(true);
     if (prefersReducedMotion) return;
+    setVideoState("loading");
     const playback = videoRef.current?.play();
-    if (playback) void playback.catch(() => undefined);
+    if (playback) void playback.catch(() => setVideoState("poster"));
   }, [prefersReducedMotion]);
 
   const pause = useCallback(() => {
     setIsActive(false);
     videoRef.current?.pause();
+    setVideoState("poster");
   }, []);
+
+  useEffect(() => {
+    const article = articleRef.current;
+    const video = videoRef.current;
+    if (!article || prefersReducedMotion) return;
+
+    const touchPointer = window.matchMedia("(hover: none), (pointer: coarse)");
+    let observer: IntersectionObserver | null = null;
+
+    const updateObserver = () => {
+      observer?.disconnect();
+      observer = null;
+      if (!touchPointer.matches) {
+        pause();
+        return;
+      }
+
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.55) play();
+          else pause();
+        },
+        { threshold: [0, 0.55, 0.75] },
+      );
+      observer.observe(article);
+    };
+
+    updateObserver();
+    touchPointer.addEventListener("change", updateObserver);
+    return () => {
+      observer?.disconnect();
+      touchPointer.removeEventListener("change", updateObserver);
+      video?.pause();
+    };
+  }, [pause, play, prefersReducedMotion]);
+
+  const fleetStyle: FleetStyle = { "--fleet-poster": `url(${item.poster})` };
 
   return (
     <motion.article
+      ref={articleRef}
       className={styles.fleetColumn}
       initial={{ x: prefersReducedMotion ? 0 : "100vw" }}
       animate={{ x: 0 }}
@@ -127,8 +176,24 @@ function FleetVideo({ item, index, onNavigate }: { item: (typeof FLEET)[number];
         if (!event.currentTarget.contains(event.relatedTarget)) pause();
       }}
       data-active={isActive}
+      data-video-state={videoState}
+      style={fleetStyle}
     >
-      <video ref={videoRef} className={styles.fleetVideo} muted loop playsInline preload="metadata" src={item.src} />
+      <video
+        ref={videoRef}
+        className={styles.fleetVideo}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster={item.poster}
+        onPlaying={() => setVideoState("playing")}
+        onWaiting={() => setVideoState("poster")}
+        onStalled={() => setVideoState("poster")}
+        onError={() => setVideoState("poster")}
+      >
+        <source src={item.src} type="video/mp4" />
+      </video>
       <div className={styles.fleetShade} />
       <div className={styles.fleetContent}>
         <div className={styles.fleetMask}>
@@ -318,10 +383,14 @@ export default function PersonalTrainingHero() {
     scheduleHeroPlaybackFallback();
     try {
       await video.play();
+      if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        clearHeroPlaybackTimer();
+        setHeroVideoState("playing");
+      }
     } catch {
       // The watchdog reveals a user-controlled fallback if autoplay is denied.
     }
-  }, [prefersReducedMotion, scheduleHeroPlaybackFallback]);
+  }, [clearHeroPlaybackTimer, prefersReducedMotion, scheduleHeroPlaybackFallback]);
 
   const handleHeroVideoPlaying = useCallback(() => {
     clearHeroPlaybackTimer();
@@ -478,7 +547,7 @@ export default function PersonalTrainingHero() {
               src={HERO_VIDEO_URL}
               poster={HERO_VIDEO_POSTER}
               className={styles.backgroundVideo}
-              autoPlay={prefersReducedMotion === false}
+              autoPlay
               muted
               loop
               playsInline

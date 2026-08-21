@@ -905,7 +905,6 @@
   }
 
   .background { transform: none; }
-  .backgroundVideo { display: none; }
   .heroTitle > *,
   .heroEyebrow,
   .heroDescription {

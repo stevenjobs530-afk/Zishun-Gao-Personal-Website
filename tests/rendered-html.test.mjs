@@ -634,14 +634,13 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(component, /event\.key === "Escape"/);
   assert.match(component, /scrollIntoView/);
   assert.match(component, /video\.readyState >= HTMLMediaElement\.HAVE_CURRENT_DATA/);
-  assert.match(component, /if \(prefersReducedMotion\)[\s\S]*setHeroVideoState\("reduced-motion"\)/);
+  assert.doesNotMatch(component, /setHeroVideoState\("reduced-motion"\)/);
+  assert.doesNotMatch(component, /if \(!video \|\| prefersReducedMotion/);
   assert.match(component, /if \(video\.error\) video\.load\(\)/);
   assert.match(component, /\bautoPlay\b/);
   assert.match(component, /preload="auto"/);
   assert.match(component, /document\.addEventListener\("visibilitychange", updatePlayback\)/);
-  assert.match(component, /document\.addEventListener\("touchend", retryFromUserGesture/);
-  assert.match(component, /document\.addEventListener\("click", retryFromUserGesture/);
-  assert.match(component, /document\.addEventListener\("keydown", retryFromUserGesture/);
+  assert.doesNotMatch(component, /retryFromUserGesture/);
   assert.match(component, /window\.addEventListener\("pageshow", updatePlayback\)/);
   assert.doesNotMatch(component, /Play animation|videoPlayFallback|HERO_PLAYBACK_TIMEOUT_MS|heroPlaybackTimerRef/);
   assert.doesNotMatch(component, /@vimeo\/player|player\.vimeo\.com|1184061018/);
@@ -663,7 +662,7 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(stylesheet, /\.heroMedia\s*\{[\s\S]*border-radius:\s*28px/s);
   assert.match(stylesheet, /\.heroMedia\[data-video-state="playing"\] \.backgroundVideo\s*\{[^}]*opacity:\s*1/s);
   assert.doesNotMatch(stylesheet, /videoPlayFallback/);
-  assert.match(stylesheet, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.backgroundVideo\s*\{\s*display:\s*none;/s);
+  assert.doesNotMatch(stylesheet, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.backgroundVideo\s*\{\s*display:\s*none;/s);
   assert.match(stylesheet, /\.story\s*\{[\s\S]*gap:\s*32px;[\s\S]*background:\s*var\(--paper,\s*#f0ece4\)/s);
   assert.match(stylesheet, /\.storySection::before[\s\S]*background-image:\s*var\(--story-section-image\)[\s\S]*background-attachment:\s*scroll[\s\S]*filter:\s*var\(--story-section-filter,\s*none\)/s);
   assert.match(stylesheet, /\.motivationSection\s*\{[^}]*--story-section-filter:\s*brightness\(1\.14\) saturate\(1\.06\)/s);

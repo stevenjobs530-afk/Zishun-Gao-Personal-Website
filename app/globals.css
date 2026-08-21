@@ -3101,16 +3101,9 @@ main[lang="zh-CN"] .contact-content h2 em {
 
   .experience-metrics > div {
     display: grid;
-    grid-template-columns: minmax(116px, 0.46fr) minmax(0, 1fr);
-    align-items: center;
+    grid-template-columns: minmax(90px, 0.45fr) 1fr;
+    align-items: baseline;
     gap: 12px;
-  }
-
-  .experience-metrics dt {
-    font-size: clamp(27px, 7.4vw, 31px);
-    line-height: 1;
-    letter-spacing: -0.03em;
-    white-space: nowrap;
   }
 
   .experience-metrics dd {

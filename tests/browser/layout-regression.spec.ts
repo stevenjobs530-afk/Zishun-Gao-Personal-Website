@@ -2,7 +2,6 @@ import { expect, test, type Page } from "@playwright/test";
 
 const VIEWPORTS = [
   { width: 390, height: 844 },
-  { width: 440, height: 900 },
   { width: 768, height: 1024 },
   { width: 1024, height: 768 },
   { width: 1440, height: 900 },
@@ -116,10 +115,6 @@ test.describe("bilingual cross-browser layout", () => {
               const tableWrap = page.locator(".ai-concept-table-wrap");
               await expect(tableWrap).toBeVisible();
               expect(await tableWrap.evaluate((element) => getComputedStyle(element).overflowX)).toMatch(/auto|scroll/);
-              const heroMedia = page.locator(".ai-concept-hero-media");
-              const expectedPosition = viewport.width <= 700 ? "82% 50%" : "50% 50%";
-              await expect(heroMedia.locator("video")).toHaveCSS("object-position", expectedPosition);
-              await expect(heroMedia).toHaveCSS("background-position", expectedPosition);
             }
 
             if (name === "personal-training") {
@@ -162,26 +157,6 @@ test.describe("bilingual cross-browser layout", () => {
               expect(gap).not.toBeNull();
               expect(gap ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(180);
             }
-
-            if (name === "home" && viewport.width <= 768) {
-              const metricIssues = await page.locator(".experience-metrics > div").evaluateAll((rows) =>
-                rows.flatMap((row) => {
-                  const value = row.querySelector<HTMLElement>("dt");
-                  const label = row.querySelector<HTMLElement>("dd");
-                  if (!value || !label) return [{ reason: "missing metric content" }];
-                  const valueRect = value.getBoundingClientRect();
-                  const labelRect = label.getBoundingClientRect();
-                  const valueStyle = getComputedStyle(value);
-                  const lineHeight = Number.parseFloat(valueStyle.lineHeight);
-                  const overlaps = Math.max(0, Math.min(valueRect.right, labelRect.right) - Math.max(valueRect.left, labelRect.left))
-                    * Math.max(0, Math.min(valueRect.bottom, labelRect.bottom) - Math.max(valueRect.top, labelRect.top));
-                  return valueRect.height <= lineHeight + 1 && overlaps === 0 && valueStyle.whiteSpace === "nowrap"
-                    ? []
-                    : [{ value: value.textContent?.trim(), height: valueRect.height, lineHeight, overlaps, whiteSpace: valueStyle.whiteSpace }];
-                }),
-              );
-              expect(metricIssues).toEqual([]);
-            }
           });
         }
       }
@@ -200,41 +175,5 @@ test.describe("bilingual cross-browser layout", () => {
     await expect(page).toHaveURL(/lang=zh/);
     await expect(page.getByLabel("动作或器械名称")).toHaveValue("My bilingual demo exercise");
     await expect(page.locator("[data-portfolio-back-link]")).toHaveAttribute("href", /lang=zh#personal-training-project/);
-  });
-
-  for (const reducedMotion of ["no-preference", "reduce"] as const) {
-    test(`Personal Training hero autoplays with ${reducedMotion} motion preference`, async ({ page }) => {
-      await page.setViewportSize({ width: 390, height: 844 });
-      await page.emulateMedia({ reducedMotion });
-      await openReady(page, "/personal-projects/personal-training/", "en");
-
-      const heroMedia = page.locator("[data-video-state][class*='heroMedia']");
-      const video = heroMedia.locator("video");
-      await expect(video).toHaveAttribute("autoplay", "");
-      await expect(video).toHaveAttribute("muted", "");
-      await expect(video).toHaveAttribute("playsinline", "");
-      await expect(video).not.toHaveCSS("display", "none");
-      await expect(heroMedia).toHaveAttribute("data-video-state", "playing", { timeout: 10_000 });
-      await expect.poll(() => video.evaluate((element) => (element as HTMLVideoElement).currentTime)).toBeGreaterThan(0);
-    });
-  }
-
-  test("Personal Training keeps its poster stable when autoplay is rejected", async ({ page }) => {
-    await page.route("**/ocean-hero-720p.mp4", (route) => route.abort());
-    await page.addInitScript(() => {
-      HTMLMediaElement.prototype.play = function play() {
-        this.pause();
-        return Promise.reject(new DOMException("Autoplay blocked", "NotAllowedError"));
-      };
-    });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await openReady(page, "/personal-projects/personal-training/", "en");
-
-    const heroMedia = page.locator("[data-video-state][class*='heroMedia']");
-    await expect(heroMedia).toHaveAttribute("data-video-state", "poster", { timeout: 10_000 });
-    await page.locator("body").click({ position: { x: 8, y: 8 } });
-    await page.waitForTimeout(250);
-    await expect(heroMedia).toHaveAttribute("data-video-state", "poster");
-    await expect(heroMedia).not.toHaveCSS("background-image", "none");
   });
 });

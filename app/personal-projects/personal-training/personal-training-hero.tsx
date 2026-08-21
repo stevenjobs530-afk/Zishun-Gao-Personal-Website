@@ -15,7 +15,7 @@ const HERO_VIDEO_URL = `${appBasePath}/personal-projects/personal-training/video
 const HERO_VIDEO_POSTER = `${appBasePath}/personal-projects/personal-training/backgrounds/personal-training-motivation.webp`;
 
 export type Language = "en" | "zh";
-type HeroVideoState = "loading" | "playing" | "poster";
+type HeroVideoState = "loading" | "playing" | "poster" | "reduced-motion";
 
 const COPY = {
   en: {
@@ -463,7 +463,7 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
 
   const requestHeroPlayback = useCallback(async () => {
     const video = backgroundVideoRef.current;
-    if (!video || document.visibilityState !== "visible") return;
+    if (!video || prefersReducedMotion || document.visibilityState !== "visible") return;
     if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) { setHeroVideoState("playing"); return; }
     video.muted = true;
     video.defaultMuted = true;
@@ -475,16 +475,24 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
       await video.play();
       if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setHeroVideoState("playing");
     } catch { setHeroVideoState("poster"); }
-  }, []);
+  }, [prefersReducedMotion]);
 
-  const handleHeroVideoPlaying = useCallback(() => { setHeroVideoState("playing"); }, []);
+  const handleHeroVideoPlaying = useCallback(() => {
+    if (prefersReducedMotion) { backgroundVideoRef.current?.pause(); setHeroVideoState("reduced-motion"); }
+    else setHeroVideoState("playing");
+  }, [prefersReducedMotion]);
 
-  const showHeroPoster = useCallback(() => { setHeroVideoState("poster"); }, []);
+  const showHeroPoster = useCallback(() => { if (!prefersReducedMotion) setHeroVideoState("poster"); }, [prefersReducedMotion]);
 
   useEffect(() => {
     const hero = heroRef.current;
     const video = backgroundVideoRef.current;
     if (!hero || !video) return;
+    if (prefersReducedMotion) {
+      video.pause();
+      const frame = window.requestAnimationFrame(() => setHeroVideoState("reduced-motion"));
+      return () => window.cancelAnimationFrame(frame);
+    }
 
     const heroRect = hero.getBoundingClientRect();
     let isHeroVisible = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
@@ -492,20 +500,27 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
       if (isHeroVisible && document.visibilityState === "visible") void requestHeroPlayback();
       else { video.pause(); setHeroVideoState("poster"); }
     };
+    const retryFromUserGesture = () => { if (isHeroVisible && video.paused) void requestHeroPlayback(); };
     const observer = new IntersectionObserver(([entry]) => { isHeroVisible = entry.isIntersecting && entry.intersectionRatio >= 0.05; updatePlayback(); }, { threshold: [0, 0.05, 0.25] });
     observer.observe(hero);
     document.addEventListener("visibilitychange", updatePlayback);
+    document.addEventListener("touchend", retryFromUserGesture, { capture: true, passive: true });
+    document.addEventListener("click", retryFromUserGesture, true);
+    document.addEventListener("keydown", retryFromUserGesture, true);
     window.addEventListener("pageshow", updatePlayback);
     window.addEventListener("focus", updatePlayback);
     updatePlayback();
     return () => {
       observer.disconnect();
       document.removeEventListener("visibilitychange", updatePlayback);
+      document.removeEventListener("touchend", retryFromUserGesture, true);
+      document.removeEventListener("click", retryFromUserGesture, true);
+      document.removeEventListener("keydown", retryFromUserGesture, true);
       window.removeEventListener("pageshow", updatePlayback);
       window.removeEventListener("focus", updatePlayback);
       video.pause();
     };
-  }, [requestHeroPlayback]);
+  }, [prefersReducedMotion, requestHeroPlayback]);
 
   useEffect(() => {
     if (!isFleetOpen) return;

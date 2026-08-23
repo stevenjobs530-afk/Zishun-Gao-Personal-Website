@@ -323,8 +323,8 @@ $line: rgba($ink, 0.14);
   font-size: clamp(42px, 5vw, 72px);
 }
 
-.apple-question-copy {
-  max-width: 940px;
+.apple-question > .apple-question-copy {
+  width: min(940px, 100%);
   margin: clamp(52px, 7vw, 86px) auto 0;
   color: rgba($ink, 0.7);
   font-size: clamp(20px, 2vw, 27px);
@@ -574,8 +574,8 @@ $line: rgba($ink, 0.14);
   }
 }
 
-.apple-intro {
-  max-width: 680px;
+.apple-uncertainty > .apple-intro {
+  width: min(680px, 100%);
   margin: 64px auto 0;
   color: rgba($ink, 0.67);
   font-size: 16px;

@@ -420,8 +420,8 @@ $line: rgba($ink, 0.12);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.aep-intro {
-  max-width: 700px;
+.aep-section > .aep-intro {
+  width: min(700px, 100%);
   margin: 42px auto 0;
   color: rgba($ink, 0.67);
   font-size: 16px;
@@ -678,8 +678,6 @@ $line: rgba($ink, 0.12);
 }
 
 .aep-safeguards > .aep-intro {
-  width: min(700px, 100%);
-  margin: 42px auto 0;
   text-wrap: balance;
 }
 

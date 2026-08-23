@@ -78,6 +78,28 @@ async function expectNoIntersection(page: Page, first: string, second: string) {
   expect((intersection?.width ?? 0) * (intersection?.height ?? 0)).toBe(0);
 }
 
+async function expectHorizontallyCentered(page: Page, elementSelector: string, containerSelector: string) {
+  const alignment = await page.evaluate(
+    ([targetSelector, parentSelector]) => {
+      const element = document.querySelector<HTMLElement>(targetSelector);
+      const container = document.querySelector<HTMLElement>(parentSelector);
+      if (!element || !container) return null;
+
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      return {
+        offset:
+          elementRect.left + elementRect.width / 2 -
+          (containerRect.left + containerRect.width / 2),
+      };
+    },
+    [elementSelector, containerSelector] as const,
+  );
+
+  expect(alignment).not.toBeNull();
+  expect(Math.abs(alignment?.offset ?? Number.POSITIVE_INFINITY)).toBeLessThanOrEqual(2);
+}
+
 test.describe("bilingual cross-browser layout", () => {
   for (const viewport of VIEWPORTS) {
     test(`${viewport.width}x${viewport.height} keeps every core route contained`, async ({ page }) => {
@@ -109,6 +131,12 @@ test.describe("bilingual cross-browser layout", () => {
               await expect(codePanel).toBeVisible();
               await expectInsideViewport(page, [".aep-code pre"]);
               expect(await codePanel.evaluate((element) => getComputedStyle(element).overflowX)).toMatch(/auto|scroll/);
+              await expectHorizontallyCentered(page, ".aep-routes > .aep-intro", ".aep-routes");
+            }
+
+            if (name === "apple") {
+              await expectHorizontallyCentered(page, ".apple-question > .apple-question-copy", ".apple-question");
+              await expectHorizontallyCentered(page, ".apple-uncertainty > .apple-intro", ".apple-uncertainty");
             }
 
             if (name === "ai-workflow") {

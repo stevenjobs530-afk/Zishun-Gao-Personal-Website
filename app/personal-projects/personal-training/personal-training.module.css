@@ -129,6 +129,13 @@
   letter-spacing: -0.075em;
 }
 
+.page[lang="zh-CN"] .heroTitle {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  row-gap: 0.12em;
+  line-height: 0.96;
+}
+
 .heroMedia {
   position: relative;
   isolation: isolate;
@@ -762,6 +769,25 @@
     font-size: 0.82em;
     letter-spacing: -0.075em;
     white-space: nowrap;
+  }
+
+  .page[lang="zh-CN"] .heroTitle {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    row-gap: 0.14em;
+    font-size: clamp(36px, 10vw, 44px);
+    line-height: 1;
+  }
+
+  .page[lang="zh-CN"] .heroTitle span,
+  .page[lang="zh-CN"] .heroTitle em {
+    width: auto;
+  }
+
+  .page[lang="zh-CN"] .heroTitle span:nth-child(3) {
+    font-size: inherit;
+    letter-spacing: inherit;
+    white-space: normal;
   }
 
   .heroMedia {

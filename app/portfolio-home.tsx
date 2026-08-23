@@ -3,9 +3,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import HonoursExhibition from "./honours-exhibition";
 import ResilientBackgroundVideo from "./components/resilient-background-video";
+import BrandOrb from "./components/brand-orb/brand-orb";
 
 type Language = "en" | "zh";
 type ViewportMode = "compact" | "medium" | "wide";
+const SECTION_IDS = ["education", "honours", "projects", "ai-workflow", "method", "experience", "contact"] as const;
+type SectionId = (typeof SECTION_IDS)[number];
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const mediaBasePath = `${appBasePath}/media`;
 
@@ -412,22 +415,63 @@ const copy = {
   },
 } as const;
 
-function Navigation({ language, toggleLanguage }: { language: Language; toggleLanguage: () => void }) {
+function Navigation({
+  language,
+  toggleLanguage,
+  activeSection,
+  onNavigate,
+}: {
+  language: Language;
+  toggleLanguage: () => void;
+  activeSection: SectionId | null;
+  onNavigate: (section: SectionId) => void;
+}) {
   const t = copy[language];
+  const navigationItems = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!activeSection || !navigationItems.current) return;
+
+    const activeLink = navigationItems.current.querySelector<HTMLAnchorElement>(`a[href="#${activeSection}"]`);
+    if (!activeLink) return;
+
+    const container = navigationItems.current;
+    const containerRect = container.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    const inset = 8;
+    const isOutside = linkRect.left < containerRect.left + inset || linkRect.right > containerRect.right - inset;
+    if (!isOutside) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const targetLeft = activeLink.offsetLeft - (container.clientWidth - activeLink.offsetWidth) / 2;
+    container.scrollTo({ left: Math.max(0, targetLeft), behavior: reducedMotion ? "auto" : "smooth" });
+  }, [activeSection, language]);
+
   return (
     <nav className="personal-navbar" aria-label={t.primaryNavigation}>
       <a href="#home" className="personal-brand glass-panel" aria-label={t.brandHome}>
-        <span className="personal-brand-mark">ZG</span>
-        <span className="personal-brand-copy"><strong>{language === "en" ? "Zishun Gao" : "高子舜"}</strong><small>{t.brandDescriptor}</small></span>
+        <BrandOrb />
       </a>
       <div className="personal-nav-main glass-panel">
-        {t.navigation.map(([id, title, compactTitle]) => (
-          <a key={id} href={`#${id}`} className="personal-nav-link" aria-label={title}>
-            <span className="personal-nav-label-full">{title}</span>
-            <span className="personal-nav-label-compact" aria-hidden="true">{compactTitle ?? title}</span>
-          </a>
-        ))}
-        <button className="personal-language-toggle" type="button" onClick={toggleLanguage} aria-label={t.languageLabel}>{t.language}</button>
+        <span ref={navigationItems} className="personal-nav-items">
+          {t.navigation.map(([id, title, compactTitle]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className="personal-nav-link"
+              aria-label={title}
+              aria-current={activeSection === id ? "location" : undefined}
+              onClick={() => onNavigate(id)}
+            >
+              <span className="personal-nav-label-full">{title}</span>
+              <span className="personal-nav-label-compact" aria-hidden="true">{compactTitle ?? title}</span>
+            </a>
+          ))}
+        </span>
+        <span className="personal-language-toggle" role="group" aria-label={language === "en" ? "Language" : "语言"}>
+          <button type="button" aria-pressed={language === "en"} onClick={language === "zh" ? toggleLanguage : undefined}>EN</button>
+          <button type="button" aria-pressed={language === "zh"} onClick={language === "en" ? toggleLanguage : undefined}>中文</button>
+        </span>
       </div>
     </nav>
   );
@@ -690,6 +734,7 @@ function ContactSection({ language }: { language: Language }) {
 
 export default function PortfolioHome({ initialLanguage }: { initialLanguage: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
+  const [activeSection, setActiveSection] = useState<SectionId | null>(null);
   const resolvedUrlLanguage = useRef(false);
   const viewportMode = useViewportMode();
 
@@ -725,13 +770,77 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     return () => window.removeEventListener("hashchange", focusReturnedProject);
   }, []);
 
+  useEffect(() => {
+    const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter((section): section is HTMLElement => Boolean(section));
+    if (sections.length !== SECTION_IDS.length) return;
+
+    let frame = 0;
+    const updateActiveSection = () => {
+      frame = 0;
+      const referenceY = Math.min(180, Math.max(88, window.innerHeight * 0.2));
+      const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      const active = atPageEnd
+        ? sections.at(-1)
+        : sections.find((section) => {
+          const rect = section.getBoundingClientRect();
+          return rect.top <= referenceY && rect.bottom > referenceY;
+        });
+      setActiveSection((current) => current === active?.id ? current : (active?.id as SectionId | undefined) ?? null);
+    };
+    const queueUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateActiveSection);
+    };
+    let initialHashSync = true;
+    let initialHashTimer = 0;
+    const alignToSectionHash = (hashId: string) => {
+      if (decodeURIComponent(window.location.hash.slice(1)) !== hashId) return;
+      document.getElementById(hashId)?.scrollIntoView({ block: "start" });
+      queueUpdate();
+    };
+    const syncHash = () => {
+      const hashId = decodeURIComponent(window.location.hash.slice(1));
+      const hasSectionHash = SECTION_IDS.includes(hashId as SectionId);
+      if (hasSectionHash) setActiveSection(hashId as SectionId);
+      if (initialHashSync && hasSectionHash && window.scrollY < 2) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            alignToSectionHash(hashId);
+          });
+        });
+        initialHashTimer = window.setTimeout(() => alignToSectionHash(hashId), 700);
+      }
+      initialHashSync = false;
+      queueUpdate();
+    };
+
+    const observer = new IntersectionObserver(queueUpdate, {
+      rootMargin: "-18% 0px -78% 0px",
+      threshold: [0, 0.01, 0.5, 1],
+    });
+    sections.forEach((section) => observer.observe(section));
+    window.addEventListener("hashchange", syncHash);
+    window.addEventListener("popstate", syncHash);
+    window.addEventListener("resize", queueUpdate, { passive: true });
+    syncHash();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("hashchange", syncHash);
+      window.removeEventListener("popstate", syncHash);
+      window.removeEventListener("resize", queueUpdate);
+      if (initialHashTimer) window.clearTimeout(initialHashTimer);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   function toggleLanguage() {
     setLanguage((current) => current === "en" ? "zh" : "en");
   }
 
   return (
     <main lang={language === "zh" ? "zh-CN" : "en"} data-viewport={viewportMode}>
-      <Navigation language={language} toggleLanguage={toggleLanguage} />
+      <Navigation language={language} toggleLanguage={toggleLanguage} activeSection={activeSection} onNavigate={setActiveSection} />
       <Hero language={language} />
       <EducationSection language={language} />
       <HonoursSection language={language} />

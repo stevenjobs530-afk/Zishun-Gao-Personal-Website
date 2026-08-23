@@ -204,4 +204,77 @@ test.describe("bilingual cross-browser layout", () => {
     await expect(page.getByLabel("动作或器械名称")).toHaveValue("My bilingual demo exercise");
     await expect(page.locator("[data-portfolio-back-link]")).toHaveAttribute("href", /lang=zh#personal-training-project/);
   });
+
+  test("homepage navigation supports keyboard, hashes, history and aria-current", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openReady(page, "/", "en");
+    await expect(page.locator(".personal-nav-link[aria-current='location']")).toHaveCount(0);
+
+    const projects = page.getByRole("link", { name: "Projects", exact: true });
+    await projects.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/#projects$/);
+    await expect(projects).toHaveAttribute("aria-current", "location");
+
+    const contact = page.getByRole("link", { name: "Contact", exact: true });
+    await contact.click();
+    await expect(page).toHaveURL(/#contact$/);
+    await expect(contact).toHaveAttribute("aria-current", "location");
+
+    await page.goBack();
+    await expect(page).toHaveURL(/#projects$/);
+    await expect(projects).toHaveAttribute("aria-current", "location");
+    await page.goForward();
+    await expect(page).toHaveURL(/#contact$/);
+    await expect(contact).toHaveAttribute("aria-current", "location");
+
+    await page.goto("/?lang=en#projects", { waitUntil: "domcontentloaded" });
+    await expect(projects).toHaveAttribute("aria-current", "location");
+
+    await page.goto("/?lang=en", { waitUntil: "domcontentloaded" });
+    const chinese = page.getByRole("button", { name: "中文", exact: true });
+    await chinese.focus();
+    await page.keyboard.press("Space");
+    await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
+    await expect(page).toHaveURL(/lang=zh/);
+  });
+
+  test("mobile scroll spy keeps the active item inside the horizontal navigation viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/?lang=en#contact", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("main")).toBeVisible();
+    const contact = page.getByRole("link", { name: "Contact", exact: true });
+    await expect(contact).toHaveAttribute("aria-current", "location");
+
+    await expect.poll(() => page.evaluate(() => {
+      const container = document.querySelector<HTMLElement>(".personal-nav-items");
+      const active = document.querySelector<HTMLElement>(".personal-nav-link[aria-current='location']");
+      if (!container || !active) return null;
+      const containerRect = container.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      return {
+        inside: activeRect.left >= containerRect.left - 2 && activeRect.right <= containerRect.right + 2,
+        rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    })).toEqual({ inside: true, rootOverflow: 0 });
+  });
+
+  test("homepage remains contained at 100, 150 and 200 percent zoom-equivalent viewports", async ({ page }) => {
+    const zoomViewports = [
+      { zoom: 100, width: 1440, height: 900 },
+      { zoom: 150, width: 960, height: 600 },
+      { zoom: 200, width: 720, height: 450 },
+    ] as const;
+
+    for (const viewport of zoomViewports) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      for (const language of ["en", "zh"] as const) {
+        await test.step(`${viewport.zoom}% ${language}`, async () => {
+          await openReady(page, "/", language);
+          await expectNoRootOverflow(page);
+          await expectInsideViewport(page, [".personal-brand", ".personal-nav-main", ".personal-hero-actions"]);
+        });
+      }
+    }
+  });
 });

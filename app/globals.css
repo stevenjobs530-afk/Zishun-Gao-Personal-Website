@@ -8,6 +8,24 @@
   --primary-white: #ffffff;
   --secondary-white: rgba(255, 255, 255, 0.72);
   --glass-bg: rgba(20, 18, 16, 0.42);
+  --glass-tint: rgba(24, 22, 20, 0.44);
+  --glass-tint-strong: rgba(19, 17, 15, 0.66);
+  --glass-tint-solid: rgba(36, 33, 29, 0.94);
+  --glass-blur: 24px;
+  --glass-saturation: 132%;
+  --glass-shadow: 0 14px 36px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --glass-shadow-raised: 0 18px 44px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --glass-shadow-pressed: 0 7px 20px rgba(0, 0, 0, 0.18), inset 0 2px 8px rgba(0, 0, 0, 0.12);
+  --glass-specular: linear-gradient(118deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.14) 24%, transparent 58%);
+  --glass-specular-soft: linear-gradient(122deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.07) 30%, transparent 64%);
+  --glass-active-fill: rgba(255, 248, 238, 0.17);
+  --glass-focus-ring: rgba(244, 218, 184, 0.82);
+  --control-radius-sm: 14px;
+  --control-radius-md: 18px;
+  --control-radius-pill: 999px;
+  --control-height-sm: 44px;
+  --control-height-md: 48px;
+  --control-height-lg: 52px;
 }
 
 /* UK Retail case study */
@@ -65,8 +83,8 @@
     rgba(18, 20, 19, 0.36);
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 18px 45px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(24px) saturate(120%);
   -webkit-backdrop-filter: blur(24px) saturate(120%);
+  backdrop-filter: blur(24px) saturate(120%);
 }
 
 .uk-case-nav {
@@ -565,14 +583,12 @@ a {
 
 .glass-panel {
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035) 52%, rgba(12, 12, 11, 0.18)),
-    rgba(24, 22, 20, 0.34);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 12px 38px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(24px) saturate(132%);
-  -webkit-backdrop-filter: blur(24px) saturate(132%);
+    var(--glass-specular-soft),
+    var(--glass-tint);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
 }
 
 .personal-hero {
@@ -619,35 +635,29 @@ a {
   isolation: isolate;
   overflow: hidden;
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.52);
+  background:
+    linear-gradient(100deg, rgba(255, 255, 255, 0.1), transparent 48%),
+    rgba(27, 24, 21, 0.48);
+  border-color: transparent;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.16),
-    inset 1px 0 0 rgba(255, 255, 255, 0.26),
-    inset -1px 0 0 rgba(255, 255, 255, 0.1),
-    0 7px 20px rgba(0, 0, 0, 0.13),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(50px) saturate(72%) brightness(1.1);
-  -webkit-backdrop-filter: blur(50px) saturate(72%) brightness(1.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 1px 0 0 rgba(255, 255, 255, 0.09),
+    0 12px 32px rgba(0, 0, 0, 0.2),
+    0 2px 5px rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(28px) saturate(118%) brightness(1.04);
+  backdrop-filter: blur(28px) saturate(118%) brightness(1.04);
 }
 
 .personal-brand::before,
 .personal-nav-main::before {
   content: "";
   position: absolute;
-  inset: 1px;
+  inset: 0 18% auto 0;
+  height: 46%;
   z-index: 0;
   border-radius: inherit;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 255, 255, 0.07) 24%,
-    transparent 47%,
-    transparent 76%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.22);
+  background: var(--glass-specular);
+  opacity: 0.7;
   pointer-events: none;
 }
 
@@ -666,79 +676,89 @@ a {
 .personal-brand:focus-visible,
 .personal-nav-main:hover,
 .personal-nav-main:focus-within {
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: transparent;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.18),
-    inset 1px 0 0 rgba(255, 255, 255, 0.28),
-    inset -1px 0 0 rgba(255, 255, 255, 0.12),
-    0 8px 22px rgba(0, 0, 0, 0.14),
-    0 1px 2px rgba(0, 0, 0, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    0 16px 38px rgba(0, 0, 0, 0.24),
+    0 2px 5px rgba(0, 0, 0, 0.12);
 }
 
 .personal-brand {
+  width: 56px;
+  height: 56px;
   min-height: 56px;
   display: inline-flex;
   align-items: center;
-  gap: 13px;
-  padding: 8px 18px 8px 9px;
-  border-radius: 999px;
+  justify-content: center;
+  flex: 0 0 56px;
+  padding: 3px;
+  border-radius: 50%;
   color: white;
 }
 
-.personal-brand-mark {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+.brand-orb {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.24), transparent 42%),
-    rgba(255, 255, 255, 0.09);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-  font-family: "Cormorant Garamond", serif;
-  font-size: 17px;
-  font-style: italic;
+  overflow: hidden;
+  filter: drop-shadow(0 4px 9px rgba(0, 0, 0, 0.24));
 }
 
-.personal-brand-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.brand-orb-fallback,
+.brand-orb-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  image-rendering: auto;
 }
 
-.personal-brand-copy strong {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.brand-orb-fallback {
+  background: var(--brand-orb-fallback) center / contain no-repeat;
 }
 
-.personal-brand-copy small {
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+.brand-orb-canvas {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.brand-orb[data-orb-ready="true"] .brand-orb-canvas {
+  opacity: 1;
 }
 
 .personal-nav-main {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 10px;
   min-height: 56px;
-  padding: 0 24px;
+  padding: 4px 6px 4px 22px;
   border-radius: 28px;
 }
 
+.personal-nav-items {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .personal-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height-sm);
+  padding: 0 10px;
+  border-radius: var(--control-radius-pill);
   font-size: 13px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.94);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
-  transition: color 0.3s ease;
+  transition: color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .personal-nav-label-compact {
@@ -747,32 +767,83 @@ a {
 
 .personal-nav-link:hover,
 .personal-nav-link:focus-visible,
-.personal-language-toggle:hover,
-.personal-language-toggle:focus-visible {
+.personal-language-toggle button:hover,
+.personal-language-toggle button:focus-visible {
   color: var(--primary-white);
 }
 
-.personal-language-toggle {
-  min-width: 46px;
-  min-height: 38px;
-  padding: 0 13px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.94);
-  cursor: pointer;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+.personal-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.personal-language-toggle:hover,
-.personal-language-toggle:focus-visible {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.18);
-  outline: none;
+.personal-nav-link[aria-current="location"] {
+  color: #fff;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.22), transparent 58%),
+    var(--glass-active-fill);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -5px 12px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.11);
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.personal-language-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(44px, 1fr));
+  gap: 2px;
+  min-width: 98px;
+  min-height: 52px;
+  padding: 3px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 52%),
+    rgba(12, 12, 11, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), inset 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.personal-language-toggle button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.68);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.personal-language-toggle button[aria-pressed="true"] {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.68), transparent 48%),
+    rgba(249, 246, 240, 0.92);
+  color: #171513;
+  cursor: default;
+  box-shadow: 0 4px 13px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.personal-language-toggle button:focus-visible,
+.personal-brand:focus-visible,
+.personal-nav-link:focus-visible,
+.primary-button:focus-visible,
+.outline-button:focus-visible {
+  outline: 2px solid var(--glass-focus-ring);
+  outline-offset: 3px;
+}
+
+.personal-language-toggle button:focus-visible {
+  outline-color: var(--glass-focus-ring);
+  outline-offset: 1px;
+}
+
+.personal-language-toggle button[aria-pressed="true"]:focus-visible {
+  outline: 2px solid rgba(62, 43, 28, 0.8);
+  outline-offset: 1px;
 }
 
 .hero-nav-spacer {
@@ -836,36 +907,46 @@ main[lang="en"] .personal-serif {
 .primary-button,
 .outline-button {
   display: inline-flex;
-  min-height: 46px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
-  padding: 14px 24px;
-  border-radius: 12px;
+  padding: 13px 24px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: transform 180ms ease, background-color 180ms ease,
+    border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .primary-button {
-  background: white;
-  color: black;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.97);
+  color: #111;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 7px 22px rgba(0, 0, 0, 0.19), inset 0 0 0 1px rgba(0, 0, 0, 0.025);
 }
 
 .primary-button:hover,
 .primary-button:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.15);
+  background: white;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(0, 0, 0, 0.025);
 }
 
 .outline-button {
-  color: white;
+  color: rgba(255, 255, 255, 0.94);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035) 58%, rgba(0, 0, 0, 0.1)),
+    rgba(18, 18, 18, 0.27);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 5px 18px rgba(0, 0, 0, 0.11);
 }
 
 .outline-button:hover,
 .outline-button:focus-visible {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.36);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 22px rgba(0, 0, 0, 0.14);
 }
 
 .personal-hero-footer {
@@ -1136,8 +1217,8 @@ main[lang="zh-CN"] .framework-heading h2 em {
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(12, 13, 12, 0.28);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(14px) saturate(108%);
   -webkit-backdrop-filter: blur(14px) saturate(108%);
+  backdrop-filter: blur(14px) saturate(108%);
 }
 
 .image-backed-section .slot-label,
@@ -1367,8 +1448,8 @@ main[lang="zh-CN"] .framework-heading h2 em {
   letter-spacing: 0.11em;
   text-transform: uppercase;
   pointer-events: none;
-  backdrop-filter: blur(12px) saturate(110%);
   -webkit-backdrop-filter: blur(12px) saturate(110%);
+  backdrop-filter: blur(12px) saturate(110%);
   transition: opacity 260ms ease;
 }
 
@@ -1765,8 +1846,8 @@ main[lang="zh-CN"] .framework-heading h2 em {
 .project-photo .project-open {
   border-color: rgba(255, 255, 255, 0.42);
   background: rgba(12, 13, 12, 0.3);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .project-number,
@@ -2162,8 +2243,8 @@ main[lang="en"] .ai-feature-copy h2 em {
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(12, 13, 12, 0.48);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
 .method-stage-number {
@@ -2438,8 +2519,8 @@ main[lang="en"] .ai-feature-copy h2 em {
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 999px;
   background: rgba(12, 13, 13, 0.48);
-  backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   transition: all 0.3s ease;
 }
 
@@ -2543,8 +2624,8 @@ main[lang="zh-CN"] .contact-content h2 em {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   transition: all 0.3s ease;
 }
 
@@ -2588,6 +2669,247 @@ main[lang="zh-CN"] .contact-content h2 em {
   padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
   color: rgba(255, 255, 255, 0.5);
+}
+
+/* Phase 2: one Liquid Glass material language for actual controls. */
+.primary-button,
+.outline-button,
+.scroll-button,
+.honour-carousel-controls button,
+.honour-dialog button,
+.certificate-controls button,
+.project-open,
+.fitness-links a,
+.ai-feature-cta,
+.contact-topline a,
+.contact-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: var(--control-height-sm);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-shadow);
+  transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease, color 180ms ease, opacity 180ms ease;
+}
+
+.primary-button::before,
+.outline-button::before,
+.scroll-button::before,
+.honour-carousel-controls button::before,
+.honour-dialog button::before,
+.certificate-controls button::before,
+.project-open::before,
+.fitness-links a::before,
+.ai-feature-cta::before,
+.contact-topline a::before,
+.contact-button::before {
+  content: "";
+  position: absolute;
+  inset: 0 26% 48% 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--glass-specular-soft);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.outline-button,
+.scroll-button,
+.honour-carousel-controls button,
+.honour-dialog button,
+.certificate-controls button,
+.project-open,
+.fitness-links a,
+.contact-topline a,
+.contact-button:not(.contact-button-primary) {
+  background:
+    linear-gradient(128deg, rgba(255, 255, 255, 0.1), transparent 54%),
+    var(--glass-tint);
+  color: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(16px) saturate(124%);
+  backdrop-filter: blur(16px) saturate(124%);
+}
+
+.primary-button,
+.ai-feature-cta,
+.contact-button-primary {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), transparent 45%),
+    rgba(248, 245, 239, 0.94);
+  color: #171513;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+.primary-button,
+.outline-button,
+.fitness-links a,
+.contact-topline a,
+.contact-button {
+  border-radius: var(--control-radius-pill);
+}
+
+.scroll-button,
+.project-open,
+.ai-feature-cta {
+  border-radius: var(--control-radius-md);
+}
+
+.honour-carousel-controls button,
+.honour-dialog button,
+.certificate-controls button {
+  min-height: var(--control-height-sm);
+  border-radius: var(--control-radius-pill);
+}
+
+.honour-art {
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.honour-art:hover,
+.honour-art:focus-visible {
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.primary-button:hover,
+.outline-button:hover,
+.scroll-button:hover,
+.honour-carousel-controls button:hover,
+.honour-dialog button:hover,
+.certificate-controls button:hover,
+.project-open:hover,
+.fitness-links a:hover,
+.ai-feature-cta:hover,
+.contact-topline a:hover,
+.contact-button:hover {
+  transform: translateY(-2px);
+  border-color: transparent;
+  box-shadow: var(--glass-shadow-raised);
+}
+
+.primary-button:hover,
+.ai-feature-cta:hover,
+.contact-button-primary:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.82), transparent 47%),
+    #fffaf3;
+  color: #171513;
+}
+
+.outline-button:hover,
+.scroll-button:hover,
+.honour-carousel-controls button:hover,
+.honour-dialog button:hover,
+.certificate-controls button:hover,
+.project-open:hover,
+.fitness-links a:hover,
+.contact-topline a:hover,
+.contact-button:not(.contact-button-primary):hover {
+  background:
+    linear-gradient(128deg, rgba(255, 255, 255, 0.16), transparent 56%),
+    rgba(35, 31, 27, 0.58);
+  color: #fff;
+}
+
+.primary-button:active,
+.outline-button:active,
+.scroll-button:active,
+.honour-carousel-controls button:active,
+.honour-dialog button:active,
+.certificate-controls button:active,
+.project-open:active,
+.fitness-links a:active,
+.ai-feature-cta:active,
+.contact-topline a:active,
+.contact-button:active {
+  transform: translateY(0);
+  box-shadow: var(--glass-shadow-pressed);
+}
+
+.primary-button:focus-visible,
+.outline-button:focus-visible,
+.scroll-button:focus-visible,
+.honour-carousel-controls button:focus-visible,
+.honour-art:focus-visible,
+.honour-dialog button:focus-visible,
+.certificate-controls button:focus-visible,
+.project-open:focus-visible,
+.fitness-links a:focus-visible,
+.ai-feature-cta:focus-visible,
+.contact-topline a:focus-visible,
+.contact-button:focus-visible {
+  border-color: transparent;
+  outline: 2px solid var(--glass-focus-ring);
+  outline-offset: 3px;
+}
+
+.contact-button-disabled,
+.contact-button-disabled:hover,
+.contact-button-disabled:active {
+  cursor: default;
+  opacity: 0.42;
+  transform: none;
+  background: rgba(25, 23, 21, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.contact-button-disabled::before {
+  display: none;
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass-panel,
+  .personal-brand,
+  .personal-nav-main,
+  .outline-button,
+  .scroll-button,
+  .honour-carousel-controls button,
+  .honour-dialog button,
+  .certificate-controls button,
+  .project-open,
+  .fitness-links a,
+  .contact-topline a,
+  .contact-button:not(.contact-button-primary) {
+    background: var(--glass-tint-solid);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel,
+  .personal-brand,
+  .personal-nav-main,
+  .outline-button,
+  .scroll-button,
+  .honour-carousel-controls button,
+  .honour-dialog button,
+  .certificate-controls button,
+  .project-open,
+  .fitness-links a,
+  .contact-topline a,
+  .contact-button:not(.contact-button-primary) {
+    background: var(--glass-tint-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .personal-brand::before,
+  .personal-nav-main::before,
+  .primary-button::before,
+  .outline-button::before,
+  .scroll-button::before,
+  .honour-carousel-controls button::before,
+  .honour-dialog button::before,
+  .certificate-controls button::before,
+  .project-open::before,
+  .fitness-links a::before,
+  .ai-feature-cta::before,
+  .contact-topline a::before,
+  .contact-button::before {
+    opacity: 0.35;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -2651,29 +2973,20 @@ main[lang="zh-CN"] .contact-content h2 em {
   .personal-navbar {
     top: 12px;
     justify-content: space-between;
-    gap: 10px;
-    padding: 0 14px;
+    gap: 8px;
+    padding: 0 12px;
   }
 
   .personal-brand {
-    flex: 0 0 auto;
-    min-height: 50px;
-    padding: 5px;
-    border-radius: 999px;
-  }
-
-  .personal-brand-mark {
-    width: 38px;
-    height: 38px;
-  }
-
-  .personal-brand-copy {
-    display: none;
+    width: 56px;
+    height: 56px;
+    min-height: 56px;
+    flex-basis: 56px;
   }
 
   .hero-nav-spacer {
-    height: 50px;
-    flex-basis: 50px;
+    height: 56px;
+    flex-basis: 56px;
   }
 
   .personal-nav-main {
@@ -2683,14 +2996,23 @@ main[lang="zh-CN"] .contact-content h2 em {
     flex: 1 1 auto;
     min-height: 50px;
     justify-content: flex-start;
-    gap: 18px;
-    padding: 0 16px;
+    gap: 4px;
+    padding: 3px 4px 3px 10px;
     border-radius: 999px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    overflow: hidden;
   }
 
-  .personal-nav-main::-webkit-scrollbar { display: none; }
+  .personal-nav-items {
+    flex: 1 1 auto;
+    gap: 2px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .personal-nav-items::-webkit-scrollbar { display: none; }
 
   .personal-nav-link {
     font-size: 11px;
@@ -2698,8 +3020,8 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 
   main[lang="en"] .personal-nav-main {
-    gap: 8px;
-    padding-inline: 10px;
+    gap: 4px;
+    padding-inline: 8px 4px;
   }
 
   main[lang="en"] .personal-nav-link {
@@ -2716,20 +3038,13 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 
   .personal-language-toggle {
-    min-width: 42px;
-    min-height: 34px;
-    padding: 0 11px;
     flex: 0 0 auto;
-    order: -1;
-    position: sticky;
-    left: 0;
+    position: relative;
     z-index: 3;
-    background: rgba(34, 34, 34, 0.88);
-  }
-
-  main[lang="en"] .personal-language-toggle {
-    min-width: 38px;
-    padding-inline: 9px;
+    min-width: 92px;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 52%),
+      rgba(22, 20, 18, 0.72);
   }
 
   .personal-hero-title {
@@ -3169,20 +3484,8 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 }
 
-@media (max-width: 400px) {
-  main[lang="en"] .personal-brand {
-    display: none;
-  }
-
-  main[lang="en"] .personal-nav-main {
-    width: 100%;
-    max-width: none;
-  }
-}
-
 @media (max-width: 340px) {
   main[lang="en"] .personal-nav-main {
-    gap: 6px;
     padding-inline: 6px;
   }
 
@@ -3193,6 +3496,7 @@ main[lang="zh-CN"] .contact-content h2 em {
 
 @media (prefers-reduced-motion: reduce) {
   .ai-feature-cta { transition: none; }
+  .brand-orb-canvas { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

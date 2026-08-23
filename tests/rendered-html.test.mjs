@@ -701,7 +701,10 @@ test("server-renders the complete English portfolio homepage by default", async 
   assert.match(html, /How I organise/);
   assert.match(html, /Work experience in/);
   assert.match(html, /Get in touch/);
-  assert.match(html, /Switch to Chinese/);
+  assert.match(html, /class="brand-orb"/);
+  assert.match(html, /role="group" aria-label="Language"/);
+  assert.match(html, /aria-pressed="true">EN/);
+  assert.match(html, /aria-pressed="false">中文/);
   assert.doesNotMatch(html, /Vertex Sci|deep-structure research lab/i);
 });
 
@@ -720,6 +723,52 @@ test("hydrates the static portfolio homepage from the requested Chinese language
   assert.match(component, /切换至英文/);
   assert.match(component, /requestedLanguage/);
   assert.match(component, /高子舜 — 个人作品集/);
+});
+
+test("keeps the local brand orb lightweight, accessible and resilient", async () => {
+  const [home, orb, renderer, shader, preset] = await Promise.all([
+    readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/brand-orb/brand-orb.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/brand-orb/orb-renderer.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/brand-orb/siri-orb.wgsl", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/brand-orb/brand-orb-preset.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(home, /<BrandOrb \/>/);
+  assert.match(home, /aria-label=\{t\.brandHome\}/);
+  assert.match(orb, /prefers-reduced-motion: reduce/);
+  assert.match(orb, /IntersectionObserver/);
+  assert.match(orb, /visibilitychange/);
+  assert.match(orb, /data-orb-mode="fallback"/);
+  assert.match(renderer, /setActive/);
+  assert.match(renderer, /navigator\.gpu/);
+  assert.match(renderer, /ORB_MIN_QUALITY_SCALE\s*=\s*3/);
+  assert.match(renderer, /ORB_MAX_QUALITY_SCALE\s*=\s*4/);
+  assert.match(renderer, /devicePixelRatio \* 2/);
+  assert.match(shader, /glsSiriFluid/);
+  assert.match(shader, /fwidth\(pd\)/);
+  assert.match(shader, /glsDiscCoverage/);
+  assert.match(shader, /glsToneMap/);
+  assert.match(shader, /SIRI_CHANNEL_SPLIT_SCALE/);
+  assert.doesNotMatch(shader, /smoothstep\(0\.99/);
+  assert.doesNotMatch(shader, /glsAuroraFluid|glsPlasmaFluid|glsChromeFluid/);
+  assert.match(preset, /speed:\s*0\.82/);
+  for (const color of ["#FFD86B", "#82F4FF", "#FF7BD5", "#8E6CFF"]) {
+    assert.match(preset, new RegExp(color));
+  }
+
+  await Promise.all([
+    access(new URL("../public/orb/siri-orb-fallback.png", import.meta.url)),
+    access(new URL("../THIRD_PARTY_LICENSES/orb-LICENSE.md", import.meta.url)),
+    access(new URL("../THIRD_PARTY_LICENSES/TOOLCRAFT_LICENSE.md", import.meta.url)),
+  ]);
+});
+
+test("ships a high-resolution transparent fallback for the clarity pass", async () => {
+  const fallback = await readFile(new URL("../public/orb/siri-orb-fallback.png", import.meta.url));
+  assert.equal(fallback.toString("ascii", 1, 4), "PNG");
+  assert.ok(fallback.readUInt32BE(16) >= 512);
+  assert.ok(fallback.readUInt32BE(20) >= 512);
 });
 
 test("keeps the homepage language state and honours interaction explicit", async () => {
@@ -745,7 +794,9 @@ test("keeps the homepage language state and honours interaction explicit", async
   assert.match(stylesheet, /personal-language-toggle/);
   assert.match(stylesheet, /main\[lang="en"\] \.personal-nav-label-full\s*\{[^}]*display:\s*none/s);
   assert.match(stylesheet, /main\[lang="en"\] \.personal-nav-label-compact\s*\{[^}]*display:\s*inline/s);
-  assert.match(stylesheet, /@media \(max-width:\s*400px\)[\s\S]*main\[lang="en"\] \.personal-brand\s*\{[^}]*display:\s*none/s);
+  assert.doesNotMatch(stylesheet, /main\[lang="en"\] \.personal-brand\s*\{[^}]*display:\s*none/s);
+  assert.match(stylesheet, /\.brand-orb\s*\{[^}]*width:\s*48px;[^}]*height:\s*48px;/s);
+  assert.match(stylesheet, /\.personal-brand\s*\{[^}]*width:\s*56px;[^}]*height:\s*56px;/s);
   assert.match(stylesheet, /@media \(max-width:\s*340px\)[\s\S]*main\[lang="en"\] \.personal-nav-link\s*\{[^}]*font-size:\s*9px/s);
   assert.match(stylesheet, /--honour-active-card-width:\s*105%/);
   assert.match(stylesheet, /0\.93\s*\/\s*1\.05\s*=\s*0\.886/);
@@ -883,4 +934,85 @@ test("keeps Apple motion preferences and local navigation explicit", async () =>
   assert.match(stylesheet, /prefers-reduced-motion:\s*reduce/);
   assert.doesNotMatch(stylesheet, /height:\s*(?:92|96|100)px;\s*background:\s*linear-gradient\(180deg/s);
   assert.match(home, /slug: "apple-app-store"/);
+});
+
+test("tracks the current homepage section with observer-driven navigation semantics", async () => {
+  const component = await readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8");
+
+  assert.match(component, /const SECTION_IDS = \["education", "honours", "projects", "ai-workflow", "method", "experience", "contact"\] as const/);
+  assert.match(component, /new IntersectionObserver\(queueUpdate/);
+  assert.match(component, /aria-current=\{activeSection === id \? "location" : undefined\}/);
+  assert.match(component, /window\.addEventListener\("hashchange", syncHash\)/);
+  assert.match(component, /window\.addEventListener\("popstate", syncHash\)/);
+  assert.match(component, /document\.documentElement\.scrollHeight - 2/);
+});
+
+test("keeps the active mobile navigation item visible without forcing motion", async () => {
+  const [component, stylesheet] = await Promise.all([
+    readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(component, /className="personal-nav-items"/);
+  assert.match(component, /container\.scrollTo\(\{ left: Math\.max\(0, targetLeft\), behavior: reducedMotion \? "auto" : "smooth" \}\)/);
+  assert.match(component, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
+  assert.match(stylesheet, /@media \(max-width: 768px\)[\s\S]*\.personal-nav-items\s*\{[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*contain;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
+  assert.match(stylesheet, /\.personal-nav-items::-webkit-scrollbar\s*\{\s*display:\s*none;\s*\}/);
+});
+
+test("defines the shared Liquid Glass token and fallback system", async () => {
+  const stylesheet = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  for (const token of [
+    "--glass-tint",
+    "--glass-tint-strong",
+    "--glass-blur",
+    "--glass-saturation",
+    "--glass-shadow",
+    "--glass-shadow-pressed",
+    "--glass-specular",
+    "--glass-specular-soft",
+    "--glass-active-fill",
+    "--glass-focus-ring",
+    "--control-radius-sm",
+    "--control-radius-md",
+    "--control-radius-pill",
+    "--control-height-sm",
+    "--control-height-md",
+    "--control-height-lg",
+  ]) assert.match(stylesheet, new RegExp(token));
+
+  assert.match(stylesheet, /@supports not \(\(-webkit-backdrop-filter: blur\(1px\)\) or \(backdrop-filter: blur\(1px\)\)\)/);
+  assert.match(stylesheet, /@media \(prefers-reduced-transparency: reduce\)/);
+  assert.match(stylesheet, /background:\s*var\(--glass-specular\)/);
+});
+
+test("uses one backdrop sampling layer in the homepage navigation group", async () => {
+  const stylesheet = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const languageTrack = stylesheet.match(/\.personal-language-toggle\s*\{([^}]*)\}/)?.[1] ?? "";
+
+  assert.match(stylesheet, /\.personal-nav-main\s*\{[\s\S]*?-webkit-backdrop-filter:\s*blur\(28px\)[^}]*backdrop-filter:\s*blur\(28px\)/s);
+  assert.doesNotMatch(languageTrack, /backdrop-filter/);
+  assert.match(stylesheet, /\.personal-nav-link\[aria-current="location"\]\s*\{[^}]*--glass-active-fill/s);
+  assert.match(stylesheet, /\.personal-language-toggle\s*\{[^}]*border:\s*1px solid transparent/s);
+});
+
+test("shares the Liquid Glass interaction language across homepage controls", async () => {
+  const stylesheet = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(stylesheet, /Phase 2: one Liquid Glass material language for actual controls/);
+  for (const selector of [
+    ".primary-button",
+    ".outline-button",
+    ".scroll-button",
+    ".honour-carousel-controls button",
+    ".project-open",
+    ".fitness-links a",
+    ".ai-feature-cta",
+    ".contact-topline a",
+    ".contact-button",
+  ]) assert.match(stylesheet, new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+
+  assert.match(stylesheet, /\.contact-button-disabled::before\s*\{[^}]*display:\s*none;/s);
+  assert.match(stylesheet, /\.contact-button-disabled,[\s\S]*?-webkit-backdrop-filter:\s*none;[^}]*backdrop-filter:\s*none;/s);
 });

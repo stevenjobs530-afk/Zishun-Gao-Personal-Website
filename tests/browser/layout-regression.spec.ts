@@ -100,6 +100,74 @@ async function expectHorizontallyCentered(page: Page, elementSelector: string, c
   expect(Math.abs(alignment?.offset ?? Number.POSITIVE_INFINITY)).toBeLessThanOrEqual(2);
 }
 
+type NavigationProbe = {
+  sequence: Array<string | null>;
+  horizontalCalls: Array<number | null>;
+  last: string | null;
+  observer?: MutationObserver;
+};
+
+async function installNavigationProbe(page: Page) {
+  await page.evaluate(() => {
+    const scopedWindow = window as typeof window & { __navigationProbe?: NavigationProbe };
+    const container = document.querySelector<HTMLElement>(".personal-nav-items");
+    if (!container) throw new Error("Navigation items container not found");
+    scopedWindow.__navigationProbe?.observer?.disconnect();
+
+    const readCurrent = () => document.querySelector<HTMLElement>(".personal-nav-link[aria-current='location']")?.getAttribute("aria-label") ?? null;
+    const probe: NavigationProbe = { sequence: [], horizontalCalls: [], last: readCurrent() };
+    const observer = new MutationObserver(() => {
+      const current = readCurrent();
+      if (current === probe.last) return;
+      probe.last = current;
+      probe.sequence.push(current);
+    });
+    observer.observe(container, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
+    probe.observer = observer;
+
+    const originalScrollTo = container.scrollTo.bind(container);
+    Object.defineProperty(container, "scrollTo", {
+      configurable: true,
+      value: (options?: ScrollToOptions | number, y?: number) => {
+        probe.horizontalCalls.push(typeof options === "number" ? options : options?.left ?? null);
+        if (typeof options === "number") originalScrollTo(options, y ?? 0);
+        else originalScrollTo(options);
+      },
+    });
+    scopedWindow.__navigationProbe = probe;
+  });
+}
+
+async function resetNavigationProbe(page: Page) {
+  await page.evaluate(() => {
+    const scopedWindow = window as typeof window & { __navigationProbe?: NavigationProbe };
+    const probe = scopedWindow.__navigationProbe;
+    if (!probe) throw new Error("Navigation probe not installed");
+    probe.sequence = [];
+    probe.horizontalCalls = [];
+    probe.last = document.querySelector<HTMLElement>(".personal-nav-link[aria-current='location']")?.getAttribute("aria-label") ?? null;
+  });
+}
+
+async function readNavigationProbe(page: Page) {
+  return page.evaluate(() => {
+    const scopedWindow = window as typeof window & { __navigationProbe?: NavigationProbe };
+    const probe = scopedWindow.__navigationProbe;
+    return probe ? { sequence: probe.sequence, horizontalCalls: probe.horizontalCalls } : null;
+  });
+}
+
+async function expectNavigationTargetReached(page: Page, id: string) {
+  await expect.poll(() => page.evaluate((targetId) => {
+    const target = document.getElementById(targetId);
+    if (!target) return false;
+    const referenceY = Math.min(180, Math.max(112, window.innerHeight * 0.2));
+    const rect = target.getBoundingClientRect();
+    const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    return (rect.top <= referenceY && rect.bottom > referenceY) || (targetId === "contact" && atPageEnd);
+  }, id)).toBe(true);
+}
+
 test.describe("bilingual cross-browser layout", () => {
   for (const viewport of VIEWPORTS) {
     test(`${viewport.width}x${viewport.height} keeps every core route contained`, async ({ page }) => {
@@ -276,5 +344,109 @@ test.describe("bilingual cross-browser layout", () => {
         });
       }
     }
+  });
+
+  test("programmatic section jumps keep one aria-current owner and one final horizontal alignment", async ({ page }) => {
+    const viewports = [{ width: 390, height: 844 }, { width: 956, height: 440 }] as const;
+
+    for (const viewport of viewports) {
+      await page.setViewportSize(viewport);
+      for (const language of ["en", "zh"] as const) {
+        await test.step(`${viewport.width}x${viewport.height} ${language}`, async () => {
+          await openReady(page, "/", language);
+          await installNavigationProbe(page);
+          const labels = language === "en"
+            ? { contact: "Contact", projects: "Projects", ai: "AI workflow", method: "Method" }
+            : { contact: "联系", projects: "项目", ai: "AI 工作流", method: "方法" };
+
+          for (const [id, label] of [["contact", labels.contact], ["projects", labels.projects], ["ai-workflow", labels.ai], ["method", labels.method]] as const) {
+            await resetNavigationProbe(page);
+            const link = page.getByRole("link", { name: label, exact: true });
+            await link.click();
+            await expect(page).toHaveURL(new RegExp(`#${id}$`));
+            await expect(link).toHaveAttribute("aria-current", "location");
+            await expectNavigationTargetReached(page, id);
+            await page.waitForTimeout(220);
+
+            const probe = await readNavigationProbe(page);
+            expect(probe).not.toBeNull();
+            expect(probe?.sequence.filter((value) => value !== null)).toEqual([label]);
+            expect(probe?.horizontalCalls.length ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(1);
+          }
+          await expectNoRootOverflow(page);
+        });
+      }
+    }
+  });
+
+  test("direct hashes, hashchange, history and keyboard activation keep the requested target", async ({ page }) => {
+    const viewports = [{ width: 390, height: 844 }, { width: 956, height: 440 }] as const;
+
+    for (const viewport of viewports) {
+      await page.setViewportSize(viewport);
+      for (const language of ["en", "zh"] as const) {
+        const labels = language === "en"
+          ? { contact: "Contact", projects: "Projects", method: "Method" }
+          : { contact: "联系", projects: "项目", method: "方法" };
+        await test.step(`${viewport.width}x${viewport.height} ${language}`, async () => {
+          await page.goto(`/?lang=${language}#contact`, { waitUntil: "domcontentloaded" });
+          await expect(page.getByRole("link", { name: labels.contact, exact: true })).toHaveAttribute("aria-current", "location");
+          await expectNavigationTargetReached(page, "contact");
+
+          await page.goto(`/?lang=${language}`, { waitUntil: "domcontentloaded" });
+          const contact = page.getByRole("link", { name: labels.contact, exact: true });
+          await contact.focus();
+          await page.keyboard.press("Enter");
+          await expect(page).toHaveURL(/#contact$/);
+          await expectNavigationTargetReached(page, "contact");
+
+          const projects = page.getByRole("link", { name: labels.projects, exact: true });
+          await projects.click();
+          await expectNavigationTargetReached(page, "projects");
+          await page.goBack();
+          await expect(page).toHaveURL(/#contact$/);
+          await expect(contact).toHaveAttribute("aria-current", "location");
+          await expectNavigationTargetReached(page, "contact");
+          await page.goForward();
+          await expect(page).toHaveURL(/#projects$/);
+          await expect(projects).toHaveAttribute("aria-current", "location");
+          await expectNavigationTargetReached(page, "projects");
+
+          await page.evaluate(() => { window.location.hash = "method"; });
+          await expect(page).toHaveURL(/#method$/);
+          await expect(page.getByRole("link", { name: labels.method, exact: true })).toHaveAttribute("aria-current", "location");
+          await expectNavigationTargetReached(page, "method");
+        });
+      }
+    }
+  });
+
+  test("manual section scrolling still hands control to the observer scroll spy", async ({ page }) => {
+    await page.setViewportSize({ width: 956, height: 440 });
+    for (const language of ["en", "zh"] as const) {
+      await openReady(page, "/", language);
+      for (const id of ["education", "honours", "projects", "ai-workflow", "method", "experience", "contact"] as const) {
+        await page.evaluate((targetId) => {
+          const previous = document.documentElement.style.scrollBehavior;
+          document.documentElement.style.scrollBehavior = "auto";
+          document.getElementById(targetId)?.scrollIntoView({ block: "start", behavior: "auto" });
+          document.documentElement.style.scrollBehavior = previous;
+        }, id);
+        await expect(page.locator(`.personal-nav-link[href="#${id}"]`)).toHaveAttribute("aria-current", "location");
+      }
+    }
+  });
+
+  test("reduced motion keeps target locking while using immediate scrolling", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 956, height: 440 });
+    await openReady(page, "/", "en");
+    await installNavigationProbe(page);
+    await resetNavigationProbe(page);
+    await page.getByRole("link", { name: "Contact", exact: true }).click();
+    await expectNavigationTargetReached(page, "contact");
+    await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto");
+    const probe = await readNavigationProbe(page);
+    expect(probe?.sequence.filter((value) => value !== null)).toEqual(["Contact"]);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import HonoursExhibition from "./honours-exhibition";
 import ResilientBackgroundVideo from "./components/resilient-background-video";
 import BrandOrb from "./components/brand-orb/brand-orb";
@@ -9,6 +9,10 @@ type Language = "en" | "zh";
 type ViewportMode = "compact" | "medium" | "wide";
 const SECTION_IDS = ["education", "honours", "projects", "ai-workflow", "method", "experience", "contact"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
+type NavigationTarget = SectionId | "home";
+const NAVIGATION_TARGET_IDS: readonly NavigationTarget[] = ["home", ...SECTION_IDS];
+const NAVIGATION_SETTLE_TIMEOUT_MS = 4_000;
+const LONG_NAVIGATION_MIN_DISTANCE = 1_800;
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const mediaBasePath = `${appBasePath}/media`;
 
@@ -424,10 +428,11 @@ function Navigation({
   language: Language;
   toggleLanguage: () => void;
   activeSection: SectionId | null;
-  onNavigate: (section: SectionId) => void;
+  onNavigate: (section: NavigationTarget) => void;
 }) {
   const t = copy[language];
   const navigationItems = useRef<HTMLSpanElement>(null);
+  const lastHorizontalAlignment = useRef<{ key: string; left: number } | null>(null);
 
   useEffect(() => {
     if (!activeSection || !navigationItems.current) return;
@@ -442,14 +447,19 @@ function Navigation({
     const isOutside = linkRect.left < containerRect.left + inset || linkRect.right > containerRect.right - inset;
     if (!isOutside) return;
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const targetLeft = activeLink.offsetLeft - (container.clientWidth - activeLink.offsetWidth) / 2;
-    container.scrollTo({ left: Math.max(0, targetLeft), behavior: reducedMotion ? "auto" : "smooth" });
+    const alignmentKey = `${language}:${activeSection}`;
+    if (lastHorizontalAlignment.current?.key === alignmentKey && Math.abs(lastHorizontalAlignment.current.left - targetLeft) < 1) return;
+    lastHorizontalAlignment.current = { key: alignmentKey, left: targetLeft };
+    container.scrollTo({ left: Math.max(0, targetLeft), behavior: "auto" });
   }, [activeSection, language]);
 
   return (
     <nav className="personal-navbar" aria-label={t.primaryNavigation}>
-      <a href="#home" className="personal-brand glass-panel" aria-label={t.brandHome}>
+      <a href="#home" className="personal-brand glass-panel" aria-label={t.brandHome} onClick={(event) => {
+        event.preventDefault();
+        onNavigate("home");
+      }}>
         <BrandOrb />
       </a>
       <div className="personal-nav-main glass-panel">
@@ -461,7 +471,10 @@ function Navigation({
               className="personal-nav-link"
               aria-label={title}
               aria-current={activeSection === id ? "location" : undefined}
-              onClick={() => onNavigate(id)}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate(id);
+              }}
             >
               <span className="personal-nav-label-full">{title}</span>
               <span className="personal-nav-label-compact" aria-hidden="true">{compactTitle ?? title}</span>
@@ -736,7 +749,56 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const [activeSection, setActiveSection] = useState<SectionId | null>(null);
   const resolvedUrlLanguage = useRef(false);
+  const programmaticTarget = useRef<NavigationTarget | null>(null);
+  const navigationReleaseTimer = useRef(0);
+  const queueScrollSpyUpdate = useRef<() => void>(() => undefined);
   const viewportMode = useViewportMode();
+
+  const releaseProgrammaticNavigation = useCallback((expectedTarget?: NavigationTarget) => {
+    if (expectedTarget && programmaticTarget.current !== expectedTarget) return;
+    programmaticTarget.current = null;
+    if (navigationReleaseTimer.current) {
+      window.clearTimeout(navigationReleaseTimer.current);
+      navigationReleaseTimer.current = 0;
+    }
+  }, []);
+
+  const startProgrammaticNavigation = useCallback((targetId: NavigationTarget, updateHistory: boolean) => {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    releaseProgrammaticNavigation();
+    programmaticTarget.current = targetId;
+    setActiveSection((current) => {
+      const next = targetId === "home" ? null : targetId;
+      return current === next ? current : next;
+    });
+
+    if (updateHistory && window.location.hash !== `#${targetId}`) {
+      const url = new URL(window.location.href);
+      url.hash = targetId;
+      window.history.pushState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    }
+
+    const targetTop = window.scrollY + target.getBoundingClientRect().top;
+    const distance = Math.abs(targetTop - window.scrollY);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const longDistance = distance > Math.max(LONG_NAVIGATION_MIN_DISTANCE, window.innerHeight * 3);
+    if (reducedMotion || longDistance) {
+      const previousInlineScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = "auto";
+      target.scrollIntoView({ block: "start", behavior: "auto" });
+      document.documentElement.style.scrollBehavior = previousInlineScrollBehavior;
+    } else {
+      target.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    navigationReleaseTimer.current = window.setTimeout(() => {
+      releaseProgrammaticNavigation(targetId);
+      queueScrollSpyUpdate.current();
+    }, NAVIGATION_SETTLE_TIMEOUT_MS);
+    window.requestAnimationFrame(() => queueScrollSpyUpdate.current());
+  }, [releaseProgrammaticNavigation]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -777,8 +839,24 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     let frame = 0;
     const updateActiveSection = () => {
       frame = 0;
-      const referenceY = Math.min(180, Math.max(88, window.innerHeight * 0.2));
+      const referenceY = Math.min(180, Math.max(112, window.innerHeight * 0.2));
       const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      const lockedTarget = programmaticTarget.current;
+      if (lockedTarget) {
+        const target = document.getElementById(lockedTarget);
+        const targetRect = target?.getBoundingClientRect();
+        const targetReached = lockedTarget === "home"
+          ? window.scrollY < 2
+          : Boolean(targetRect && ((targetRect.top <= referenceY && targetRect.bottom > referenceY) || (atPageEnd && lockedTarget === "contact")));
+
+        if (!targetReached) {
+          const expectedActive = lockedTarget === "home" ? null : lockedTarget;
+          setActiveSection((current) => current === expectedActive ? current : expectedActive);
+          return;
+        }
+        releaseProgrammaticNavigation(lockedTarget);
+      }
+
       const active = atPageEnd
         ? sections.at(-1)
         : sections.find((section) => {
@@ -791,26 +869,49 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
       if (frame) return;
       frame = window.requestAnimationFrame(updateActiveSection);
     };
+    queueScrollSpyUpdate.current = queueUpdate;
     let initialHashSync = true;
     let initialHashTimer = 0;
-    const alignToSectionHash = (hashId: string) => {
-      if (decodeURIComponent(window.location.hash.slice(1)) !== hashId) return;
-      document.getElementById(hashId)?.scrollIntoView({ block: "start" });
-      queueUpdate();
-    };
+    let hashSyncFrame = 0;
     const syncHash = () => {
       const hashId = decodeURIComponent(window.location.hash.slice(1));
-      const hasSectionHash = SECTION_IDS.includes(hashId as SectionId);
-      if (hasSectionHash) setActiveSection(hashId as SectionId);
-      if (initialHashSync && hasSectionHash && window.scrollY < 2) {
-        window.requestAnimationFrame(() => {
-          window.requestAnimationFrame(() => {
-            alignToSectionHash(hashId);
-          });
-        });
-        initialHashTimer = window.setTimeout(() => alignToSectionHash(hashId), 700);
+      const hasNavigationHash = NAVIGATION_TARGET_IDS.includes(hashId as NavigationTarget);
+      if (hasNavigationHash) {
+        startProgrammaticNavigation(hashId as NavigationTarget, false);
+        if (initialHashSync) {
+          initialHashTimer = window.setTimeout(() => {
+            if (decodeURIComponent(window.location.hash.slice(1)) === hashId) {
+              startProgrammaticNavigation(hashId as NavigationTarget, false);
+            }
+          }, 700);
+        }
+      } else {
+        releaseProgrammaticNavigation();
+        queueUpdate();
       }
       initialHashSync = false;
+    };
+    const scheduleHashSync = () => {
+      if (hashSyncFrame) return;
+      hashSyncFrame = window.requestAnimationFrame(() => {
+        hashSyncFrame = 0;
+        syncHash();
+      });
+    };
+    const interruptProgrammaticNavigation = () => {
+      if (!programmaticTarget.current) return;
+      releaseProgrammaticNavigation();
+      queueUpdate();
+    };
+    const interruptOnNavigationKey = (event: KeyboardEvent) => {
+      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", "Escape", " "].includes(event.key)) {
+        interruptProgrammaticNavigation();
+      }
+    };
+    const finishProgrammaticNavigation = (event: Event) => {
+      if (event.target !== document) return;
+      if (!programmaticTarget.current) return;
+      releaseProgrammaticNavigation();
       queueUpdate();
     };
 
@@ -819,20 +920,33 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
       threshold: [0, 0.01, 0.5, 1],
     });
     sections.forEach((section) => observer.observe(section));
-    window.addEventListener("hashchange", syncHash);
-    window.addEventListener("popstate", syncHash);
+    window.addEventListener("hashchange", scheduleHashSync);
+    window.addEventListener("popstate", scheduleHashSync);
     window.addEventListener("resize", queueUpdate, { passive: true });
+    window.addEventListener("scrollend", finishProgrammaticNavigation);
+    window.addEventListener("wheel", interruptProgrammaticNavigation, { passive: true });
+    window.addEventListener("touchstart", interruptProgrammaticNavigation, { passive: true });
+    window.addEventListener("pointerdown", interruptProgrammaticNavigation, { passive: true });
+    window.addEventListener("keydown", interruptOnNavigationKey);
     syncHash();
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("hashchange", syncHash);
-      window.removeEventListener("popstate", syncHash);
+      window.removeEventListener("hashchange", scheduleHashSync);
+      window.removeEventListener("popstate", scheduleHashSync);
       window.removeEventListener("resize", queueUpdate);
+      window.removeEventListener("scrollend", finishProgrammaticNavigation);
+      window.removeEventListener("wheel", interruptProgrammaticNavigation);
+      window.removeEventListener("touchstart", interruptProgrammaticNavigation);
+      window.removeEventListener("pointerdown", interruptProgrammaticNavigation);
+      window.removeEventListener("keydown", interruptOnNavigationKey);
       if (initialHashTimer) window.clearTimeout(initialHashTimer);
+      if (hashSyncFrame) window.cancelAnimationFrame(hashSyncFrame);
       if (frame) window.cancelAnimationFrame(frame);
+      queueScrollSpyUpdate.current = () => undefined;
+      releaseProgrammaticNavigation();
     };
-  }, []);
+  }, [releaseProgrammaticNavigation, startProgrammaticNavigation]);
 
   function toggleLanguage() {
     setLanguage((current) => current === "en" ? "zh" : "en");
@@ -840,7 +954,7 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
 
   return (
     <main lang={language === "zh" ? "zh-CN" : "en"} data-viewport={viewportMode}>
-      <Navigation language={language} toggleLanguage={toggleLanguage} activeSection={activeSection} onNavigate={setActiveSection} />
+      <Navigation language={language} toggleLanguage={toggleLanguage} activeSection={activeSection} onNavigate={(target) => startProgrammaticNavigation(target, true)} />
       <Hero language={language} />
       <EducationSection language={language} />
       <HonoursSection language={language} />

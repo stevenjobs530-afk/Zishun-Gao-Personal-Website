@@ -942,8 +942,8 @@ test("tracks the current homepage section with observer-driven navigation semant
   assert.match(component, /const SECTION_IDS = \["education", "honours", "projects", "ai-workflow", "method", "experience", "contact"\] as const/);
   assert.match(component, /new IntersectionObserver\(queueUpdate/);
   assert.match(component, /aria-current=\{activeSection === id \? "location" : undefined\}/);
-  assert.match(component, /window\.addEventListener\("hashchange", syncHash\)/);
-  assert.match(component, /window\.addEventListener\("popstate", syncHash\)/);
+  assert.match(component, /window\.addEventListener\("hashchange", scheduleHashSync\)/);
+  assert.match(component, /window\.addEventListener\("popstate", scheduleHashSync\)/);
   assert.match(component, /document\.documentElement\.scrollHeight - 2/);
 });
 
@@ -954,10 +954,44 @@ test("keeps the active mobile navigation item visible without forcing motion", a
   ]);
 
   assert.match(component, /className="personal-nav-items"/);
-  assert.match(component, /container\.scrollTo\(\{ left: Math\.max\(0, targetLeft\), behavior: reducedMotion \? "auto" : "smooth" \}\)/);
-  assert.match(component, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
+  assert.match(component, /container\.scrollTo\(\{ left: Math\.max\(0, targetLeft\), behavior: "auto" \}\)/);
+  assert.doesNotMatch(component, /targetLeft\), behavior: reducedMotion \? "auto" : "smooth"/);
   assert.match(stylesheet, /@media \(max-width: 768px\)[\s\S]*\.personal-nav-items\s*\{[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*contain;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
   assert.match(stylesheet, /\.personal-nav-items::-webkit-scrollbar\s*\{\s*display:\s*none;\s*\}/);
+});
+
+test("locks programmatic navigation to one target until arrival, interruption or timeout", async () => {
+  const component = await readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8");
+
+  assert.match(component, /const programmaticTarget = useRef<NavigationTarget \| null>\(null\)/);
+  assert.match(component, /programmaticTarget\.current = targetId/);
+  assert.match(component, /if \(!targetReached\) \{[\s\S]*expectedActive = lockedTarget === "home" \? null : lockedTarget[\s\S]*return;/s);
+  assert.match(component, /releaseProgrammaticNavigation\(lockedTarget\)/);
+  assert.match(component, /NAVIGATION_SETTLE_TIMEOUT_MS = 4_000/);
+  assert.match(component, /window\.addEventListener\("scrollend", finishProgrammaticNavigation\)/);
+  assert.match(component, /window\.addEventListener\("touchstart", interruptProgrammaticNavigation/);
+  assert.match(component, /window\.addEventListener\("wheel", interruptProgrammaticNavigation/);
+});
+
+test("uses distance and motion preference to avoid expensive long smooth jumps", async () => {
+  const component = await readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8");
+
+  assert.match(component, /LONG_NAVIGATION_MIN_DISTANCE = 1_800/);
+  assert.match(component, /distance > Math\.max\(LONG_NAVIGATION_MIN_DISTANCE, window\.innerHeight \* 3\)/);
+  assert.match(component, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
+  assert.match(component, /document\.documentElement\.style\.scrollBehavior = "auto"/);
+  assert.match(component, /target\.scrollIntoView\(\{ block: "start", behavior: "auto" \}\)/);
+  assert.match(component, /target\.scrollIntoView\(\{ block: "start", behavior: "smooth" \}\)/);
+});
+
+test("owns click and history navigation without duplicate hash writers", async () => {
+  const component = await readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8");
+
+  assert.match(component, /event\.preventDefault\(\);[\s\S]*onNavigate\(id\)/s);
+  assert.match(component, /window\.history\.pushState\(null, "", `\$\{url\.pathname\}\$\{url\.search\}\$\{url\.hash\}`\)/);
+  assert.match(component, /let hashSyncFrame = 0/);
+  assert.match(component, /const scheduleHashSync = \(\) => \{[\s\S]*requestAnimationFrame/s);
+  assert.match(component, /startProgrammaticNavigation\(hashId as NavigationTarget, false\)/);
 });
 
 test("defines the shared Liquid Glass token and fallback system", async () => {

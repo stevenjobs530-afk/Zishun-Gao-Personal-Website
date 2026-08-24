@@ -253,6 +253,43 @@ test("adds the client-localized AI workflow feature to the portfolio homepage", 
   assert.match(component, /requestedLanguage/);
 });
 
+test("adds an accessible reduced-motion-aware AI logo loop to the workflow framing", async () => {
+  const [page, component, stylesheet] = await Promise.all([
+    readFile(new URL("../app/case-studies/ai-assisted-job-workflow/ai-workflow-concept.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/ai-assisted-job-workflow/ai-logo-loop.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/ai-assisted-job-workflow/ai-workflow-concept.scss", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /<AiLogoLoop language=\{language\}/);
+  assert.match(component, /ChatGPT/);
+  assert.match(component, /Claude/);
+  assert.match(component, /DeepSeek/);
+  assert.match(component, /Gemini/);
+  assert.match(component, /Grok/);
+  assert.match(component, /Kimi/);
+  assert.match(component, /window\.setInterval/);
+  assert.match(component, /visibilitychange/);
+  assert.match(component, /document\.visibilityState === "visible"/);
+  assert.match(component, /manualPaused \|\| interactionPaused \|\| !pageVisible \|\| reducedMotion/);
+  assert.match(component, /prefers-reduced-motion: reduce/);
+  assert.match(component, /onMouseEnter/);
+  assert.match(component, /onFocusCapture/);
+  assert.match(component, /no partnership or endorsement implied/);
+  assert.match(stylesheet, /\.ai-concept-framing-grid[\s\S]*grid-template-columns:\s*1\.3fr 1fr 1fr/);
+  assert.match(stylesheet, /> \.ai-logo-loop\s*\{\s*grid-column:\s*2 \/ 4;/);
+  assert.match(stylesheet, /@media \(max-width: 700px\)[\s\S]*\.ai-concept-framing-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(stylesheet, /\.ai-logo-loop-item\s*\{[\s\S]*transition:[\s\S]*620ms/);
+
+  await Promise.all([
+    "ChatGPT.svg",
+    "Claude.svg",
+    "DeepSeek.svg",
+    "Gemini.svg",
+    "Grok.svg",
+    "Kimi-Black.svg",
+  ].map((file) => access(new URL(`../public/case-studies/ai-workflow/logos/${file}`, import.meta.url))));
+});
+
 test("uses the supplied AI laboratory image without the previous orbit decoration", async () => {
   const [home, stylesheet] = await Promise.all([
     readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),

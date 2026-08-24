@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import PortfolioBackLink from "../../components/portfolio-back-link";
 import ResilientBackgroundVideo from "../../components/resilient-background-video";
+import AiLogoLoop from "./ai-logo-loop";
 import "./ai-workflow-concept.scss";
 
 type Language = "en" | "zh";
@@ -328,9 +329,10 @@ export default function AiWorkflowConcept({ initialLanguage }: { initialLanguage
         <section className="ai-concept-section ai-concept-framing">
           <header><p>{t.framing.label}</p><h2>{t.framing.title}</h2></header>
           <div className="ai-concept-framing-grid">
-            <p>{t.framing.body}</p>
-            <aside><span>{t.framing.principleLabel}</span><strong>{t.framing.principle}</strong></aside>
-            <aside><span>{t.framing.statusLabel}</span><strong>{t.framing.status}</strong></aside>
+            <p className="ai-concept-framing-copy">{t.framing.body}</p>
+            <AiLogoLoop language={language} />
+            <aside className="ai-concept-framing-card"><span>{t.framing.principleLabel}</span><strong>{t.framing.principle}</strong></aside>
+            <aside className="ai-concept-framing-card"><span>{t.framing.statusLabel}</span><strong>{t.framing.status}</strong></aside>
           </div>
         </section>
 

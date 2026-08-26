@@ -186,6 +186,11 @@ test.describe("bilingual cross-browser layout", () => {
                   `#${sectionId} .framework-heading h2`,
                   `#${sectionId} .framework-heading`,
                 );
+                await expectNoIntersection(
+                  page,
+                  `#${sectionId} .framework-kicker`,
+                  `#${sectionId} .framework-heading h2`,
+                );
               }
             }
 

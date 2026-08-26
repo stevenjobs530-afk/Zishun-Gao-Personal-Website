@@ -315,7 +315,8 @@ test("keeps paired homepage headings optically consistent in both languages", as
   const stylesheet = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
   assert.match(stylesheet, /\.framework-heading h2 em\s*\{[^}]*font-family:\s*"Cormorant Garamond"[^}]*font-size:\s*1em[^}]*font-weight:\s*500[^}]*letter-spacing:\s*-0\.045em/s);
-  assert.match(stylesheet, /\.framework-heading h2\s*\{[^}]*grid-column:\s*1 \/ -1;[^}]*width:\s*100%;[^}]*text-align:\s*center;[^}]*text-wrap:\s*balance;/s);
+  assert.match(stylesheet, /\.framework-heading h2\s*\{[^}]*grid-column:\s*1 \/ -1;[^}]*grid-row:\s*2;[^}]*width:\s*100%;[^}]*text-align:\s*center;[^}]*text-wrap:\s*balance;/s);
+  assert.match(stylesheet, /\.framework-heading > p\s*\{[^}]*grid-column:\s*3;[^}]*grid-row:\s*3;/s);
   assert.match(stylesheet, /main\[lang="en"\] \.framework-heading h2 em\s*\{[^}]*font-family:\s*inherit[^}]*font-size:\s*0\.94em[^}]*font-style:\s*italic[^}]*letter-spacing:\s*-0\.055em/s);
   assert.match(stylesheet, /main\[lang="en"\] \.ai-feature-copy h2 em\s*\{[^}]*font-family:\s*inherit[^}]*font-size:\s*0\.94em[^}]*font-style:\s*italic[^}]*letter-spacing:\s*inherit/s);
   assert.match(stylesheet, /\.contact-content h2\s*\{[^}]*line-height:\s*1\.02/s);

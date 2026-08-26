@@ -274,11 +274,12 @@ test("adds an accessible reduced-motion-aware AI logo loop to the workflow frami
   assert.match(component, /prefers-reduced-motion: reduce/);
   assert.match(component, /onMouseEnter/);
   assert.match(component, /onFocusCapture/);
+  assert.match(component, /rotationIntervalMs = 2000/);
   assert.match(component, /no partnership or endorsement implied/);
   assert.match(stylesheet, /\.ai-concept-framing-grid[\s\S]*grid-template-columns:\s*1\.3fr 1fr 1fr/);
   assert.match(stylesheet, /> \.ai-logo-loop\s*\{\s*grid-column:\s*2 \/ 4;/);
   assert.match(stylesheet, /@media \(max-width: 700px\)[\s\S]*\.ai-concept-framing-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(stylesheet, /\.ai-logo-loop-item\s*\{[\s\S]*transition:[\s\S]*620ms/);
+  assert.match(stylesheet, /\.ai-logo-loop-item\s*\{[\s\S]*transition:[\s\S]*460ms/);
 
   await Promise.all([
     "ChatGPT.svg",
@@ -314,7 +315,7 @@ test("keeps paired homepage headings optically consistent in both languages", as
   const stylesheet = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
   assert.match(stylesheet, /\.framework-heading h2 em\s*\{[^}]*font-family:\s*"Cormorant Garamond"[^}]*font-size:\s*1em[^}]*font-weight:\s*500[^}]*letter-spacing:\s*-0\.045em/s);
-  assert.match(stylesheet, /main\[lang="en"\] \.personal-serif\s*\{[^}]*font-family:\s*inherit[^}]*font-size:\s*1em[^}]*font-style:\s*italic[^}]*letter-spacing:\s*-0\.03em/s);
+  assert.match(stylesheet, /\.framework-heading h2\s*\{[^}]*grid-column:\s*1 \/ -1;[^}]*width:\s*100%;[^}]*text-align:\s*center;[^}]*text-wrap:\s*balance;/s);
   assert.match(stylesheet, /main\[lang="en"\] \.framework-heading h2 em\s*\{[^}]*font-family:\s*inherit[^}]*font-size:\s*0\.94em[^}]*font-style:\s*italic[^}]*letter-spacing:\s*-0\.055em/s);
   assert.match(stylesheet, /main\[lang="en"\] \.ai-feature-copy h2 em\s*\{[^}]*font-family:\s*inherit[^}]*font-size:\s*0\.94em[^}]*font-style:\s*italic[^}]*letter-spacing:\s*inherit/s);
   assert.match(stylesheet, /\.contact-content h2\s*\{[^}]*line-height:\s*1\.02/s);
@@ -323,10 +324,10 @@ test("keeps paired homepage headings optically consistent in both languages", as
   assert.match(stylesheet, /main\[lang="zh-CN"\] \.contact-content h2 em\s*\{[^}]*margin-top:\s*0\.16em[^}]*font-family:\s*inherit[^}]*font-size:\s*1em[^}]*font-style:\s*normal[^}]*line-height:\s*1/s);
   assert.match(stylesheet, /main\[lang="zh-CN"\] \.framework-heading h2 em\s*\{[^}]*font-family:\s*"Inter"[^}]*font-style:\s*normal[^}]*font-weight:\s*400/s);
   assert.match(stylesheet, /main\[lang="zh-CN"\] \.framework-heading h2\s*\{[^}]*font-size:\s*clamp\(44px, 13\.2vw, 62px\)[^}]*line-height:\s*0\.94/s);
-  assert.match(stylesheet, /@media \(max-width: 768px\)[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > span,[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > em\s*\{[^}]*display:\s*block;[^}]*margin-left:\s*0;[^}]*overflow-wrap:\s*anywhere;[^}]*white-space:\s*normal;/s);
+  assert.match(stylesheet, /@media \(max-width: 768px\)[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > span,[\s\S]*main\[lang="zh-CN"\] \.framework-heading h2 > em\s*\{[^}]*display:\s*inline;[^}]*overflow-wrap:\s*normal;[^}]*white-space:\s*normal;/s);
 });
 
-test("keeps bilingual display titles free of punctuation", async () => {
+test("keeps bilingual display titles free of sentence-ending punctuation", async () => {
   const copyFiles = [
     "../app/portfolio-home.tsx",
     "../app/case-studies/uk-retail/uk-retail-case-study.tsx",
@@ -339,13 +340,37 @@ test("keeps bilingual display titles free of punctuation", async () => {
   for (const source of sources) {
     const values = [...source.matchAll(/\b(?:title|titleTop|titleBottom|italic|name|statement):\s*"([^"]+)"/g)].map((match) => match[1]);
     assert.ok(values.length > 0);
-    for (const value of values) assert.doesNotMatch(value, /[.!?,;:。！？；：，]/);
+    for (const value of values) assert.doesNotMatch(value, /[.!?;:。！？；：]/);
   }
 
   const personalTraining = await readFile(new URL("../app/personal-projects/personal-training/personal-training-hero.tsx", import.meta.url), "utf8");
   const copyHeadings = [...personalTraining.matchAll(/\btitle:\s*"([^"]+)"/g)].map((match) => match[1]);
   assert.ok(copyHeadings.length > 0);
-  for (const heading of copyHeadings) assert.doesNotMatch(heading, /[.!?,;:。！？；：，]/);
+  for (const heading of copyHeadings) assert.doesNotMatch(heading, /[.!?;:。！？；：]/);
+});
+
+test("uses semantic naturally wrapping titles for the August 26 refinement", async () => {
+  const [home, personalTraining, aiWorkflow, apple, aep, ukRetail] = await Promise.all([
+    readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/personal-projects/personal-training/personal-training-hero.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/ai-assisted-job-workflow/ai-workflow-concept.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/apple-app-store/apple-case-study.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/early-career-wellbeing/aep-case-study.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/case-studies/uk-retail/uk-retail-case-study.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(home, /title: "Zishun Gao — Personal Website"/);
+  assert.match(home, /title: "高子舜个人网站"/);
+  assert.match(home, /<h1 className="personal-hero-title">\{t\.title\}<\/h1>/);
+  assert.doesNotMatch(home, /t\.greeting|t\.bridge|t\.statement|className="personal-serif"/);
+  assert.match(personalTraining, /title: "A PERSONAL TRAINING LOG FOR STRENGTH AND CARDIO RECORDS"/);
+  assert.match(personalTraining, /title: "一份个人训练记录，覆盖力量与有氧训练"/);
+  assert.doesNotMatch(personalTraining, /copy\.hero\.title\.map/);
+  assert.match(aiWorkflow, /工作簿中的来源、状态与下一步/);
+  assert.match(aiWorkflow, /本页记录的流程、职责分工与当前限制/);
+  assert.match(apple, /项目记录的输出、筛选条件与数据限制/);
+  assert.match(aep, /回答验证、存储与导出准备/);
+  assert.match(ukRetail, /原始数据、处理规则与输出结果的对应关系/);
 });
 
 test("keeps experience cards inside the available responsive width", async () => {
@@ -731,7 +756,8 @@ test("server-renders the complete English portfolio homepage by default", async 
 
   const html = await response.text();
   assert.match(html, /<title>Zishun Gao — Personal Portfolio<\/title>/);
-  assert.match(html, /Hello, I/);
+  assert.match(html, /Zishun Gao — Personal Website/);
+  assert.doesNotMatch(html, /Hello, I|My work covers/);
   assert.match(html, />Education</);
   assert.match(html, />Honours</);
   assert.match(html, /Selected projects/);
@@ -753,7 +779,8 @@ test("hydrates the static portfolio homepage from the requested Chinese language
   assert.match(html, /<title>Zishun Gao — Personal Portfolio<\/title>/);
 
   const component = await readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8");
-  assert.match(component, /金融 风险 数据分析与应用研究/);
+  assert.match(component, /高子舜个人网站/);
+  assert.doesNotMatch(component, /你好，我是|金融 风险 数据分析与应用研究/);
   assert.match(component, /教育与/);
   assert.match(component, /荣誉与/);
   assert.match(component, /项目案例/);
@@ -1003,9 +1030,14 @@ test("locks programmatic navigation to one target until arrival, interruption or
   assert.match(component, /const programmaticTarget = useRef<NavigationTarget \| null>\(null\)/);
   assert.match(component, /programmaticTarget\.current = targetId/);
   assert.match(component, /if \(!targetReached\) \{[\s\S]*expectedActive = lockedTarget === "home" \? null : lockedTarget[\s\S]*return;/s);
-  assert.match(component, /releaseProgrammaticNavigation\(lockedTarget\)/);
   assert.match(component, /NAVIGATION_SETTLE_TIMEOUT_MS = 4_000/);
+  assert.match(component, /INITIAL_HASH_MIN_STABILITY_MS = 1_200/);
+  assert.match(component, /NAVIGATION_STABLE_CHECKS_REQUIRED = 3/);
+  assert.match(component, /document\.fonts\.ready\.then/);
+  assert.match(component, /stabilizeInitialLayout && !targetReached/);
+  assert.match(component, /stableChecks >= NAVIGATION_STABLE_CHECKS_REQUIRED/);
   assert.match(component, /window\.addEventListener\("scrollend", finishProgrammaticNavigation\)/);
+  assert.match(component, /if \(!lockedTarget \|\| !isNavigationTargetReached\(lockedTarget\)\) return/);
   assert.match(component, /window\.addEventListener\("touchstart", interruptProgrammaticNavigation/);
   assert.match(component, /window\.addEventListener\("wheel", interruptProgrammaticNavigation/);
 });
@@ -1028,7 +1060,7 @@ test("owns click and history navigation without duplicate hash writers", async (
   assert.match(component, /window\.history\.pushState\(null, "", `\$\{url\.pathname\}\$\{url\.search\}\$\{url\.hash\}`\)/);
   assert.match(component, /let hashSyncFrame = 0/);
   assert.match(component, /const scheduleHashSync = \(\) => \{[\s\S]*requestAnimationFrame/s);
-  assert.match(component, /startProgrammaticNavigation\(hashId as NavigationTarget, false\)/);
+  assert.match(component, /startProgrammaticNavigation\(hashId as NavigationTarget, false, initialHashSync\)/);
 });
 
 test("defines the shared Liquid Glass token and fallback system", async () => {

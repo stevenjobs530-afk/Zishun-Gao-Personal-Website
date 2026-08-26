@@ -39,7 +39,7 @@ const COPY = {
     },
     hero: {
       eyebrow: "PERSONAL TRAINING WEBSITE V2 · INDEPENDENT FULL-STACK PROJECT",
-      title: ["A PERSONAL", "TRAINING LOG", "FOR STRENGTH AND", "CARDIO RECORDS"],
+      title: "A PERSONAL TRAINING LOG FOR STRENGTH AND CARDIO RECORDS",
       description: "A mobile-first personal project for recording user-named strength exercises and machines, structured sets, cardio sessions, rest days and simple summaries based on saved records.",
       explore: "Explore training models",
     },
@@ -155,7 +155,7 @@ const COPY = {
     },
     hero: {
       eyebrow: "个人训练网站 V2 · 独立全栈项目",
-      title: ["一份个人", "训练记录", "覆盖力量与", "有氧训练"],
+      title: "一份个人训练记录，覆盖力量与有氧训练",
       description: "一个以移动端为先的个人项目，用于记录用户自定义名称的力量动作与器械、结构化训练组、有氧训练、休息日，以及基于已保存记录生成的简单汇总。",
       explore: "浏览训练模型",
     },
@@ -449,7 +449,7 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
     document.querySelector('meta[name="description"]')?.setAttribute("content", copy.meta.description);
     if (url.searchParams.get("lang") !== language) {
       url.searchParams.set("lang", language);
-      window.history.replaceState({}, "", url);
+      window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
     }
   }, [copy.meta.description, copy.meta.title, language]);
 
@@ -458,7 +458,7 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
     setLanguage(nextLanguage);
     const url = new URL(window.location.href);
     url.searchParams.set("lang", nextLanguage);
-    window.history.replaceState({}, "", url);
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
   }, [language]);
 
   const requestHeroPlayback = useCallback(async () => {
@@ -564,7 +564,7 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
         <motion.div className={styles.heroHeading} initial={false} animate="visible" variants={titleContainer}>
           <motion.p className={styles.heroEyebrow} initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}>{copy.hero.eyebrow}</motion.p>
           <h1 id="personal-training-hero-title" className={styles.heroTitle}>
-            {copy.hero.title.map((line, index) => index % 2 === 0 ? <motion.span variants={titleVariants} key={line}>{line}</motion.span> : <motion.em variants={titleVariants} key={line}>{line}</motion.em>)}
+            <motion.span variants={titleVariants}>{copy.hero.title}</motion.span>
           </h1>
         </motion.div>
 

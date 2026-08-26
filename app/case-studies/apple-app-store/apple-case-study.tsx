@@ -228,7 +228,7 @@ const copy = {
         label: "05 / 技术证据", title: "将数据质量问题记录为可查询字段", body: "该流程基于价格派生分类，分别记录价格缺失与逻辑不一致，然后统计所有问题字段。原始值始终保留，便于复核。", filename: "src/clean_apple_appstore_dataset.py · Python", snippet: `df["Free_By_Price"] = df["Price"].fillna(0).eq(0)\ndf["Issue_Missing_Price"] = df["Price"].isna()\ndf["Issue_Price_Logic_Mismatch"] = (\n    df["Free"].eq(False) & df["Price"].fillna(0).eq(0)\n)\nissue_columns = [c for c in df.columns if c.startswith("Issue_")]\ndf["Quality_Issue_Count"] = df[issue_columns].sum(axis=1)`,
       },
       results: {
-        label: "06 / 结果与边界", title: "项目记录的输出 筛选条件与数据限制", items: [["可复现", "代码仓库将转换、清洗、SQL 验证与 Python 分析记录为独立步骤。"], ["可筛选", "问题字段使每项分析能够定义自己真正需要的数据质量条件。"], ["历史范围明确", "证据支持对 2021 年数据集的比较，而不支持对当前应用目录或市场表现的结论。"]], countLabel: "保持可见的记录差异", countNote: "清洗摘要记录 1,230,376 条，而后续分析报告记录 1,229,886 条。本页不会为这 490 条差异虚构未记录的原因；只有在引用最终分析报告时才使用后一个数字。",
+        label: "06 / 结果与边界", title: "项目记录的输出、筛选条件与数据限制", items: [["可复现", "代码仓库将转换、清洗、SQL 验证与 Python 分析记录为独立步骤。"], ["可筛选", "问题字段使每项分析能够定义自己真正需要的数据质量条件。"], ["历史范围明确", "证据支持对 2021 年数据集的比较，而不支持对当前应用目录或市场表现的结论。"]], countLabel: "保持可见的记录差异", countNote: "清洗摘要记录 1,230,376 条，而后续分析报告记录 1,229,886 条。本页不会为这 490 条差异虚构未记录的原因；只有在引用最终分析报告时才使用后一个数字。",
       },
       closing: { label: "项目总结", title: "代码仓库记录了完整流程与当前限制", body: "其中包含源记录、明确的处理规则、数据质量字段与描述性分析结果。", repository: "查看完整证据", projects: "返回所有项目" },
     },

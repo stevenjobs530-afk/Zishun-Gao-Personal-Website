@@ -875,27 +875,14 @@ a {
 }
 
 .personal-hero-title {
+  width: min(1120px, 92vw);
   color: var(--primary-white);
   font-size: clamp(38px, 4.8vw, 76px);
   font-weight: 400;
   letter-spacing: -0.03em;
-  line-height: 0.95;
-}
-
-.personal-serif {
-  font-family: "Cormorant Garamond", serif;
-  font-size: 1.14em;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-}
-
-main[lang="en"] .personal-serif {
-  font-family: inherit;
-  font-size: 1em;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  line-height: 1;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .personal-hero-actions {
@@ -1120,7 +1107,7 @@ main[lang="en"] .personal-serif {
 
 .framework-heading {
   display: grid;
-  grid-template-columns: minmax(150px, 0.38fr) minmax(0, 3.62fr);
+  grid-template-columns: minmax(150px, 0.38fr) minmax(0, 3.24fr) minmax(150px, 0.38fr);
   grid-template-rows: auto auto;
   align-items: start;
   column-gap: 40px;
@@ -1128,6 +1115,8 @@ main[lang="en"] .personal-serif {
 }
 
 .framework-kicker {
+  grid-column: 1;
+  grid-row: 1;
   align-self: start;
   display: flex;
   flex-direction: column;
@@ -1144,12 +1133,18 @@ main[lang="en"] .personal-serif {
 }
 
 .framework-heading h2 {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
   max-width: none;
+  justify-self: center;
   font-size: clamp(52px, 6.2vw, 106px);
   font-weight: 400;
   letter-spacing: -0.065em;
   line-height: 0.86;
-  white-space: nowrap;
+  text-align: center;
+  text-wrap: balance;
+  white-space: normal;
 }
 
 .framework-heading-wide h2 {
@@ -1189,7 +1184,8 @@ main[lang="zh-CN"] .framework-heading h2 em {
 }
 
 .framework-heading > p {
-  grid-column: 2;
+  grid-column: 3;
+  grid-row: 2;
   max-width: 330px;
   justify-self: end;
   font-size: 12px;
@@ -2914,7 +2910,7 @@ main[lang="zh-CN"] .contact-content h2 em {
 
 @media (max-width: 1100px) {
   .framework-heading {
-    grid-template-columns: minmax(120px, 0.4fr) 2.6fr;
+    grid-template-columns: minmax(120px, 0.4fr) minmax(0, 2.2fr) minmax(120px, 0.4fr);
   }
 
   .framework-heading h2 {
@@ -3109,16 +3105,19 @@ main[lang="zh-CN"] .contact-content h2 em {
   .framework-heading {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 26px;
+    text-align: center;
   }
 
   .framework-kicker {
+    align-self: flex-start;
     flex-direction: row;
     gap: 18px;
   }
 
   .framework-heading h2 {
+    width: 100%;
     font-size: clamp(42px, 11.5vw, 58px);
     line-height: 0.94;
     white-space: normal;
@@ -3135,9 +3134,8 @@ main[lang="zh-CN"] .contact-content h2 em {
 
   main[lang="zh-CN"] .framework-heading h2 > span,
   main[lang="zh-CN"] .framework-heading h2 > em {
-    display: block;
-    margin-left: 0;
-    overflow-wrap: anywhere;
+    display: inline;
+    overflow-wrap: normal;
     white-space: normal;
   }
 

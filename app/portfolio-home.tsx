@@ -12,6 +12,9 @@ type SectionId = (typeof SECTION_IDS)[number];
 type NavigationTarget = SectionId | "home";
 const NAVIGATION_TARGET_IDS: readonly NavigationTarget[] = ["home", ...SECTION_IDS];
 const NAVIGATION_SETTLE_TIMEOUT_MS = 4_000;
+const INITIAL_HASH_MIN_STABILITY_MS = 1_200;
+const NAVIGATION_STABILITY_CHECK_MS = 120;
+const NAVIGATION_STABLE_CHECKS_REQUIRED = 3;
 const LONG_NAVIGATION_MIN_DISTANCE = 1_800;
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const mediaBasePath = `${appBasePath}/media`;
@@ -72,10 +75,7 @@ const copy = {
     ],
     hero: {
       eyebrow: "Finance · Economics · Risk management",
-      greeting: "Hello, I'm",
-      name: "Zishun Gao",
-      bridge: "My work covers",
-      statement: "finance risk data analysis and applied research",
+      title: "Zishun Gao — Personal Website",
       primaryCta: "View my work",
       secondaryCta: "Explore profile",
       cvCta: "Download English CV",
@@ -254,10 +254,7 @@ const copy = {
     ],
     hero: {
       eyebrow: "金融 · 经济 · 风险管理",
-      greeting: "你好，我是",
-      name: "高子舜",
-      bridge: "的项目主要涉及",
-      statement: "金融 风险 数据分析与应用研究",
+      title: "高子舜个人网站",
       primaryCta: "查看作品",
       secondaryCta: "了解我的背景",
       cvCta: "下载中文简历",
@@ -513,11 +510,7 @@ function Hero({ language }: { language: Language }) {
       <div className="hero-nav-spacer" aria-hidden="true" />
       <div className="personal-hero-content">
         <p className="personal-eyebrow">{t.eyebrow}</p>
-        <h1 className="personal-hero-title">
-          <span>{t.greeting}</span><br />
-          <span className="personal-serif">{t.name}</span><span>{language === "zh" ? t.bridge : ` ${t.bridge}`}</span><br />
-          <span>{t.statement}</span>
-        </h1>
+        <h1 className="personal-hero-title">{t.title}</h1>
         <div className="personal-hero-actions">
           <a href="#projects" className="primary-button">{t.primaryCta}</a>
           <a href="#education" className="outline-button glass-panel">{t.secondaryCta}</a>
@@ -754,6 +747,17 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
   const queueScrollSpyUpdate = useRef<() => void>(() => undefined);
   const viewportMode = useViewportMode();
 
+  const isNavigationTargetReached = useCallback((targetId: NavigationTarget) => {
+    if (targetId === "home") return window.scrollY < 2;
+
+    const target = document.getElementById(targetId);
+    if (!target) return false;
+    const referenceY = Math.min(180, Math.max(112, window.innerHeight * 0.2));
+    const rect = target.getBoundingClientRect();
+    const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    return (rect.top <= referenceY && rect.bottom > referenceY) || (targetId === "contact" && atPageEnd);
+  }, []);
+
   const releaseProgrammaticNavigation = useCallback((expectedTarget?: NavigationTarget) => {
     if (expectedTarget && programmaticTarget.current !== expectedTarget) return;
     programmaticTarget.current = null;
@@ -763,7 +767,7 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     }
   }, []);
 
-  const startProgrammaticNavigation = useCallback((targetId: NavigationTarget, updateHistory: boolean) => {
+  const startProgrammaticNavigation = useCallback((targetId: NavigationTarget, updateHistory: boolean, stabilizeInitialLayout = false) => {
     const target = document.getElementById(targetId);
     if (!target) return;
 
@@ -784,21 +788,58 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     const distance = Math.abs(targetTop - window.scrollY);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const longDistance = distance > Math.max(LONG_NAVIGATION_MIN_DISTANCE, window.innerHeight * 3);
-    if (reducedMotion || longDistance) {
+    const alignTargetImmediately = () => {
       const previousInlineScrollBehavior = document.documentElement.style.scrollBehavior;
       document.documentElement.style.scrollBehavior = "auto";
       target.scrollIntoView({ block: "start", behavior: "auto" });
       document.documentElement.style.scrollBehavior = previousInlineScrollBehavior;
+    };
+
+    if (reducedMotion || longDistance || stabilizeInitialLayout) {
+      alignTargetImmediately();
     } else {
       target.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
-    navigationReleaseTimer.current = window.setTimeout(() => {
-      releaseProgrammaticNavigation(targetId);
-      queueScrollSpyUpdate.current();
-    }, NAVIGATION_SETTLE_TIMEOUT_MS);
+    const startedAt = window.performance.now();
+    const minimumSettleTime = stabilizeInitialLayout ? INITIAL_HASH_MIN_STABILITY_MS : 0;
+    let lastDocumentHeight = -1;
+    let stableChecks = 0;
+    const settleNavigation = () => {
+      if (programmaticTarget.current !== targetId) return;
+
+      const documentHeight = document.documentElement.scrollHeight;
+      const targetReached = isNavigationTargetReached(targetId);
+      const layoutStable = documentHeight === lastDocumentHeight;
+      stableChecks = targetReached && layoutStable ? stableChecks + 1 : 0;
+      lastDocumentHeight = documentHeight;
+
+      if (stabilizeInitialLayout && !targetReached) alignTargetImmediately();
+
+      const elapsed = window.performance.now() - startedAt;
+      const stableEnough = targetReached
+        && stableChecks >= NAVIGATION_STABLE_CHECKS_REQUIRED
+        && elapsed >= minimumSettleTime;
+      if (stableEnough || elapsed >= NAVIGATION_SETTLE_TIMEOUT_MS) {
+        releaseProgrammaticNavigation(targetId);
+        queueScrollSpyUpdate.current();
+        return;
+      }
+
+      navigationReleaseTimer.current = window.setTimeout(settleNavigation, NAVIGATION_STABILITY_CHECK_MS);
+    };
+
+    navigationReleaseTimer.current = window.setTimeout(settleNavigation, NAVIGATION_STABILITY_CHECK_MS);
+    if (stabilizeInitialLayout) {
+      void document.fonts.ready.then(() => {
+        if (programmaticTarget.current !== targetId) return;
+        lastDocumentHeight = -1;
+        stableChecks = 0;
+        alignTargetImmediately();
+      });
+    }
     window.requestAnimationFrame(() => queueScrollSpyUpdate.current());
-  }, [releaseProgrammaticNavigation]);
+  }, [isNavigationTargetReached, releaseProgrammaticNavigation]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -843,18 +884,17 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
       const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
       const lockedTarget = programmaticTarget.current;
       if (lockedTarget) {
-        const target = document.getElementById(lockedTarget);
-        const targetRect = target?.getBoundingClientRect();
-        const targetReached = lockedTarget === "home"
-          ? window.scrollY < 2
-          : Boolean(targetRect && ((targetRect.top <= referenceY && targetRect.bottom > referenceY) || (atPageEnd && lockedTarget === "contact")));
+        const targetReached = isNavigationTargetReached(lockedTarget);
 
         if (!targetReached) {
           const expectedActive = lockedTarget === "home" ? null : lockedTarget;
           setActiveSection((current) => current === expectedActive ? current : expectedActive);
           return;
         }
-        releaseProgrammaticNavigation(lockedTarget);
+
+        const expectedActive = lockedTarget === "home" ? null : lockedTarget;
+        setActiveSection((current) => current === expectedActive ? current : expectedActive);
+        return;
       }
 
       const active = atPageEnd
@@ -871,20 +911,12 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     };
     queueScrollSpyUpdate.current = queueUpdate;
     let initialHashSync = true;
-    let initialHashTimer = 0;
     let hashSyncFrame = 0;
     const syncHash = () => {
       const hashId = decodeURIComponent(window.location.hash.slice(1));
       const hasNavigationHash = NAVIGATION_TARGET_IDS.includes(hashId as NavigationTarget);
       if (hasNavigationHash) {
-        startProgrammaticNavigation(hashId as NavigationTarget, false);
-        if (initialHashSync) {
-          initialHashTimer = window.setTimeout(() => {
-            if (decodeURIComponent(window.location.hash.slice(1)) === hashId) {
-              startProgrammaticNavigation(hashId as NavigationTarget, false);
-            }
-          }, 700);
-        }
+        startProgrammaticNavigation(hashId as NavigationTarget, false, initialHashSync);
       } else {
         releaseProgrammaticNavigation();
         queueUpdate();
@@ -910,8 +942,8 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     };
     const finishProgrammaticNavigation = (event: Event) => {
       if (event.target !== document) return;
-      if (!programmaticTarget.current) return;
-      releaseProgrammaticNavigation();
+      const lockedTarget = programmaticTarget.current;
+      if (!lockedTarget || !isNavigationTargetReached(lockedTarget)) return;
       queueUpdate();
     };
 
@@ -940,13 +972,12 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
       window.removeEventListener("touchstart", interruptProgrammaticNavigation);
       window.removeEventListener("pointerdown", interruptProgrammaticNavigation);
       window.removeEventListener("keydown", interruptOnNavigationKey);
-      if (initialHashTimer) window.clearTimeout(initialHashTimer);
       if (hashSyncFrame) window.cancelAnimationFrame(hashSyncFrame);
       if (frame) window.cancelAnimationFrame(frame);
       queueScrollSpyUpdate.current = () => undefined;
       releaseProgrammaticNavigation();
     };
-  }, [releaseProgrammaticNavigation, startProgrammaticNavigation]);
+  }, [isNavigationTargetReached, releaseProgrammaticNavigation, startProgrammaticNavigation]);
 
   function toggleLanguage() {
     setLanguage((current) => current === "en" ? "zh" : "en");

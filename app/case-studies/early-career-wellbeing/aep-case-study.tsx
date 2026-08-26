@@ -191,7 +191,7 @@ if (payload.route !== expectedRoute(payload.situation as string)) {
       },
       flow: {
         label: "04 / 数据流程",
-        title: "回答验证 存储与导出准备",
+        title: "回答验证、存储与导出准备",
         steps: [
           ["01", "问卷", "序列化当前路径与可选回答，不收集账户或登录标识。"],
           ["02", "验证", "Edge Function 检查来源、同意状态、版本、路径、选项、评分范围与文本长度。"],

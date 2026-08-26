@@ -7,7 +7,7 @@ import Image from "next/image";
 type Language = "en" | "zh";
 
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const rotationIntervalMs = 2700;
+const rotationIntervalMs = 2000;
 
 const logos = [
   ["ChatGPT", "ChatGPT.svg"],

@@ -104,11 +104,9 @@
 }
 
 .heroTitle {
-  max-width: 1680px;
+  max-width: 18ch;
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 0.18em;
+  display: block;
   color: var(--ink, #171614);
   font-family: "Inter", system-ui, sans-serif;
   font-size: clamp(58px, 7.2vw, 126px);
@@ -121,18 +119,8 @@
 .heroTitle span,
 .heroTitle em { display: inline; }
 
-.heroTitle em {
-  font-family: inherit;
-  font-size: 0.94em;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.075em;
-}
-
 .page[lang="zh-CN"] .heroTitle {
-  display: grid;
-  grid-template-columns: max-content max-content;
-  row-gap: 0.12em;
+  max-width: 100%;
   line-height: 0.96;
 }
 
@@ -754,27 +742,21 @@
   }
 
   .heroTitle {
-    display: flex;
+    max-width: 100%;
+    display: block;
     font-size: clamp(40px, 11.5vw, 48px);
     line-height: 0.88;
   }
 
   .heroTitle span,
   .heroTitle em {
-    width: 100%;
-    display: block;
-  }
-
-  .heroTitle span:nth-child(3) {
-    font-size: 0.82em;
-    letter-spacing: -0.075em;
-    white-space: nowrap;
+    width: auto;
+    display: inline;
   }
 
   .page[lang="zh-CN"] .heroTitle {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    row-gap: 0.14em;
+    max-width: 100%;
+    display: block;
     font-size: clamp(36px, 10vw, 44px);
     line-height: 1;
   }
@@ -782,12 +764,6 @@
   .page[lang="zh-CN"] .heroTitle span,
   .page[lang="zh-CN"] .heroTitle em {
     width: auto;
-  }
-
-  .page[lang="zh-CN"] .heroTitle span:nth-child(3) {
-    font-size: inherit;
-    letter-spacing: inherit;
-    white-space: normal;
   }
 
   .heroMedia {

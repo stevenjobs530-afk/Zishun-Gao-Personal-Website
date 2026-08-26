@@ -179,6 +179,16 @@ test.describe("bilingual cross-browser layout", () => {
             await openReady(page, route, language);
             await expectNoRootOverflow(page);
 
+            if (name === "home" && [390, 768, 1440].includes(viewport.width)) {
+              for (const sectionId of ["education", "honours", "projects", "method", "experience"]) {
+                await expectHorizontallyCentered(
+                  page,
+                  `#${sectionId} .framework-heading h2`,
+                  `#${sectionId} .framework-heading`,
+                );
+              }
+            }
+
             if (name === "uk-retail") {
               await expectInsideViewport(page, [
                 "#overview h2",

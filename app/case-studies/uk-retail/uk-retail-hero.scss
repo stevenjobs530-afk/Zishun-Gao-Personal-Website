@@ -270,12 +270,16 @@ $warm-paper: #f5f3ef;
   }
 
   h2 {
+    grid-column: 1 / -1;
+    width: 100%;
     max-width: 850px;
+    justify-self: center;
     font-family: "P22 Mackinac W01 Book", Georgia, serif;
     font-size: clamp(38px, 5vw, 72px);
     font-weight: 400;
     letter-spacing: -0.052em;
     line-height: 1.03;
+    text-align: center;
     text-wrap: balance;
   }
 }

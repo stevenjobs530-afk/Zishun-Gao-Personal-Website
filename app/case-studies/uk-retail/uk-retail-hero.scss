@@ -1408,3 +1408,15 @@ $warm-paper: #f5f3ef;
     padding: 0;
   }
 }
+
+/* Reserve a separate row below the fixed back link on narrow phones. */
+@media (max-width: 380px) {
+  .uk-retail-nav {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 68px);
+  }
+
+  .uk-retail-hero-copy {
+    padding-top: 152px;
+  }
+}

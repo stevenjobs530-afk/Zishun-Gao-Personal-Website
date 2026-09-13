@@ -739,6 +739,10 @@ a {
   border-radius: 28px;
 }
 
+.personal-menu-toggle {
+  display: none;
+}
+
 .personal-nav-items {
   min-width: 0;
   display: flex;
@@ -3069,52 +3073,73 @@ main[lang="zh-CN"] .contact-content h2 em {
     flex-basis: 56px;
   }
 
-  .personal-nav-main {
-    width: 0;
+  .personal-nav-main,
+  main[lang="en"] .personal-nav-main {
     min-width: 0;
-    max-width: none;
-    flex: 1 1 auto;
-    min-height: 50px;
-    justify-content: flex-start;
-    gap: 4px;
-    padding: 3px 4px 3px 10px;
+    width: auto;
+    flex: 0 1 auto;
+    min-height: 56px;
+    gap: 8px;
+    padding: 3px 4px 3px 8px;
+    overflow: visible;
+    --hero-glass-fill: rgba(25, 29, 31, 0.78);
+  }
+
+  .personal-nav-main:is(:hover, :focus-within) {
+    background-color: rgba(25, 29, 31, 0.78);
+  }
+
+  .personal-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 64px;
+    padding: 0 12px;
+    border: 0;
     border-radius: 999px;
-    overflow: hidden;
+    background: transparent;
+    color: white;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .personal-menu-toggle:focus-visible {
+    outline: 2px solid var(--glass-focus-ring);
+    outline-offset: 2px;
   }
 
   .personal-nav-items {
-    flex: 1 1 auto;
-    gap: 2px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-padding-inline: 8px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .personal-nav-items::-webkit-scrollbar { display: none; }
-
-  .personal-nav-link {
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  main[lang="en"] .personal-nav-main {
-    gap: 4px;
-    padding-inline: 8px 4px;
-  }
-
-  main[lang="en"] .personal-nav-link {
-    font-size: 10px;
-    letter-spacing: -0.01em;
-  }
-
-  main[lang="en"] .personal-nav-label-full {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(320px, calc(100vw - 24px));
+    max-height: calc(100svh - 100px);
     display: none;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 24px;
+    background: var(--hero-glass-light), rgba(20, 27, 30, 0.96);
+    box-shadow: var(--hero-glass-shadow);
   }
 
-  main[lang="en"] .personal-nav-label-compact {
-    display: inline;
+  .personal-nav-items[data-open="true"] { display: flex; }
+
+  .personal-nav-link,
+  main[lang="en"] .personal-nav-link {
+    min-height: 44px;
+    justify-content: flex-start;
+    padding: 0 16px;
+    font-size: 15px;
+    letter-spacing: normal;
+    color: white;
+    white-space: normal;
   }
 
   .personal-language-toggle {
@@ -3349,20 +3374,46 @@ main[lang="zh-CN"] .contact-content h2 em {
   .project-framework {
     min-height: auto;
     padding: 28px 0;
-    grid-template-columns: auto 1fr auto;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
   }
 
   .project-number {
-    min-height: 70px;
+    min-height: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .project-number span { max-width: 75%; text-align: right; }
+
+  .project-copy h3 { overflow-wrap: anywhere; line-height: 1.05; }
+
+  .project-copy > .project-description {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: normal;
+    text-transform: none;
+    color: #fff;
+    opacity: 1;
+  }
+
+  .project-details > p { font-size: 14px; color: #fff; }
+
+  .project-photo::before {
+    background: linear-gradient(180deg, rgba(8, 9, 8, 0.72), rgba(8, 9, 8, 0.65));
   }
 
   .project-copy {
-    grid-column: 2 / -1;
+    min-width: 0;
+    grid-column: 1 / -1;
   }
 
   .project-details {
-    grid-column: 2 / -1;
+    min-width: 0;
+    grid-column: 1 / -1;
   }
 
   .project-photo {
@@ -3375,7 +3426,7 @@ main[lang="zh-CN"] .contact-content h2 em {
   .project-photo-2 { background-position: 76% 35%; }
 
   .project-path {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
     justify-content: flex-start;
     flex-wrap: wrap;
     text-align: left;
@@ -3572,7 +3623,7 @@ main[lang="zh-CN"] .contact-content h2 em {
   }
 
   main[lang="en"] .personal-nav-link {
-    font-size: 9px;
+    font-size: 15px;
   }
 }
 

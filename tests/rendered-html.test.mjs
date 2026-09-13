@@ -857,12 +857,9 @@ test("keeps the homepage language state and honours interaction explicit", async
   assert.match(honours, /setHasExploredGallery\(true\)/);
   assert.match(honours, /\}, \[language, honours\.length\]\);/);
   assert.match(stylesheet, /personal-language-toggle/);
-  assert.match(stylesheet, /main\[lang="en"\] \.personal-nav-label-full\s*\{[^}]*display:\s*none/s);
-  assert.match(stylesheet, /main\[lang="en"\] \.personal-nav-label-compact\s*\{[^}]*display:\s*inline/s);
   assert.doesNotMatch(stylesheet, /main\[lang="en"\] \.personal-brand\s*\{[^}]*display:\s*none/s);
   assert.match(stylesheet, /\.brand-orb\s*\{[^}]*width:\s*48px;[^}]*height:\s*48px;/s);
   assert.match(stylesheet, /\.personal-brand\s*\{[^}]*width:\s*56px;[^}]*height:\s*56px;/s);
-  assert.match(stylesheet, /@media \(max-width:\s*340px\)[\s\S]*main\[lang="en"\] \.personal-nav-link\s*\{[^}]*font-size:\s*9px/s);
   assert.match(stylesheet, /--honour-active-card-width:\s*105%/);
   assert.match(stylesheet, /0\.93\s*\/\s*1\.05\s*=\s*0\.886/);
   assert.match(stylesheet, /mask-image:\s*linear-gradient\(90deg/);
@@ -1010,19 +1007,6 @@ test("tracks the current homepage section with observer-driven navigation semant
   assert.match(component, /window\.addEventListener\("hashchange", scheduleHashSync\)/);
   assert.match(component, /window\.addEventListener\("popstate", scheduleHashSync\)/);
   assert.match(component, /document\.documentElement\.scrollHeight - 2/);
-});
-
-test("keeps the active mobile navigation item visible without forcing motion", async () => {
-  const [component, stylesheet] = await Promise.all([
-    readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-  ]);
-
-  assert.match(component, /className="personal-nav-items"/);
-  assert.match(component, /container\.scrollTo\(\{ left: Math\.max\(0, targetLeft\), behavior: "auto" \}\)/);
-  assert.doesNotMatch(component, /targetLeft\), behavior: reducedMotion \? "auto" : "smooth"/);
-  assert.match(stylesheet, /@media \(max-width: 768px\)[\s\S]*\.personal-nav-items\s*\{[^}]*overflow-x:\s*auto;[^}]*overscroll-behavior-x:\s*contain;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
-  assert.match(stylesheet, /\.personal-nav-items::-webkit-scrollbar\s*\{\s*display:\s*none;\s*\}/);
 });
 
 test("locks programmatic navigation to one target until arrival, interruption or timeout", async () => {

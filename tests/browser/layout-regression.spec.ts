@@ -293,13 +293,13 @@ test.describe("bilingual cross-browser layout", () => {
     await openReady(page, "/", "en");
     await expect(page.locator(".personal-nav-link[aria-current='location']")).toHaveCount(0);
 
-    const projects = page.getByRole("link", { name: "Projects", exact: true });
+    const projects = page.getByRole("link", { includeHidden: true, name: "Projects", exact: true });
     await projects.focus();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/#projects$/);
     await expect(projects).toHaveAttribute("aria-current", "location");
 
-    const contact = page.getByRole("link", { name: "Contact", exact: true });
+    const contact = page.getByRole("link", { includeHidden: true, name: "Contact", exact: true });
     await contact.click();
     await expect(page).toHaveURL(/#contact$/);
     await expect(contact).toHaveAttribute("aria-current", "location");
@@ -322,24 +322,52 @@ test.describe("bilingual cross-browser layout", () => {
     await expect(page).toHaveURL(/lang=zh/);
   });
 
-  test("mobile scroll spy keeps the active item inside the horizontal navigation viewport", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/?lang=en#contact", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("main")).toBeVisible();
-    const contact = page.getByRole("link", { name: "Contact", exact: true });
-    await expect(contact).toHaveAttribute("aria-current", "location");
+  test("mobile menu reveals all links, closes after navigation and returns focus on Escape", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await openReady(page, "/", "en");
+    const toggle = page.locator(".personal-menu-toggle");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("link", { includeHidden: true, name: "Contact", exact: true })).toBeHidden();
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    for (const link of await page.locator(".personal-nav-link").all()) await expect(link).toBeVisible();
+    await expectInsideViewport(page, [".personal-nav-link"]);
+    await page.getByRole("link", { includeHidden: true, name: "Contact", exact: true }).click();
+    await expect(page).toHaveURL(/#contact$/);
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.click();
+    await page.getByRole("link", { includeHidden: true, name: "Projects", exact: true }).focus();
+    await page.keyboard.press("Escape");
+    await expect(toggle).toBeFocused();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
 
-    await expect.poll(() => page.evaluate(() => {
-      const container = document.querySelector<HTMLElement>(".personal-nav-items");
-      const active = document.querySelector<HTMLElement>(".personal-nav-link[aria-current='location']");
-      if (!container || !active) return null;
-      const containerRect = container.getBoundingClientRect();
-      const activeRect = active.getBoundingClientRect();
-      return {
-        inside: activeRect.left >= containerRect.left - 2 && activeRect.right <= containerRect.right + 2,
-        rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      };
-    })).toEqual({ inside: true, rootOverflow: 0 });
+  test("phone project text, AEP metrics and retail controls do not collide", async ({ page }) => {
+    for (const viewport of [{ width: 320, height: 568 }, { width: 375, height: 812 }, { width: 390, height: 844 }, { width: 430, height: 932 }]) {
+      await page.setViewportSize(viewport);
+      for (const language of ["en", "zh"] as const) {
+        await openReady(page, "/", language);
+        const overflow = await page.locator(".project-copy h3, .project-description").evaluateAll(elements =>
+          elements.filter(e => e.scrollWidth > e.clientWidth + 1).map(e => e.textContent));
+        expect(overflow).toEqual([]);
+        await expectNoRootOverflow(page);
+        await openReady(page, "/case-studies/early-career-wellbeing/", language);
+        await expectNoIntersection(page, ".aep-hero-copy", ".aep-metrics");
+        const metricsSpacing = await page.evaluate(() => {
+          const copy = document.querySelector(".aep-hero-copy")!.getBoundingClientRect();
+          const metrics = document.querySelector(".aep-metrics")!.getBoundingClientRect();
+          return { gap: metrics.top - copy.bottom, left: metrics.left, right: innerWidth - metrics.right };
+        });
+        expect(metricsSpacing.gap).toBeGreaterThanOrEqual(24);
+        expect(metricsSpacing.left).toBeGreaterThanOrEqual(16);
+        expect(metricsSpacing.right).toBeGreaterThanOrEqual(16);
+        await expectNoRootOverflow(page);
+        await openReady(page, "/case-studies/uk-retail/", language);
+        await expectNoIntersection(page, "[data-portfolio-back-link]", ".uk-retail-mobile-language");
+        await expectNoIntersection(page, "[data-portfolio-back-link]", ".uk-retail-nav-cta");
+        await expectNoRootOverflow(page);
+      }
+    }
   });
 
   test("homepage remains contained at 100, 150 and 200 percent zoom-equivalent viewports", async ({ page }) => {
@@ -376,7 +404,8 @@ test.describe("bilingual cross-browser layout", () => {
 
           for (const [id, label] of [["contact", labels.contact], ["projects", labels.projects], ["ai-workflow", labels.ai], ["method", labels.method]] as const) {
             await resetNavigationProbe(page);
-            const link = page.getByRole("link", { name: label, exact: true });
+            const link = page.getByRole("link", { includeHidden: true, name: label, exact: true });
+            if (viewport.width <= 768) await page.locator(".personal-menu-toggle").click();
             await link.click();
             await expect(page).toHaveURL(new RegExp(`#${id}$`));
             await expect(link).toHaveAttribute("aria-current", "location");
@@ -405,17 +434,19 @@ test.describe("bilingual cross-browser layout", () => {
           : { contact: "联系", projects: "项目", method: "方法" };
         await test.step(`${viewport.width}x${viewport.height} ${language}`, async () => {
           await page.goto(`/?lang=${language}#contact`, { waitUntil: "domcontentloaded" });
-          await expect(page.getByRole("link", { name: labels.contact, exact: true })).toHaveAttribute("aria-current", "location");
+          await expect(page.getByRole("link", { includeHidden: true, name: labels.contact, exact: true })).toHaveAttribute("aria-current", "location");
           await expectNavigationTargetReached(page, "contact");
 
           await page.goto(`/?lang=${language}`, { waitUntil: "domcontentloaded" });
-          const contact = page.getByRole("link", { name: labels.contact, exact: true });
+          const contact = page.getByRole("link", { includeHidden: true, name: labels.contact, exact: true });
+          if (viewport.width <= 768) await page.locator(".personal-menu-toggle").click();
           await contact.focus();
           await page.keyboard.press("Enter");
           await expect(page).toHaveURL(/#contact$/);
           await expectNavigationTargetReached(page, "contact");
 
-          const projects = page.getByRole("link", { name: labels.projects, exact: true });
+          const projects = page.getByRole("link", { includeHidden: true, name: labels.projects, exact: true });
+          if (viewport.width <= 768) await page.locator(".personal-menu-toggle").click();
           await projects.click();
           await expectNavigationTargetReached(page, "projects");
           await page.goBack();
@@ -429,7 +460,7 @@ test.describe("bilingual cross-browser layout", () => {
 
           await page.evaluate(() => { window.location.hash = "method"; });
           await expect(page).toHaveURL(/#method$/);
-          await expect(page.getByRole("link", { name: labels.method, exact: true })).toHaveAttribute("aria-current", "location");
+          await expect(page.getByRole("link", { includeHidden: true, name: labels.method, exact: true })).toHaveAttribute("aria-current", "location");
           await expectNavigationTargetReached(page, "method");
         });
       }
@@ -458,7 +489,7 @@ test.describe("bilingual cross-browser layout", () => {
     await openReady(page, "/", "en");
     await installNavigationProbe(page);
     await resetNavigationProbe(page);
-    await page.getByRole("link", { name: "Contact", exact: true }).click();
+    await page.getByRole("link", { includeHidden: true, name: "Contact", exact: true }).click();
     await expectNavigationTargetReached(page, "contact");
     await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto");
     const probe = await readNavigationProbe(page);

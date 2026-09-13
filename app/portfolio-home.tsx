@@ -428,39 +428,47 @@ function Navigation({
   onNavigate: (section: NavigationTarget) => void;
 }) {
   const t = copy[language];
-  const navigationItems = useRef<HTMLSpanElement>(null);
-  const lastHorizontalAlignment = useRef<{ key: string; left: number } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigation = useRef<HTMLElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!activeSection || !navigationItems.current) return;
-
-    const activeLink = navigationItems.current.querySelector<HTMLAnchorElement>(`a[href="#${activeSection}"]`);
-    if (!activeLink) return;
-
-    const container = navigationItems.current;
-    const containerRect = container.getBoundingClientRect();
-    const linkRect = activeLink.getBoundingClientRect();
-    const inset = 8;
-    const isOutside = linkRect.left < containerRect.left + inset || linkRect.right > containerRect.right - inset;
-    if (!isOutside) return;
-
-    const targetLeft = activeLink.offsetLeft - (container.clientWidth - activeLink.offsetWidth) / 2;
-    const alignmentKey = `${language}:${activeSection}`;
-    if (lastHorizontalAlignment.current?.key === alignmentKey && Math.abs(lastHorizontalAlignment.current.left - targetLeft) < 1) return;
-    lastHorizontalAlignment.current = { key: alignmentKey, left: targetLeft };
-    container.scrollTo({ left: Math.max(0, targetLeft), behavior: "auto" });
-  }, [activeSection, language]);
+    if (!menuOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !navigation.current?.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [menuOpen]);
 
   return (
-    <nav className="personal-navbar" aria-label={t.primaryNavigation}>
+    <nav ref={navigation} className="personal-navbar" aria-label={t.primaryNavigation}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && menuOpen) {
+          setMenuOpen(false);
+          menuButton.current?.focus();
+        }
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false);
+      }}
+    >
       <a href="#home" className="personal-brand glass-panel" aria-label={t.brandHome} onClick={(event) => {
         event.preventDefault();
+        setMenuOpen(false);
         onNavigate("home");
       }}>
         <BrandOrb />
       </a>
       <div className="personal-nav-main glass-panel">
-        <span ref={navigationItems} className="personal-nav-items">
+        <button ref={menuButton} type="button" className="personal-menu-toggle"
+          aria-expanded={menuOpen} aria-controls="portfolio-navigation-links"
+          onClick={() => setMenuOpen((open) => !open)}>
+          {language === "en" ? (menuOpen ? "Close" : "Menu") : (menuOpen ? "关闭" : "菜单")}
+        </button>
+        <span id="portfolio-navigation-links" className="personal-nav-items" data-open={menuOpen}>
           {t.navigation.map(([id, title, compactTitle]) => (
             <a
               key={id}
@@ -470,6 +478,7 @@ function Navigation({
               aria-current={activeSection === id ? "location" : undefined}
               onClick={(event) => {
                 event.preventDefault();
+                setMenuOpen(false);
                 onNavigate(id);
               }}
             >

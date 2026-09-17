@@ -75,12 +75,12 @@ test("keeps the user-owned hero background and responsive language controls", as
 
   assert.match(component, /uk-retail-hero-bg/);
   assert.doesNotMatch(component, /<video/);
-  assert.match(stylesheet, /uk-retail-hero-clean-data\.png/);
-  assert.match(stylesheet, /method-background\.png/);
-  assert.match(stylesheet, /evidence-trail-background\.png/);
+  assert.match(stylesheet, /uk-retail-hero-clean-data\.webp/);
+  assert.match(stylesheet, /method-background\.webp/);
+  assert.match(stylesheet, /evidence-trail-background\.webp/);
   assert.doesNotMatch(stylesheet, /outputs-background\.png/);
-  assert.match(stylesheet, /cleaning-decisions-background\.png/);
-  assert.match(stylesheet, /results-background\.png/);
+  assert.match(stylesheet, /cleaning-decisions-background\.webp/);
+  assert.match(stylesheet, /results-background\.webp/);
   assert.match(component, /uk-retail-mobile-language/);
   assert.match(component, /document\.documentElement\.lang/);
   assert.match(stylesheet, /max-width:\s*580px.+max-height:\s*720px/s);
@@ -90,7 +90,7 @@ test("keeps the user-owned hero background and responsive language controls", as
   assert.match(stylesheet, /@media \(max-width: 580px\)[\s\S]*\.uk-retail-evidence-list[\s\S]*?> span\s*\{[^}]*margin-left:\s*2px;/s);
 
   await Promise.all([
-    access(new URL("public/case-studies/uk-retail/uk-retail-hero-clean-data.png", projectRoot)),
+    access(new URL("public/case-studies/uk-retail/uk-retail-hero-clean-data.webp", projectRoot)),
     access(new URL("public/case-studies/uk-retail/method-background.png", projectRoot)),
     access(new URL("public/case-studies/uk-retail/evidence-trail-background.png", projectRoot)),
     access(new URL("public/case-studies/uk-retail/cleaning-decisions-background.png", projectRoot)),
@@ -295,18 +295,18 @@ test("uses the supplied AI laboratory image without the previous orbit decoratio
   const [home, stylesheet] = await Promise.all([
     readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    access(new URL("../public/backgrounds/ai-workflow-laboratory.png", import.meta.url)),
+    access(new URL("../public/backgrounds/ai-workflow-laboratory.webp", import.meta.url)),
   ]);
 
-  assert.match(stylesheet, /ai-workflow-laboratory\.png/);
+  assert.match(stylesheet, /ai-workflow-laboratory\.webp/);
   assert.doesNotMatch(home, /ai-feature-atmosphere|ai-orbit/);
 });
 
 test("uses the supplied evidence image for the Working Method section", async () => {
   const stylesheet = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  await access(new URL("../public/backgrounds/method-evidence.png", import.meta.url));
+  await access(new URL("../public/backgrounds/method-evidence.webp", import.meta.url));
 
-  assert.match(stylesheet, /\.method-photo\s*\{[^}]*method-evidence\.png/s);
+  assert.match(stylesheet, /\.method-photo\s*\{[^}]*method-evidence\.webp/s);
   assert.match(stylesheet, /\.framework-method\s*\{[^}]*background-color:\s*#d8d0c3;/s);
   assert.doesNotMatch(stylesheet, /\.framework-method\s*\{[^}]*background:\s*#d8d0c3;/s);
 });
@@ -360,8 +360,8 @@ test("uses semantic naturally wrapping titles for the August 26 refinement", asy
     readFile(new URL("../app/case-studies/uk-retail/uk-retail-case-study.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(home, /title: "Zishun Gao — Personal Website"/);
-  assert.match(home, /title: "高子舜个人网站"/);
+  assert.match(home, /title: "Zishun Gao"/);
+  assert.match(home, /title: "高子舜"/);
   assert.match(home, /<h1 className="personal-hero-title">\{t\.title\}<\/h1>/);
   assert.doesNotMatch(home, /t\.greeting|t\.bridge|t\.statement|className="personal-serif"/);
   assert.match(personalTraining, /title: "A PERSONAL TRAINING LOG FOR STRENGTH AND CARDIO RECORDS"/);
@@ -462,7 +462,7 @@ test("keeps the AI case-study Hero focused on the supplied video composition", a
   );
 
   assert.match(component, /videoClassName="ai-concept-hero-video"/);
-  assert.match(component, /className="ai-concept-nav-cta"/);
+  assert.doesNotMatch(component, /className="ai-concept-nav-cta"/);
   assert.match(component, /className="ai-concept-primary"/);
   assert.doesNotMatch(component, /className="ai-concept-grid"/);
   assert.doesNotMatch(component, /className="ai-concept-orbits"/);
@@ -566,14 +566,14 @@ test("uses the supplied runner image and a compact AEP-to-personal-project gap",
   const [home, stylesheet] = await Promise.all([
     readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    access(new URL("../public/backgrounds/personal-training-runner.png", import.meta.url)),
+    access(new URL("../public/backgrounds/personal-training-runner.webp", import.meta.url)),
   ]);
 
   assert.match(home, /className="projects-content"/);
   assert.match(stylesheet, /\.projects-content\s*\{[^}]*gap:\s*24px;/s);
-  assert.match(stylesheet, /\.fitness-project\s*\{[^}]*personal-training-runner\.png/s);
+  assert.match(stylesheet, /\.fitness-project\s*\{[^}]*personal-training-runner\.webp/s);
   assert.match(stylesheet, /\.project-photo-1\s*\{\s*background-position:\s*center 62%;\s*\}/);
-  assert.match(stylesheet, /\.project-photo-2\s*\{[^}]*apple-park-card\.png/s);
+  assert.match(stylesheet, /\.project-photo-2\s*\{[^}]*apple-construction-grid\.webp/s);
   assert.match(stylesheet, /\.project-photo-2\s*\{\s*background-position:\s*center 35%;\s*\}/);
   assert.match(stylesheet, /background-size:\s*cover,\s*130% auto;/);
   await access(new URL("../public/backgrounds/apple-park-card.png", import.meta.url));
@@ -757,7 +757,7 @@ test("server-renders the complete English portfolio homepage by default", async 
 
   const html = await response.text();
   assert.match(html, /<title>Zishun Gao — Personal Portfolio<\/title>/);
-  assert.match(html, /Zishun Gao — Personal Website/);
+  assert.match(html, /Zishun Gao/);
   assert.doesNotMatch(html, /Hello, I|My work covers/);
   assert.match(html, />Education</);
   assert.match(html, />Honours</);
@@ -780,7 +780,7 @@ test("hydrates the static portfolio homepage from the requested Chinese language
   assert.match(html, /<title>Zishun Gao — Personal Portfolio<\/title>/);
 
   const component = await readFile(new URL("../app/portfolio-home.tsx", import.meta.url), "utf8");
-  assert.match(component, /高子舜个人网站/);
+  assert.match(component, /高子舜/);
   assert.doesNotMatch(component, /你好，我是|金融 风险 数据分析与应用研究/);
   assert.match(component, /教育与/);
   assert.match(component, /荣誉与/);
@@ -988,7 +988,7 @@ test("keeps Apple motion preferences and local navigation explicit", async () =>
   assert.match(component, /<ResilientBackgroundVideo/);
   assert.match(shared, /prefers-reduced-motion: reduce/);
   assert.match(component, /\?lang=\$\{language\}#project-apple-app-store/);
-  assert.match(component, /apple-construction-grid\.png[^>]+unoptimized/);
+  assert.match(component, /apple-construction-grid\.webp[^>]+unoptimized/);
   assert.match(component, /View repository/);
   assert.match(component, /aria-expanded=\{isActive\}/);
   assert.match(component, /event\.key === "Enter" \|\| event\.key === " "/);

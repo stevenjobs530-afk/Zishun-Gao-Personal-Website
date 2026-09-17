@@ -257,14 +257,19 @@ function ProjectNavigation({ copy, onNavigate, onToggleLanguage }: {
   onNavigate: (target: string) => void;
   onToggleLanguage: () => void;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLButtonElement>(null);
   return (
-    <nav className={styles.projectNavigation} aria-label={copy.label}>
-      <div className={styles.sectionNavigation}>
+    <nav className={styles.projectNavigation} aria-label={copy.label} onKeyDown={(event) => { if (event.key === "Escape") { setMenuOpen(false); menuRef.current?.focus(); } }}>
+      <div className={styles.sectionNavigation} data-menu-open={menuOpen}>
+        <button ref={menuRef} type="button" className={styles.mobileMenuToggle} aria-expanded={menuOpen} aria-controls="training-navigation" onClick={() => setMenuOpen((open) => !open)}>{copy.language === "中文" ? (menuOpen ? "Close menu" : "Menu") : (menuOpen ? "关闭菜单" : "菜单")}</button>
+        <div id="training-navigation" className={styles.navigationItems}>
         {copy.items.map(([label, target]) => (
-          <a key={target} href={`#${target}`} onClick={(event) => { event.preventDefault(); onNavigate(target); }}>
+          <a key={target} href={`#${target}`} onClick={(event) => { event.preventDefault(); setMenuOpen(false); onNavigate(target); }}>
             {label}
           </a>
         ))}
+        </div>
         <button type="button" onClick={onToggleLanguage} aria-label={copy.languageLabel}>
           {copy.language}
         </button>

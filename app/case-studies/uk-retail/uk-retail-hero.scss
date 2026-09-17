@@ -46,7 +46,7 @@ $warm-paper: #f5f3ef;
   pointer-events: none;
   background:
     linear-gradient(180deg, rgba($paper, 0.12) 0%, rgba($paper, 0) 48%, rgba($paper, 0.08) 100%),
-    url("/case-studies/uk-retail/uk-retail-hero-clean-data.png") 68% 54% / cover no-repeat;
+    url("/case-studies/uk-retail/uk-retail-hero-clean-data.webp") 68% 54% / cover no-repeat;
   filter: saturate(0.94) contrast(1.12) brightness(0.97);
 }
 
@@ -354,7 +354,7 @@ $warm-paper: #f5f3ef;
 
 .uk-retail-evidence {
   &::before {
-    background-image: url("/case-studies/uk-retail/evidence-trail-background.png");
+    background-image: url("/case-studies/uk-retail/evidence-trail-background.webp");
     background-position: 86% 45%;
     filter: blur(0.7px) contrast(1.06);
     opacity: 0.56;
@@ -419,7 +419,7 @@ $warm-paper: #f5f3ef;
   background: $ink;
 
   &::before {
-    background-image: url("/case-studies/uk-retail/method-background.png");
+    background-image: url("/case-studies/uk-retail/method-background.webp");
     background-position: 72% 55%;
     filter: blur(0.8px) grayscale(0.16) contrast(1.12) brightness(0.62);
     opacity: 0.58;
@@ -735,7 +735,7 @@ $warm-paper: #f5f3ef;
 
 .uk-retail-decisions {
   &::before {
-    background-image: url("/case-studies/uk-retail/cleaning-decisions-background.png");
+    background-image: url("/case-studies/uk-retail/cleaning-decisions-background.webp");
     background-position: 84% 42%;
     filter: blur(0.7px) contrast(1.06);
     opacity: 0.52;
@@ -821,7 +821,7 @@ $warm-paper: #f5f3ef;
   }
 
   &::before {
-    background-image: url("/case-studies/uk-retail/results-background.png");
+    background-image: url("/case-studies/uk-retail/results-background.webp");
     background-position: 18% 54%;
     filter: blur(0.8px) contrast(1.06);
     opacity: 0.5;

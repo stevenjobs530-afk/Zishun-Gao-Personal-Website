@@ -1,0 +1,274 @@
+/* Readable shared surfaces; mobile heroes show the artwork and copy in separate rows. */
+.personal-nav-main.glass-panel {
+  background: #292824;
+  border-color: #625e56;
+}
+.personal-menu-toggle { display: none; }
+.menu-discovery-hint { display: none; }
+.project-photo-2 { background-image: none; }
+main .project-photo-2 > .centered-apple-artwork {
+  grid-area: auto;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: #f3f3f3;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  pointer-events: none;
+}
+.project-photo-2::before { z-index: 1; }
+.project-photo-2 > :not(.centered-apple-artwork) { z-index: 2; }
+.personal-hero-content .personal-intro {
+  max-width: 42ch;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.6;
+  opacity: 1;
+  text-wrap: balance;
+}
+.personal-hero-footer { justify-content: flex-end; }
+.personal-hero-content {
+  padding: 32px;
+  border-radius: 24px;
+  background: rgba(20, 23, 20, 0.76);
+}
+.personal-eyebrow { color: #ece8df; line-height: 1.6; }
+.project-photo::before { background: rgba(12, 19, 23, 0.82); }
+.project-photo::after { display: none; }
+.project-photo .project-copy > .project-description {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.65;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #f3f0e9;
+  opacity: 1;
+}
+.project-photo .project-details > p { font-size: 15px; color: #e6e4de; }
+.project-photo .project-copy > p,
+.project-photo .project-path,
+.project-photo .project-number { opacity: 1; }
+.project-copy h3 { line-height: 1.1; }
+.framework-heading > p { font-size: 16px; line-height: 1.6; }
+@media (max-width: 1100px) {
+  main .framework-heading > p { display: block; }
+}
+main .ai-concept-nav-links {
+  padding: 10px 16px;
+  border-radius: 28px;
+  background: #16323f;
+}
+main .ai-concept-nav-links a,
+main .ai-concept-nav-links button { min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; }
+main .ai-concept-hero-copy {
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(6, 23, 34, 0.88);
+  width: min(760px, calc(100% - 80px));
+}
+main .ai-concept-hero-copy > span { font-size: 17px; line-height: 1.65; }
+main .ai-concept-hero-copy > p { font-size: 14px; line-height: 1.6; color: #d9e4e8; }
+main .ai-concept-primary { min-height: 48px; height: auto; padding: 12px 20px; width: auto; }
+
+@media (max-width: 768px) {
+  main .personal-navbar { align-items: flex-start; }
+  main .personal-nav-main.glass-panel {
+    position: relative;
+    overflow: visible;
+    justify-content: space-between;
+    padding: 4px 6px 4px 12px;
+  }
+  .personal-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 10px;
+    color: white;
+    background: transparent;
+    border: 0;
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    gap: 10px;
+  }
+  .menu-chevron { font-size: 20px; line-height: 1; }
+  .menu-discovery-hint {
+    display: block;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    padding: 7px 12px;
+    border-radius: 12px;
+    background: #292824;
+    color: #f4f0e8;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  main .personal-nav-items { display: none; }
+  main .personal-nav-main[data-menu-open="true"] .personal-nav-items {
+    display: flex;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(300px, calc(100vw - 24px));
+    max-height: calc(100svh - 100px);
+    overflow: auto;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    border: 1px solid #625e56;
+    border-radius: 20px;
+    background: #292824;
+    box-shadow: 0 16px 30px #0005;
+  }
+  main[lang] .personal-nav-link { font-size: 16px; min-height: 44px; padding: 12px; }
+  main[lang] .personal-nav-label-full { display: inline; }
+  main[lang] .personal-nav-label-compact { display: none; }
+  main .personal-hero {
+    min-height: 100svh;
+    height: auto;
+    padding: 110px 20px 40px;
+    justify-content: center;
+    gap: 0;
+  }
+  .hero-nav-spacer { display: none; }
+  .personal-hero-content {
+    width: 100%;
+    min-width: 0;
+    padding: 28px 20px;
+    gap: 22px;
+    background: rgba(20, 23, 20, 0.88);
+  }
+  main .personal-hero-title { width: 100%; font-size: clamp(42px, 12vw, 62px); line-height: 1.1; }
+  .personal-hero-content .personal-intro { max-width: 100%; font-size: 16px; }
+  .personal-eyebrow { font-size: 11px; letter-spacing: 0.12em; margin: 0; }
+  .personal-hero-actions { gap: 12px; }
+  .personal-hero-footer { display: none; }
+  main .framework-heading > p { display: block; max-width: 42ch; }
+  main .project-framework { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  main .project-framework > * { grid-column: 1; min-width: 0; }
+  main .project-number { min-height: 0; flex-direction: row; gap: 16px; }
+  main .project-number span { max-width: none; }
+  main .project-path { line-height: 1.7; }
+  main .project-photo { padding: 26px 24px; }
+  main .project-open { width: 48px; height: 48px; }
+  main .ai-feature-summary { font-size: 16px; line-height: 1.65; }
+  main .ai-concept-section > header h2 { font-size: clamp(32px, 10vw, 52px); overflow-wrap: anywhere; }
+  main .ai-concept-closing h2 { max-width: 100%; min-width: 0; font-size: clamp(36px, 11vw, 64px); overflow-wrap: anywhere; }
+
+  main .apple-hero,
+  main .aep-hero,
+  main .uk-retail-hero,
+  main .ai-concept-hero {
+    height: auto;
+    min-height: 100svh;
+    padding: 96px 20px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 24px;
+    overflow: visible;
+  }
+  main .apple-hero { background: #080e15; }
+  main .aep-hero { background: #07303a; }
+  main .ai-concept-hero { background: #0b2637; }
+  main .uk-retail-hero { background: #f3f0e9; }
+  main .apple-hero-media,
+  main .aep-hero-media,
+  main .ai-concept-hero-media,
+  main .uk-retail-hero-bg {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    flex: none;
+    border-radius: 16px;
+    background-size: contain;
+    background-position: center;
+    --background-video-position: center;
+    filter: none;
+    transform: none;
+  }
+  main .apple-hero-video,
+  main .aep-hero-video,
+  main .ai-concept-hero-video { object-fit: contain; position: absolute; inset: 0; }
+  main .apple-hero-shade,
+  main .aep-hero-shade { display: none; }
+  main .apple-hero-copy,
+  main .aep-hero-copy,
+  main .uk-retail-hero-copy,
+  main .ai-concept-hero-copy {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    align-items: flex-start;
+    background: none;
+    border-radius: 0;
+  }
+  main .apple-hero-copy h1,
+  main.aep-page[lang] .aep-hero-copy h1,
+  main .uk-retail-hero-copy h1,
+  main .ai-concept-hero-copy h1 {
+    max-width: 100%;
+    font-size: clamp(34px, 9.5vw, 54px);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    overflow-wrap: break-word;
+  }
+  main .apple-hero-copy > span,
+  main .aep-hero-copy > span,
+  main .uk-retail-hero-copy > span,
+  main .ai-concept-hero-copy > span {
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 100%;
+    margin-top: 20px;
+    text-wrap: pretty;
+  }
+  main .apple-hero-copy > span,
+  main .aep-hero-copy > span,
+  main .ai-concept-hero-copy > span { color: #edf2f4; }
+  main .uk-retail-hero-copy > span { color: #393934; }
+  main .apple-hero-copy > p,
+  main .aep-hero-copy > p { color: #d8e0e3; line-height: 1.6; font-size: 11px; }
+  main .apple-metrics,
+  main .aep-metrics,
+  main .uk-retail-panel-wrap {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    margin: 0;
+    grid-template-columns: 1fr;
+  }
+  main .apple-metrics > div,
+  main .aep-metrics > div { gap: 16px; flex-wrap: wrap; }
+  main .apple-metrics dd,
+  main .aep-metrics dd { font-size: 12px; line-height: 1.5; color: #d8e0e3; }
+  main .apple-hero-actions,
+  main .aep-hero-actions { width: 100%; margin-top: 24px; flex-direction: column; }
+  main .apple-hero-actions a,
+  main .aep-hero-actions a { width: 100%; min-height: 48px; font-size: 15px; }
+  main .ai-concept-frame { position: static; height: auto; transform: none; display: block; }
+  main .ai-concept-hero-media { aspect-ratio: 4 / 3; }
+  main .ai-concept-nav { position: absolute; top: 14px; right: 20px; left: auto; width: auto; height: auto; padding: 0; }
+  main .ai-concept-nav-links { padding: 0 14px; }
+  main .ai-concept-nav-links a { display: none; }
+  main .ai-concept-nav-links button { min-height: 48px; font-size: 15px; color: white; }
+  main .ai-concept-hero-copy > p { max-width: 100%; font-size: 14px; }
+  main .ai-concept-primary { width: 100%; min-height: 48px; font-size: 15px; margin-top: 24px; }
+  main .ai-concept-nav > *, main .ai-concept-hero-copy > * { animation: none; }
+  main .uk-retail-nav { position: absolute; }
+  main .uk-retail-nav-cta { display: none; }
+  main .uk-retail-panel-items { grid-template-columns: 1fr; }
+  main .uk-retail-panel-items > div { border-right: 0; padding: 16px; gap: 20px; flex-wrap: wrap; }
+}

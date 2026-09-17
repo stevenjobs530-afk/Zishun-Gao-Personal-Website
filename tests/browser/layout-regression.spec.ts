@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const VIEWPORTS = [
+  { width: 320, height: 568 },
   { width: 390, height: 844 },
   { width: 768, height: 1024 },
   { width: 1024, height: 768 },
@@ -23,6 +24,11 @@ async function openReady(page: Page, path: string, language: "en" | "zh") {
   await expect(page.locator("main")).toBeVisible();
   await page.evaluate(async () => document.fonts.ready);
   await expect(page.locator("html")).toHaveAttribute("lang", language === "zh" ? "zh-CN" : "en");
+}
+
+async function openMobileMenu(page: Page) {
+  const toggle = page.locator(".personal-menu-toggle");
+  if (await toggle.isVisible() && await toggle.getAttribute("aria-expanded") !== "true") await toggle.click();
 }
 
 async function expectNoRootOverflow(page: Page) {
@@ -233,12 +239,12 @@ test.describe("bilingual cross-browser layout", () => {
               const heroOpacity = await page.locator("h1").evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity));
               expect(heroOpacity).toBeGreaterThan(0.9);
               const heroMedia = page.locator("[data-video-state][class*='heroMedia']");
-              const mediaBackground = await heroMedia.evaluate((element) => getComputedStyle(element).backgroundImage);
+              const mediaBackground = await heroMedia.locator("[class*=background]").first().evaluate((element) => getComputedStyle(element).backgroundImage);
               expect(mediaBackground).not.toBe("none");
               expect(await heroMedia.evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity))).toBeGreaterThan(0.9);
               if (viewport.width <= 768) {
                 const navigation = page.locator("[class*='sectionNavigation']");
-                const languageToggle = navigation.locator("button");
+                const languageToggle = navigation.locator("button[aria-label]");
                 await expect(languageToggle).toBeVisible();
                 const [navigationBox, toggleBox] = await Promise.all([navigation.boundingBox(), languageToggle.boundingBox()]);
                 expect(navigationBox).not.toBeNull();
@@ -246,7 +252,9 @@ test.describe("bilingual cross-browser layout", () => {
                 expect((toggleBox?.x ?? 0) + (toggleBox?.width ?? 0)).toBeLessThanOrEqual(
                   (navigationBox?.x ?? 0) + (navigationBox?.width ?? 0) + 2,
                 );
-                await navigation.evaluate((element) => { element.scrollLeft = element.scrollWidth; });
+                const menu = navigation.locator("button[aria-expanded]");
+                if (await menu.isVisible()) await menu.click();
+                else await navigation.evaluate((element) => { element.scrollLeft = element.scrollWidth; });
                 const lastLink = navigation.locator("a").last();
                 await expect(lastLink).toBeVisible();
                 const [navBox, linkBox] = await Promise.all([navigation.boundingBox(), lastLink.boundingBox()]);
@@ -299,6 +307,7 @@ test.describe("bilingual cross-browser layout", () => {
     await expect(page).toHaveURL(/#projects$/);
     await expect(projects).toHaveAttribute("aria-current", "location");
 
+    await openMobileMenu(page);
     const contact = page.getByRole("link", { name: "Contact", exact: true });
     await contact.click();
     await expect(page).toHaveURL(/#contact$/);
@@ -322,10 +331,11 @@ test.describe("bilingual cross-browser layout", () => {
     await expect(page).toHaveURL(/lang=zh/);
   });
 
-  test("mobile scroll spy keeps the active item inside the horizontal navigation viewport", async ({ page }) => {
+  test("mobile menu exposes every destination and retains the active section", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/?lang=en#contact", { waitUntil: "domcontentloaded" });
     await expect(page.locator("main")).toBeVisible();
+    await openMobileMenu(page);
     const contact = page.getByRole("link", { name: "Contact", exact: true });
     await expect(contact).toHaveAttribute("aria-current", "location");
 
@@ -377,6 +387,7 @@ test.describe("bilingual cross-browser layout", () => {
           for (const [id, label] of [["contact", labels.contact], ["projects", labels.projects], ["ai-workflow", labels.ai], ["method", labels.method]] as const) {
             await resetNavigationProbe(page);
             const link = page.getByRole("link", { name: label, exact: true });
+            await openMobileMenu(page);
             await link.click();
             await expect(page).toHaveURL(new RegExp(`#${id}$`));
             await expect(link).toHaveAttribute("aria-current", "location");
@@ -405,17 +416,19 @@ test.describe("bilingual cross-browser layout", () => {
           : { contact: "联系", projects: "项目", method: "方法" };
         await test.step(`${viewport.width}x${viewport.height} ${language}`, async () => {
           await page.goto(`/?lang=${language}#contact`, { waitUntil: "domcontentloaded" });
-          await expect(page.getByRole("link", { name: labels.contact, exact: true })).toHaveAttribute("aria-current", "location");
+          await expect(page.getByRole("link", { name: labels.contact, exact: true, includeHidden: true })).toHaveAttribute("aria-current", "location");
           await expectNavigationTargetReached(page, "contact");
 
           await page.goto(`/?lang=${language}`, { waitUntil: "domcontentloaded" });
-          const contact = page.getByRole("link", { name: labels.contact, exact: true });
+          const contact = page.getByRole("link", { name: labels.contact, exact: true, includeHidden: true });
+          await openMobileMenu(page);
           await contact.focus();
           await page.keyboard.press("Enter");
           await expect(page).toHaveURL(/#contact$/);
           await expectNavigationTargetReached(page, "contact");
 
-          const projects = page.getByRole("link", { name: labels.projects, exact: true });
+          const projects = page.getByRole("link", { name: labels.projects, exact: true, includeHidden: true });
+          await openMobileMenu(page);
           await projects.click();
           await expectNavigationTargetReached(page, "projects");
           await page.goBack();
@@ -429,7 +442,7 @@ test.describe("bilingual cross-browser layout", () => {
 
           await page.evaluate(() => { window.location.hash = "method"; });
           await expect(page).toHaveURL(/#method$/);
-          await expect(page.getByRole("link", { name: labels.method, exact: true })).toHaveAttribute("aria-current", "location");
+          await expect(page.getByRole("link", { name: labels.method, exact: true, includeHidden: true })).toHaveAttribute("aria-current", "location");
           await expectNavigationTargetReached(page, "method");
         });
       }

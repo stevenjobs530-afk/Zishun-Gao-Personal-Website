@@ -317,7 +317,7 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
           <p className="apple-question-copy">{t.sections.question.body}</p>
           <aside className="apple-history-feature">
             <div><span>{t.sections.question.contextLabel}</span><p>{t.sections.question.context}</p></div>
-            <figure><Image src={`${appBasePath}/case-studies/apple-app-store/apple-construction-grid.png`} width={1448} height={1086} sizes="(max-width: 760px) 88vw, 42vw" alt={t.historyArtworkAlt} unoptimized /></figure>
+            <figure><Image src={`${appBasePath}/case-studies/apple-app-store/apple-construction-grid.webp`} width={1448} height={1086} sizes="(max-width: 760px) 88vw, 42vw" alt={t.historyArtworkAlt} unoptimized /></figure>
           </aside>
         </section>
 

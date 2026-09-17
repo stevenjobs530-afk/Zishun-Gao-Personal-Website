@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./resilient-background-video.module.css";
+import Image from "next/image";
 
 type VideoState = "loading" | "playing" | "poster" | "reduced-motion";
 
@@ -12,6 +13,7 @@ type ResilientBackgroundVideoProps = {
   className?: string;
   videoClassName?: string;
   priority?: boolean;
+  staticOnMobile?: boolean;
 };
 
 type PosterStyle = CSSProperties & {
@@ -24,6 +26,7 @@ export default function ResilientBackgroundVideo({
   className,
   videoClassName,
   priority = false,
+  staticOnMobile = false,
 }: ResilientBackgroundVideoProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -33,7 +36,7 @@ export default function ResilientBackgroundVideo({
 
   const requestPlayback = useCallback(async () => {
     const video = videoRef.current;
-    if (!video || reducedMotionRef.current || !isVisibleRef.current || document.visibilityState !== "visible") return;
+    if (!video || reducedMotionRef.current || !isVisibleRef.current || document.visibilityState !== "visible" || (staticOnMobile && window.matchMedia("(max-width: 768px)").matches)) return;
 
     if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       setVideoState("playing");
@@ -53,7 +56,7 @@ export default function ResilientBackgroundVideo({
     } catch {
       setVideoState("poster");
     }
-  }, []);
+  }, [staticOnMobile]);
 
   useEffect(() => {
     const media = mediaRef.current;
@@ -61,7 +64,10 @@ export default function ResilientBackgroundVideo({
     if (!media || !video) return;
 
     const updatePlayback = () => {
-      if (isVisibleRef.current && document.visibilityState === "visible") {
+      if (staticOnMobile && window.matchMedia("(max-width: 768px)").matches) {
+        video.pause();
+        setVideoState("poster");
+      } else if (isVisibleRef.current && document.visibilityState === "visible") {
         void requestPlayback();
       } else {
         video.pause();
@@ -91,6 +97,7 @@ export default function ResilientBackgroundVideo({
     document.addEventListener("keydown", retryFromUserGesture, true);
     window.addEventListener("pageshow", updatePlayback);
     window.addEventListener("focus", updatePlayback);
+    window.addEventListener("resize", updatePlayback);
     updatePlayback();
 
     return () => {
@@ -101,9 +108,10 @@ export default function ResilientBackgroundVideo({
       document.removeEventListener("keydown", retryFromUserGesture, true);
       window.removeEventListener("pageshow", updatePlayback);
       window.removeEventListener("focus", updatePlayback);
+      window.removeEventListener("resize", updatePlayback);
       video.pause();
     };
-  }, [requestPlayback]);
+  }, [requestPlayback, staticOnMobile]);
 
   useEffect(() => {
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -143,14 +151,16 @@ export default function ResilientBackgroundVideo({
       className={`${styles.media}${className ? ` ${className}` : ""}`}
       data-video-state={videoState}
       data-resilient-background-video
+      data-static-on-mobile={staticOnMobile || undefined}
       style={posterStyle}
       aria-hidden="true"
     >
+      <Image src={poster} alt="" fill sizes="100vw" unoptimized priority={priority} className={styles.poster} />
       <video
         ref={videoRef}
         className={`${styles.video}${videoClassName ? ` ${videoClassName}` : ""}`}
         poster={poster}
-        autoPlay
+        autoPlay={!staticOnMobile}
         muted
         loop
         playsInline
@@ -161,6 +171,7 @@ export default function ResilientBackgroundVideo({
         onWaiting={showPoster}
         onStalled={showPoster}
         onError={showPoster}
+        onPause={showPoster}
       >
         <source src={src} type="video/mp4" />
       </video>

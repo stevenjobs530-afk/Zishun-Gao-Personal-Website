@@ -1092,7 +1092,7 @@ a {
 }
 
 .method-photo {
-  --section-image: url("/backgrounds/method-evidence.png");
+  --section-image: url("/backgrounds/method-evidence.webp");
   --section-position: center;
 }
 
@@ -1826,8 +1826,8 @@ main[lang="zh-CN"] .framework-heading h2 em {
   z-index: 1;
 }
 
-.project-photo-1 { --project-image: url("/backgrounds/project-1.jpg"); --project-position: center; }
-.project-photo-2 { --project-image: url("/backgrounds/apple-park-card.png"); --project-position: center; }
+.project-photo-1 { --project-image: url("/case-studies/uk-retail/uk-retail-hero-clean-data.webp"); --project-position: center; }
+.project-photo-2 { --project-image: url("/case-studies/apple-app-store/apple-construction-grid.webp"); --project-position: center; }
 .project-photo-3 { --project-image: url("/backgrounds/project-3.jpg"); --project-position: center; }
 
 .project-photo-1 { background-position: center 62%; }
@@ -1949,7 +1949,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
   background-color: #433b2f;
   background-image:
     linear-gradient(90deg, rgba(12, 14, 12, 0.76) 0%, rgba(12, 14, 12, 0.56) 58%, rgba(12, 14, 12, 0.42) 100%),
-    url("/backgrounds/personal-training-runner.png");
+    url("/backgrounds/personal-training-runner.webp");
   background-position: center, 100% 68%;
   background-repeat: no-repeat;
   background-size: cover, 130% auto;
@@ -2050,7 +2050,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
   background-image:
     linear-gradient(90deg, rgba(5, 15, 18, 0.9) 0%, rgba(5, 15, 18, 0.7) 50%, rgba(5, 15, 18, 0.46) 100%),
     linear-gradient(180deg, rgba(5, 15, 18, 0.12) 0%, rgba(5, 15, 18, 0.58) 100%),
-    url("/backgrounds/ai-workflow-laboratory.png");
+    url("/backgrounds/ai-workflow-laboratory.webp");
   background-position: center;
   background-size: cover;
   color: white;
@@ -3399,7 +3399,7 @@ main[lang="zh-CN"] .contact-content h2 em {
     gap: 40px;
     background-image:
       linear-gradient(180deg, rgba(5, 15, 18, 0.78), rgba(5, 15, 18, 0.7)),
-      url("/backgrounds/ai-workflow-laboratory.png");
+      url("/backgrounds/ai-workflow-laboratory.webp");
     background-position: 58% center;
   }
 
@@ -3438,7 +3438,7 @@ main[lang="zh-CN"] .contact-content h2 em {
     padding: 24px 20px;
     background-image:
       linear-gradient(180deg, rgba(10, 12, 10, 0.65), rgba(10, 12, 10, 0.72)),
-      url("/backgrounds/personal-training-runner.png");
+      url("/backgrounds/personal-training-runner.webp");
     background-position: center, 76% 66%;
     background-size: cover, cover;
   }

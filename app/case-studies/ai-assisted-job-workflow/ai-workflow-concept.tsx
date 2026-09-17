@@ -313,7 +313,6 @@ export default function AiWorkflowConcept({ initialLanguage }: { initialLanguage
               <a href="#safeguards">{t.safeguardsNav}</a>
               <button type="button" onClick={toggleLanguage} aria-label={t.languageLabel}>{t.language}</button>
             </div>
-            <a className="ai-concept-nav-cta" href="#system">{t.hero.cta}</a>
           </nav>
 
           <div className="ai-concept-hero-copy">

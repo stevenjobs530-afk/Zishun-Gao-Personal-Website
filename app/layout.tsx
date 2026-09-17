@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./responsive-readability.css";
 
 export const metadata: Metadata = {
   title: "Zishun Gao — Personal Portfolio",

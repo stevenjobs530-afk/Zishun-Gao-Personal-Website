@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import HonoursExhibition from "./honours-exhibition";
 import ResilientBackgroundVideo from "./components/resilient-background-video";
+import CenteredAppleArtwork from "./components/centered-apple-artwork";
 import BrandOrb from "./components/brand-orb/brand-orb";
 
 type Language = "en" | "zh";
@@ -75,7 +76,7 @@ const copy = {
     ],
     hero: {
       eyebrow: "Finance · Economics · Risk management",
-      title: "Zishun Gao — Personal Website",
+      title: "Zishun Gao",
       primaryCta: "View my work",
       secondaryCta: "Explore profile",
       cvCta: "Download English CV",
@@ -254,7 +255,7 @@ const copy = {
     ],
     hero: {
       eyebrow: "金融 · 经济 · 风险管理",
-      title: "高子舜个人网站",
+      title: "高子舜",
       primaryCta: "查看作品",
       secondaryCta: "了解我的背景",
       cvCta: "下载中文简历",
@@ -428,6 +429,9 @@ function Navigation({
   onNavigate: (section: NavigationTarget) => void;
 }) {
   const t = copy[language];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuDiscovered, setMenuDiscovered] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const navigationItems = useRef<HTMLSpanElement>(null);
   const lastHorizontalAlignment = useRef<{ key: string; left: number } | null>(null);
 
@@ -452,15 +456,25 @@ function Navigation({
   }, [activeSection, language]);
 
   return (
-    <nav className="personal-navbar" aria-label={t.primaryNavigation}>
+    <nav className="personal-navbar" aria-label={t.primaryNavigation} onKeyDown={(event) => {
+      if (event.key === "Escape" && menuOpen) {
+        setMenuOpen(false);
+        menuButton.current?.focus();
+      }
+    }}>
       <a href="#home" className="personal-brand glass-panel" aria-label={t.brandHome} onClick={(event) => {
         event.preventDefault();
         onNavigate("home");
       }}>
         <BrandOrb />
       </a>
-      <div className="personal-nav-main glass-panel">
-        <span ref={navigationItems} className="personal-nav-items">
+      <div className="personal-nav-main glass-panel" data-menu-open={menuOpen}>
+        <button ref={menuButton} type="button" className="personal-menu-toggle" aria-describedby={!menuOpen && !menuDiscovered && !activeSection ? "menu-discovery-hint" : undefined} aria-expanded={menuOpen} aria-controls="portfolio-navigation" onClick={() => { setMenuDiscovered(true); setMenuOpen((open) => !open); }}>
+          <span>{language === "en" ? (menuOpen ? "Close menu" : "Menu") : (menuOpen ? "关闭菜单" : "菜单")}</span>
+          <span className="menu-chevron" aria-hidden="true">{menuOpen ? "−" : "+"}</span>
+        </button>
+        {!menuOpen && !menuDiscovered && !activeSection && <span className="menu-discovery-hint" id="menu-discovery-hint">{language === "en" ? "Tap Menu to explore all sections" : "点击菜单，浏览全部内容"}</span>}
+        <span id="portfolio-navigation" ref={navigationItems} className="personal-nav-items">
           {t.navigation.map(([id, title, compactTitle]) => (
             <a
               key={id}
@@ -470,6 +484,7 @@ function Navigation({
               aria-current={activeSection === id ? "location" : undefined}
               onClick={(event) => {
                 event.preventDefault();
+                setMenuOpen(false);
                 onNavigate(id);
               }}
             >
@@ -505,20 +520,20 @@ function Hero({ language }: { language: Language }) {
         videoClassName="personal-hero-video"
         src={`${mediaBasePath}/video/homepage-hero.mp4`}
         poster={`${mediaBasePath}/posters/homepage-hero.jpg`}
+        staticOnMobile
         priority
       />
       <div className="hero-nav-spacer" aria-hidden="true" />
       <div className="personal-hero-content">
         <p className="personal-eyebrow">{t.eyebrow}</p>
         <h1 className="personal-hero-title">{t.title}</h1>
+        <p className="personal-intro">{t.intro}<br />{t.introSecond}</p>
         <div className="personal-hero-actions">
           <a href="#projects" className="primary-button">{t.primaryCta}</a>
-          <a href="#education" className="outline-button glass-panel">{t.secondaryCta}</a>
           <a href={`${appBasePath}/cv/${cvFilename}`} className="outline-button glass-panel" download={cvFilename}>{t.cvCta}</a>
         </div>
       </div>
       <div className="personal-hero-footer">
-        <p className="personal-intro">{t.intro}<br />{t.introSecond}</p>
         <a href="#education" className="scroll-button glass-panel" aria-label={t.exploreLabel}><span>{t.explore}</span><ArrowIcon /></a>
       </div>
     </section>
@@ -592,6 +607,7 @@ function ProjectsSection({ language }: { language: Language }) {
         <div className="project-list">
           {t.items.map((project, index) => (
             <article id={`project-${project.slug}`} tabIndex={-1} className={`project-framework project-photo project-photo-${index + 1}`} key={project.index}>
+              {project.slug === "apple-app-store" && <CenteredAppleArtwork />}
               <div className="project-number">{project.index}<span>{project.tools}</span></div>
               <div className="project-copy"><p>{project.type}</p><h3>{project.title}</h3><p className="project-description">{project.description}</p></div>
               <div className="project-details">
@@ -722,6 +738,7 @@ function ContactSection({ language }: { language: Language }) {
         videoClassName="contact-flower-video"
         src={`${mediaBasePath}/video/homepage-contact.mp4`}
         poster={`${mediaBasePath}/posters/homepage-contact.jpg`}
+        staticOnMobile
       />
       <div className="contact-topline"><span>07</span><a href="#home">{t.top}</a></div>
       <div className="contact-content">
@@ -730,7 +747,6 @@ function ContactSection({ language }: { language: Language }) {
         <p className="contact-intro">{t.intro}</p>
         <div className="contact-buttons" aria-label={t.optionsLabel}>
           {contacts.map(([label, href], index) => <a key={label} href={href} className={index === 0 ? "contact-button contact-button-primary" : "contact-button"} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined}><span>{label}</span><ArrowIcon /></a>)}
-          <button type="button" className="contact-button contact-button-disabled" disabled><span>{t.instagram}</span></button>
         </div>
       </div>
       <div className="contact-footer"><span>© 2026 {language === "en" ? "Zishun Gao" : "高子舜"}</span><span>{t.footer}</span></div>

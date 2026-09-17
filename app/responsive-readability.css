@@ -29,9 +29,41 @@ main .project-photo-2 > .centered-apple-artwork {
 .personal-hero-footer { justify-content: flex-end; }
 .personal-hero-content {
   padding: 32px;
-  border-radius: 24px;
-  background: rgba(20, 23, 20, 0.76);
+  background: transparent;
+  isolation: isolate;
 }
+.personal-hero-content::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -120px -160px;
+  background: radial-gradient(ellipse at center, rgba(22, 25, 21, 0.64) 0%, rgba(22, 25, 21, 0.48) 30%, rgba(22, 25, 21, 0.18) 56%, transparent 75%);
+  pointer-events: none;
+}
+.personal-hero-content .personal-hero-title,
+.personal-hero-content .personal-intro,
+.personal-hero-content .personal-eyebrow {
+  color: #fffaf0;
+  text-shadow: 0 2px 12px rgba(12, 17, 12, 0.48);
+}
+.personal-hero-actions .primary-button {
+  background: #f2ede3;
+  border: 1px solid rgba(255, 250, 240, 0.5);
+  box-shadow: 0 4px 16px rgba(12, 17, 12, 0.12);
+  color: #252823;
+}
+.personal-hero-actions .outline-button {
+  background: rgba(31, 36, 29, 0.28);
+  border: 1px solid rgba(255, 250, 240, 0.48);
+  box-shadow: none;
+  color: #fffaf0;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.personal-hero-actions .outline-button::before,
+.personal-hero-actions .outline-button::after { display: none; }
+.personal-hero-actions a:hover { transform: translateY(-2px); }
+.personal-hero-actions a:focus-visible { outline: 2px solid #fffaf0; outline-offset: 5px; }
 .personal-eyebrow { color: #ece8df; line-height: 1.6; }
 .project-photo::before { background: rgba(12, 19, 23, 0.82); }
 .project-photo::after { display: none; }
@@ -141,8 +173,9 @@ main .ai-concept-primary { min-height: 48px; height: auto; padding: 12px 20px; w
     min-width: 0;
     padding: 28px 20px;
     gap: 22px;
-    background: rgba(20, 23, 20, 0.88);
+    background: transparent;
   }
+  .personal-hero-content::before { inset: -90px -65px; }
   main .personal-hero-title { width: 100%; font-size: clamp(42px, 12vw, 62px); line-height: 1.1; }
   .personal-hero-content .personal-intro { max-width: 100%; font-size: 16px; }
   .personal-eyebrow { font-size: 11px; letter-spacing: 0.12em; margin: 0; }

@@ -324,8 +324,13 @@
 .fleetContent dd { color: #fff; text-align: left; }
 
 .viewButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 112px;
   min-height: 46px;
+  padding: 14px 24px;
+  text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);

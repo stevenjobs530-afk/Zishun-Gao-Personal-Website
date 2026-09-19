@@ -1088,6 +1088,7 @@ a {
 .honours-photo .framework-heading > p {
   max-width: 520px;
   justify-self: auto;
+  align-self: center;
   text-align: center;
 }
 
@@ -1184,10 +1185,13 @@ main[lang="zh-CN"] .framework-heading h2 em {
 }
 
 .framework-heading > p {
-  grid-column: 3;
+  grid-column: 1 / -1;
   grid-row: 3;
-  max-width: 330px;
-  justify-self: end;
+  width: 100%;
+  max-width: 60ch;
+  justify-self: start;
+  align-self: flex-start;
+  text-align: left;
   font-size: 12px;
   line-height: 1.5;
 }

@@ -237,38 +237,37 @@ export default function UkRetailCaseStudy({ initialLanguage }: { initialLanguage
   return (
     <main className="uk-retail-page" lang={language === "zh" ? "zh-CN" : "en"}>
       <PortfolioBackLink href={portfolioHref} language={language} ariaLabel={t.backLabel} />
-      <section className="uk-retail-hero" aria-labelledby="uk-retail-title">
-        <div className="uk-retail-hero-bg" aria-hidden="true" />
-
-        <header className="uk-retail-nav">
-          <nav className="uk-retail-nav-links" aria-label={t.navigationLabel}>
-            <a href={repositoryUrl} target="_blank" rel="noreferrer">
-              {t.repository}
-            </a>
-            <button type="button" onClick={toggleLanguage} aria-label={t.languageLabel}>
-              {t.language}
-            </button>
-          </nav>
-
-          <button
-            className="uk-retail-mobile-language"
-            type="button"
-            onClick={toggleLanguage}
-            aria-label={t.languageLabel}
-          >
+      <header className="uk-retail-nav">
+        <nav className="uk-retail-nav-links" aria-label={t.navigationLabel}>
+          <a href={repositoryUrl} target="_blank" rel="noreferrer">
+            {t.repository}
+          </a>
+          <button type="button" onClick={toggleLanguage} aria-label={t.languageLabel}>
             {t.language}
           </button>
+        </nav>
 
-          <a
-            className="uk-retail-nav-cta"
-            href={repositoryUrl}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={t.repositoryLabel}
-          >
-            {t.cta}
-          </a>
-        </header>
+        <button
+          className="uk-retail-mobile-language"
+          type="button"
+          onClick={toggleLanguage}
+          aria-label={t.languageLabel}
+        >
+          {t.language}
+        </button>
+
+        <a
+          className="uk-retail-nav-cta"
+          href={repositoryUrl}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t.repositoryLabel}
+        >
+          {t.cta}
+        </a>
+      </header>
+      <section className="uk-retail-hero" aria-labelledby="uk-retail-title">
+        <div className="uk-retail-hero-bg" aria-hidden="true" />
 
         <div className="uk-retail-hero-copy">
           <p>{t.eyebrow}</p>

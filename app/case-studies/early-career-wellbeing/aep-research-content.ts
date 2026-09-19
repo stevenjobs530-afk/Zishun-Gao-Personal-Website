@@ -1,4 +1,6 @@
 // Public summaries only; no participant-level records or academic attachments.
+export const aepQuestionnaireUrl = "https://stevenjobs530-afk.github.io/AEP-Workplace-Wellbeing-Questionnaire-Formal/";
+
 export const aepResearchContent = {
   "en": {
     "title": "Early-career wellbeing: from research to practical insights",
@@ -9,6 +11,21 @@ export const aepResearchContent = {
     "findingsLink": "Findings",
     "instrument": "View the research instrument",
     "instrumentLabel": "View the AEP research instrument in a new tab",
+    "questionnairePreview": {
+      "link": "Questionnaire",
+      "label": "Research instrument / Preview",
+      "title": "Explore the questionnaire",
+      "intro": "I developed the bilingual questionnaire interface to guide participants through the study introduction, consent and questions about early-career wellbeing and employer support.",
+      "privacy": "These screenshots show the blank questionnaire only. No participant images, individual answers or submission records are displayed here.",
+      "hint": "Select a screenshot to enlarge it.",
+      "cta": "View the full questionnaire",
+      "note": "The link opens the original questionnaire in a new tab. It is provided as an example of the research instrument; you do not need to submit a response.",
+      "images": [
+        ["introduction", "Study introduction", "Research purpose, voluntary participation and participant-support information.", "Blank questionnaire introduction showing the research purpose and participation guidance"],
+        ["consent", "Consent and screening", "Consent information and the questions used to guide participants to the relevant route.", "Blank consent and screening screen with no options selected"],
+        ["employer-support", "Employer support needs", "Example questions about the support that could help during the transition into work.", "Blank employer support questions with unchecked options"]
+      ]
+    },
     "metrics": [
       [
         "45",
@@ -198,6 +215,21 @@ export const aepResearchContent = {
     "findingsLink": "研究发现",
     "instrument": "查看研究问卷",
     "instrumentLabel": "在新标签页中查看 AEP 研究问卷",
+    "questionnairePreview": {
+      "link": "问卷预览",
+      "label": "研究问卷 / 预览",
+      "title": "浏览研究问卷",
+      "intro": "我开发了中英双语问卷界面，引导参与者了解研究、阅读知情同意信息，并回答有关职场新人福祉与雇主支持的问题。",
+      "privacy": "以下截图仅展示未填写的问卷，不展示参与者照片、个人回答或提交记录。",
+      "hint": "点击截图可放大查看。",
+      "cta": "查看完整问卷",
+      "note": "链接将在新标签页中打开原始问卷，供浏览研究工具示例，无需提交回答。",
+      "images": [
+        ["introduction", "研究介绍", "研究目的、自愿参与说明及参与者支持信息。", "未填写的问卷介绍页，展示研究目的与参与说明"],
+        ["consent", "知情同意与筛选", "知情同意信息，以及用于引导参与者进入相应路径的筛选问题。", "未选择任何选项的知情同意与筛选页面"],
+        ["employer-support", "雇主支持需求", "展示有关从教育到就业的过渡中所需支持的示例问题。", "未勾选任何选项的雇主支持需求问题"]
+      ]
+    },
     "metrics": [
       [
         "45",

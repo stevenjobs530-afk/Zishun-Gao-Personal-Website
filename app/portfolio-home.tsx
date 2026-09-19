@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { aepResearchContent } from "./case-studies/early-career-wellbeing/aep-research-content";
+import { aepQuestionnaireUrl, aepResearchContent } from "./case-studies/early-career-wellbeing/aep-research-content";
 import HonoursExhibition from "./honours-exhibition";
 import ResilientBackgroundVideo from "./components/resilient-background-video";
 import CenteredAppleArtwork from "./components/centered-apple-artwork";
@@ -614,6 +614,7 @@ function ProjectsSection({ language }: { language: Language }) {
               <div className="project-details">
                 <div className="project-path" aria-label={t.workflowLabel}>{project.path.map((step, stepIndex) => <span key={step}>{step}{stepIndex < project.path.length - 1 ? <i>→</i> : null}</span>)}</div>
                 <p>{project.value}</p><strong>{project.metric}</strong>
+                {project.slug === "early-career-wellbeing" && <a className="project-questionnaire-link" href={aepQuestionnaireUrl} target="_blank" rel="noreferrer">{aepResearchContent[language].questionnairePreview.cta} <ArrowIcon /></a>}
               </div>
               <a
                 className="project-open"

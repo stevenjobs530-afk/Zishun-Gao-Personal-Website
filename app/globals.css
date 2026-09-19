@@ -1902,6 +1902,24 @@ main[lang="zh-CN"] .framework-heading h2 em {
   font-weight: 600;
 }
 
+.project-questionnaire-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.project-questionnaire-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+.project-questionnaire-link:hover { background: rgba(255, 255, 255, 0.15); }
+
 .project-path {
   display: flex;
   align-items: center;

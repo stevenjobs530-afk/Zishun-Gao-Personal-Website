@@ -17,13 +17,13 @@ import {
 import PortfolioBackLink from "../../components/portfolio-back-link";
 import ResilientBackgroundVideo from "../../components/resilient-background-video";
 import "./aep-case-study.scss";
-import { aepResearchContent } from "./aep-research-content";
+import { aepQuestionnaireUrl, aepResearchContent } from "./aep-research-content";
 
 type Language = "en" | "zh";
 const appBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const repositoryUrl = "https://github.com/stevenjobs530-afk/AEP-Workplace-Wellbeing-Questionnaire-Formal";
-const questionnaireUrl = "https://stevenjobs530-afk.github.io/AEP-Workplace-Wellbeing-Questionnaire-Formal/";
+const questionnaireUrl = aepQuestionnaireUrl;
 const heroVideo = `${appBasePath}/media/video/early-career-wellbeing-hero.mp4`;
 const heroPoster = `${appBasePath}/media/posters/early-career-wellbeing-hero.jpg`;
 
@@ -223,6 +223,7 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
         <nav className="aep-reading-links" aria-label={language === "en" ? "Explore the case study" : "浏览案例内容"}>
           <a href="#research">{t.research}</a>
           <a href="#contribution">{r.contributionLink}</a>
+          <a href="#questionnaire">{r.questionnairePreview.link}</a>
           <a href="#findings">{r.findingsLink}</a>
           <a href="#system">{t.system}</a>
           <a href="#safeguards">{t.safeguards}</a>
@@ -239,6 +240,30 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
           <div className="aep-heading"><p>{r.contribution.label}</p><h2 id="contribution-title">{r.contribution.title}</h2></div>
           <p className="aep-intro">{r.contribution.intro}</p>
           <div className="aep-editorial-grid">{r.contribution.items.map(([title, body]) => <article key={title}><h3>{title}</h3><p>{body}</p></article>)}</div>
+        </section>
+
+        <section id="questionnaire" tabIndex={-1} className="aep-section aep-questionnaire" aria-labelledby="questionnaire-title">
+          <div className="aep-heading"><p>{r.questionnairePreview.label}</p><h2 id="questionnaire-title">{r.questionnairePreview.title}</h2></div>
+          <p className="aep-intro">{r.questionnairePreview.intro}</p>
+          <div className="aep-questionnaire-gallery">
+            {r.questionnairePreview.images.map(([file, title, caption, alt]) => {
+              const src = `${appBasePath}/case-studies/early-career-wellbeing/questionnaire-${file}.webp`;
+              return <figure key={file}>
+                <a href={src} target="_blank" rel="noreferrer" aria-label={`${title} — ${r.questionnairePreview.hint}`}>
+                  {/* Fixed-size static screenshots retain their native aspect ratio. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={alt} width={844} height={840} loading="lazy" decoding="async" />
+                </a>
+                <figcaption><h3>{title}</h3><p>{caption}</p></figcaption>
+              </figure>;
+            })}
+          </div>
+          <div className="aep-questionnaire-footer">
+            <p className="aep-preview-hint">{r.questionnairePreview.hint}</p>
+            <p>{r.questionnairePreview.privacy}</p>
+            <a href={questionnaireUrl} target="_blank" rel="noreferrer">{r.questionnairePreview.cta}<ExternalLink aria-hidden="true" /></a>
+            <p>{r.questionnairePreview.note}</p>
+          </div>
         </section>
 
         <section id="methods" tabIndex={-1} className="aep-section aep-routes aep-dark" aria-labelledby="methods-title">

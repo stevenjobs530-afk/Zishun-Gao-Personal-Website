@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
+import { aepResearchContent } from "./aep-research-content";
 import AepCaseStudy from "./aep-case-study";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Early-Career Wellbeing Questionnaire — Zishun Gao",
-  description:
-    "An AEP questionnaire project covering early-career wellbeing, participant routing, server-side validation and protected research data.",
+  title: `${aepResearchContent.en.title} — Zishun Gao`,
+  description: aepResearchContent.en.description,
+  openGraph: {
+    title: aepResearchContent.en.title,
+    description: aepResearchContent.en.description,
+    type: "article",
+  },
+  twitter: {
+    card: "summary",
+    title: aepResearchContent.en.title,
+    description: aepResearchContent.en.description,
+  },
 };
 
 export default function EarlyCareerWellbeingPage() {

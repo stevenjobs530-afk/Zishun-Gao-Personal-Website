@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { aepResearchContent } from "./case-studies/early-career-wellbeing/aep-research-content";
 import HonoursExhibition from "./honours-exhibition";
 import ResilientBackgroundVideo from "./components/resilient-background-video";
 import CenteredAppleArtwork from "./components/centered-apple-artwork";
@@ -141,12 +142,12 @@ const copy = {
         {
           index: "03",
           type: "Applied research",
-          tools: "JavaScript · Supabase · RLS",
-          title: "AEP early career wellbeing questionnaire",
-          description: "A seven-stage University of Bristol questionnaire with server-side validation, protected storage and structured export for later analysis.",
-          path: ["Questionnaire", "Validation", "Protected storage", "Export"],
-          value: "The project documents the questionnaire structure, submission checks, protected storage and export process; it does not present participant findings.",
-          metric: "Seven-stage online study",
+          tools: aepResearchContent.en.card.tools,
+          title: aepResearchContent.en.title,
+          description: aepResearchContent.en.description,
+          path: aepResearchContent.en.card.path,
+          value: aepResearchContent.en.card.value,
+          metric: aepResearchContent.en.card.metric,
           slug: "early-career-wellbeing",
         },
       ],
@@ -320,12 +321,12 @@ const copy = {
         {
           index: "03",
           type: "应用研究",
-          tools: "JavaScript · Supabase · RLS",
-          title: "AEP 职场新人福祉问卷",
-          description: "一项分为七个阶段的布里斯托大学问卷，包含服务端验证、受保护存储与供后续分析使用的结构化导出。",
-          path: ["问卷", "验证", "受保护存储", "导出"],
-          value: "项目记录问卷结构、提交验证、受保护存储与导出流程；本页不展示参与者结论。",
-          metric: "七阶段在线研究",
+          tools: aepResearchContent.zh.card.tools,
+          title: aepResearchContent.zh.title,
+          description: aepResearchContent.zh.description,
+          path: aepResearchContent.zh.card.path,
+          value: aepResearchContent.zh.card.value,
+          metric: aepResearchContent.zh.card.metric,
           slug: "early-career-wellbeing",
         },
       ],

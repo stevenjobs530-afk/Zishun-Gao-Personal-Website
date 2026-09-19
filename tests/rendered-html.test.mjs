@@ -883,13 +883,20 @@ test("server-renders the redesigned English AEP case study", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Early-Career Wellbeing Questionnaire — Zishun Gao<\/title>/i);
-  assert.match(html, /A questionnaire on the transition from education to employment/);
-  assert.match(html, /Research scope and boundaries/);
-  assert.match(html, /participant routes/);
-  assert.match(html, /guided stages/);
+  assert.match(html, /<title>Early-career wellbeing: from research to practical insights — Zishun Gao<\/title>/i);
+  assert.match(html, /The Talent Lighthouse/);
+  assert.match(html, /My contribution/);
+  assert.match(html, /28\/45 respondents/);
+  assert.match(html, /23\/33 respondents/);
+  assert.match(html, /18\/33 respondents/);
+  assert.match(html, /different questions and respondent bases, not a measured decline/);
+  assert.match(html, /did not implement or evaluate their effectiveness/);
+  const sections = ["research", "contribution", "methods", "findings", "recommendations", "reflection", "system", "safeguards", "limitations"];
+  const positions = sections.map((id) => html.indexOf(`id="${id}"`));
+  assert.ok(positions.every((position, index) => position >= 0 && (index === 0 || position > positions[index - 1])));
+  assert.doesNotMatch(html, /does not display participant responses or claim research findings|infrastructure only|Open live questionnaire/);
   assert.match(html, /RLS/);
-  assert.match(html, /The project combines questionnaire design with documented data safeguards/);
+  assert.match(html, /Research value comes from careful interpretation/);
   assert.match(html, /AEP-Workplace-Wellbeing-Questionnaire-Formal/);
   assert.match(html, /\?lang=en#project-early-career-wellbeing/);
   assert.match(html, /data-portfolio-back-link/);
@@ -903,16 +910,19 @@ test("hydrates the static AEP route from the requested Chinese language", async 
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /<title>Early-Career Wellbeing Questionnaire — Zishun Gao<\/title>/);
+  assert.match(html, /<title>Early-career wellbeing: from research to practical insights — Zishun Gao<\/title>/);
 
   const component = await readFile(
     new URL("../app/case-studies/early-career-wellbeing/aep-case-study.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(component, /一份关于从教育走向就业经历的问卷/);
-  assert.match(component, /三条路径让不同参与者看到与自身情况相关的问题/);
+  const content = await readFile(new URL("../app/case-studies/early-career-wellbeing/aep-research-content.ts", import.meta.url), "utf8");
+  assert.match(content, /职场新人福祉：从研究到实践洞见/);
+  assert.match(content, /28\/45 名受访者/);
+  assert.match(content, /23\/33 名受访者/);
+  assert.match(content, /18\/33 名受访者/);
   assert.match(component, /requestedLanguage/);
-  assert.match(component, /AEP 职场新人福祉问卷 — 高子舜/);
+  assert.match(component, /aepResearchContent\[language\]/);
 });
 
 test("uses one persistent Back to Portfolio control across every detail route", async () => {

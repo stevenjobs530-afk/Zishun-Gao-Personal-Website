@@ -1305,10 +1305,46 @@ $line: rgba($ink, 0.12);
   span { display: block; margin-top: 16px; font-size: 15px; line-height: 1.6; color: #d7e5e5; }
 }
 
-// Keep the limitations content centred despite the page-wide list/paragraph reset.
+// Keep these sections centred despite the page-wide list/paragraph reset.
+.aep-page #reflection > ol,
 .aep-page #limitations > ol,
 .aep-page #limitations > .aep-source-note {
   margin-inline: auto;
+}
+
+.aep-page .aep-limitations-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-block: 48px 0;
+
+  li {
+    display: flex;
+    flex: 0 1 calc((100% - 40px) / 3);
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    min-height: 0;
+    gap: 0;
+    padding: clamp(26px, 3vw, 38px);
+    border: 1px solid $line;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.65);
+    text-align: center;
+  }
+
+  li > span { color: $teal; font-size: 12px; font-weight: 600; }
+  h3 { margin-top: 24px; font-size: clamp(28px, 2.5vw, 36px); line-height: 1.18; text-wrap: balance; }
+  p { margin-top: 20px; color: #41545a; font-size: 16px; line-height: 1.75; }
+}
+
+@media (max-width: 1000px) {
+  .aep-page .aep-limitations-grid li { flex-basis: calc((100% - 20px) / 2); }
+}
+
+@media (max-width: 640px) {
+  .aep-page .aep-limitations-grid li { flex-basis: 100%; }
 }
 
 .aep-research-notes { margin-top: 32px; }

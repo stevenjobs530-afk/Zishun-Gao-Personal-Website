@@ -316,7 +316,7 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
 
         <section id="limitations" tabIndex={-1} className="aep-section aep-outcomes" aria-labelledby="limits-title">
           <div className="aep-heading"><p>{r.limits.label}</p><h2 id="limits-title">{r.limits.title}</h2></div>
-          <ol>{r.limits.items.map(([title, body], index) => <li key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{body}</p></li>)}</ol>
+          <ol className="aep-limitations-grid">{r.limits.items.map(([title, body], index) => <li key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{body}</p></li>)}</ol>
           <p className="aep-source-note">{r.limits.source}</p>
         </section>
 

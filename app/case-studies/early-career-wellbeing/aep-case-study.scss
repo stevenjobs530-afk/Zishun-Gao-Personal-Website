@@ -1305,6 +1305,12 @@ $line: rgba($ink, 0.12);
   span { display: block; margin-top: 16px; font-size: 15px; line-height: 1.6; color: #d7e5e5; }
 }
 
+// Keep the limitations content centred despite the page-wide list/paragraph reset.
+.aep-page #limitations > ol,
+.aep-page #limitations > .aep-source-note {
+  margin-inline: auto;
+}
+
 .aep-research-notes { margin-top: 32px; }
 .aep-research-notes p { max-width: 82ch; margin-top: 18px; color: #c6d8da; font-size: 16px; line-height: 1.8; }
 .aep-insight { margin-top: 32px; padding: clamp(24px, 4vw, 42px); border-radius: 26px; background: $mist; }

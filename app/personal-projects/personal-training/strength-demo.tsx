@@ -102,6 +102,19 @@ export default function StrengthDemo({ language, copy }: { language: Language; c
   const [state, dispatch] = useReducer(reducer, copy.defaults, createInitialState);
   const [statusKey, setStatusKey] = useState<StatusKey>("ready");
   const previousDefaults = useRef(copy.defaults);
+  const removeButtons = useRef(new Map<number, HTMLButtonElement>());
+  const addButton = useRef<HTMLButtonElement>(null);
+  const pendingFocusIndex = useRef<number | null>(null);
+
+  // Removing a set unmounts its focused button, so hand focus to the next
+  // remaining set (or the add action) instead of letting it fall to <body>.
+  useEffect(() => {
+    const index = pendingFocusIndex.current;
+    if (index === null) return;
+    pendingFocusIndex.current = null;
+    const next = state.sets[Math.min(index, state.sets.length - 1)];
+    (next ? removeButtons.current.get(next.id) : addButton.current)?.focus();
+  }, [state.sets]);
 
   useEffect(() => {
     if (previousDefaults.current === copy.defaults) return;
@@ -115,6 +128,7 @@ export default function StrengthDemo({ language, copy }: { language: Language; c
   };
 
   const removeSet = (id: number) => {
+    pendingFocusIndex.current = state.sets.findIndex((set) => set.id === id);
     dispatch({ type: "remove", id });
     setStatusKey("removed");
   };
@@ -125,7 +139,7 @@ export default function StrengthDemo({ language, copy }: { language: Language; c
   };
 
   return (
-    <div className={styles.demoPanel} aria-labelledby="strength-demo-title" lang={language === "zh" ? "zh-CN" : "en"}>
+    <div className={styles.demoPanel} role="group" aria-labelledby="strength-demo-title" lang={language === "zh" ? "zh-CN" : "en"}>
       <div className={styles.demoHeader}>
         <div>
           <span className={styles.demoBadge}>{copy.badge}</span>
@@ -201,7 +215,14 @@ export default function StrengthDemo({ language, copy }: { language: Language; c
                   aria-label={copy.setRepsLabel(index + 1)}
                 />
               </label>
-              <button type="button" className={styles.removeSet} onClick={() => removeSet(set.id)} aria-label={copy.removeSetLabel(index + 1)}>
+              <button
+                type="button"
+                ref={(element) => {
+                  if (element) removeButtons.current.set(set.id, element);
+                  else removeButtons.current.delete(set.id);
+                }}
+                className={styles.removeSet}
+                onClick={() => removeSet(set.id)} aria-label={copy.removeSetLabel(index + 1)}>
                 {copy.remove}
               </button>
             </div>
@@ -210,7 +231,7 @@ export default function StrengthDemo({ language, copy }: { language: Language; c
       </fieldset>
 
       <div className={styles.demoActions}>
-        <button type="button" onClick={addSet}>{copy.add}</button>
+        <button ref={addButton} type="button" onClick={addSet}>{copy.add}</button>
         <button type="button" onClick={reset}>{copy.reset}</button>
       </div>
       <p className={styles.demoStatus} role="status" aria-live="polite">{copy.status[statusKey]}</p>

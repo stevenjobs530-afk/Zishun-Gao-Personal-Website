@@ -231,7 +231,7 @@ export default function UkRetailCaseStudy({ initialLanguage }: { initialLanguage
     setLanguage(next);
     const url = new URL(window.location.href);
     url.searchParams.set("lang", next);
-    window.history.replaceState({}, "", url);
+    window.history.replaceState(window.history.state, "", url);
   }
 
   return (
@@ -393,7 +393,7 @@ export default function UkRetailCaseStudy({ initialLanguage }: { initialLanguage
               </div>
               <p>{t.sections.code.body}</p>
             </div>
-            <pre aria-label={t.sections.code.label}>
+            <pre role="region" tabIndex={0} aria-label={t.sections.code.label}>
               <code>{t.sections.code.snippet}</code>
             </pre>
           </div>

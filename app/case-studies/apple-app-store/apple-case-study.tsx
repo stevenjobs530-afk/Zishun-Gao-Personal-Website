@@ -270,7 +270,7 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
     setLanguage(next);
     const url = new URL(window.location.href);
     url.searchParams.set("lang", next);
-    window.history.replaceState({}, "", url);
+    window.history.replaceState(window.history.state, "", url);
   }
 
   return (
@@ -283,6 +283,8 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
           src={heroVideo}
           poster={heroPoster}
           priority
+          language={language}
+          controlClassName="apple-video-control"
         />
         <div className="apple-hero-shade" aria-hidden="true" />
 
@@ -336,19 +338,16 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
                 type="button"
                 aria-expanded={isActive}
                 aria-controls={detailId}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    setActivePipelineStep((current) => current === index ? null : index);
-                  }
-                }}
                 onClick={() => setActivePipelineStep((current) => current === index ? null : index)}
               >
-                <div className="apple-pipeline-icon" aria-hidden="true"><Icon /></div>
-                <span>{number}</span><h3>{title}</h3><p>{body}</p>
+                {/* Buttons only accept phrasing content, so the card text uses spans rather than h3/p. */}
+                <span className="apple-pipeline-icon" aria-hidden="true"><Icon /></span>
+                <span className="apple-pipeline-number">{number}</span>
+                <span className="apple-pipeline-title">{title}</span>
+                <span className="apple-pipeline-body">{body}</span>
                 <small>{t.sections.pipeline.detailPrompt}</small>
               </button>
-              <div id={detailId} className="apple-pipeline-detail" aria-hidden={!isActive}>
+              <div id={detailId} className="apple-pipeline-detail">
                 <strong>{evidence.label}</strong>
                 <p>{evidence.body}</p>
                 <pre><code>{evidence.files}</code></pre>
@@ -380,7 +379,7 @@ export default function AppleCaseStudy({ initialLanguage }: { initialLanguage: L
 
         <section className="apple-section apple-code apple-dark" aria-labelledby="code-title">
           <div><div className="apple-heading"><p>{t.sections.code.label}</p><h2 id="code-title">{t.sections.code.title}</h2></div><p>{t.sections.code.body}</p></div>
-          <pre aria-label={t.sections.code.filename}><span>{t.sections.code.filename}</span><code>{t.sections.code.snippet}</code></pre>
+          <pre role="region" tabIndex={0} aria-label={t.sections.code.filename}><span>{t.sections.code.filename}</span><code>{t.sections.code.snippet}</code></pre>
         </section>
 
         <section id="results" className="apple-section apple-results" aria-labelledby="results-title">

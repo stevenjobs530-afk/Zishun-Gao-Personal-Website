@@ -176,7 +176,7 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
     setLanguage(next);
     const url = new URL(window.location.href);
     url.searchParams.set("lang", next);
-    window.history.replaceState({}, "", url);
+    window.history.replaceState(window.history.state, "", url);
   }
 
   return (
@@ -189,6 +189,8 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
           src={heroVideo}
           poster={heroPoster}
           priority
+          language={language}
+          controlClassName="aep-video-control"
         />
         <div className="aep-hero-shade" aria-hidden="true" />
 
@@ -311,7 +313,7 @@ export default function AepCaseStudy({ initialLanguage }: { initialLanguage: Lan
 
         <section className="aep-section aep-code aep-dark" aria-labelledby="code-title">
           <div><div className="aep-heading"><p>{t.sections.code.label}</p><h2 id="code-title">{t.sections.code.title}</h2></div><p>{t.sections.code.body}</p></div>
-          <pre aria-label={t.sections.code.filename}><span>{t.sections.code.filename}</span><code>{t.sections.code.snippet}</code></pre>
+          <pre role="region" tabIndex={0} aria-label={t.sections.code.filename}><span tabIndex={0}>{t.sections.code.filename}</span><code>{t.sections.code.snippet}</code></pre>
         </section>
 
         <section id="limitations" tabIndex={-1} className="aep-section aep-outcomes" aria-labelledby="limits-title">

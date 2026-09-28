@@ -38,3 +38,49 @@
     transition: none;
   }
 }
+
+.media[data-video-state="paused"] .video {
+  opacity: 1;
+}
+
+.pauseButton {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(12, 14, 13, 0.58);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.pauseButton:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(12, 14, 13, 0.76);
+}
+
+.pauseButton:focus-visible {
+  outline: 2px solid rgba(244, 218, 184, 0.92);
+  outline-offset: 3px;
+}
+
+.control {
+  position: absolute;
+  z-index: 6;
+  pointer-events: auto;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 768px) {
+  .controlDesktopOnly { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control { display: none; }
+}

@@ -16,6 +16,17 @@ function withAssetBasePath(src: string) {
   return src.startsWith("/") ? `${assetBasePath}${src}` : src;
 }
 
+/** Carousel-sized WebP derivative (scripts/generate-certificate-thumbnails.mjs); the dialog keeps the original. */
+function thumbnailSrc(src: string) {
+  return src.replace(/^\/achievements\/([^/]+)\.png$/, "/achievements/thumbs/$1.webp");
+}
+
+/** Marks Chinese runs inside English copy (e.g. "三创赛") so screen readers switch voice. */
+function withChineseRuns(text: string, language: Language) {
+  if (language === "zh") return text;
+  return text.split(/([㐀-鿿]+)/).map((part, index) => index % 2 === 1 ? <span lang="zh-CN" key={index}>{part}</span> : part);
+}
+
 const honoursByLanguage: Record<Language, Honour[]> = {
   en: [
     {
@@ -372,12 +383,12 @@ export default function HonoursExhibition({ language }: { language: Language }) 
                     else moveToTrack(itemIndex);
                   }} aria-label={isActive ? `${t.enlarge} ${honour.title}` : `${t.centre} ${honour.title}`} aria-current={isActive ? "true" : undefined} tabIndex={!clone && isActive ? 0 : -1}>
                     <span className="honour-art-frame">
-                      <img src={withAssetBasePath(honour.images[0].src)} alt="" loading="lazy" />
+                      <img src={withAssetBasePath(thumbnailSrc(honour.images[0].src))} alt="" loading="lazy" decoding="async" />
                     </span>
                     <span className="honour-open-label">{isActive ? t.tap : t.select}</span>
                   </button>
                   <div className="honour-meta">
-                    <div><h3>{honour.title}</h3><p>{honour.detail}</p></div>
+                    <div><h3>{withChineseRuns(honour.title, language)}</h3><p>{honour.detail}</p></div>
                     <span>{honour.label}</span>
                   </div>
                 </article>
@@ -404,11 +415,11 @@ export default function HonoursExhibition({ language }: { language: Language }) 
             if (event.key === "ArrowRight") { event.preventDefault(); moveImage(1); }
           }}>
             <div className="honour-dialog-header">
-              <div><span>{selected.label}</span><h3 id="honour-dialog-title">{selected.title}</h3></div>
+              <div><span>{selected.label}</span><h3 id="honour-dialog-title">{withChineseRuns(selected.title, language)}</h3></div>
               <button ref={closeButton} type="button" onClick={closeHonour} aria-label={t.closeLabel}>{t.close}</button>
             </div>
 
-            <div className={`certificate-stage${certificateDragging ? " is-dragging" : ""}${reducedMotion ? " is-static" : ""}`} tabIndex={reducedMotion ? -1 : 0} aria-label={reducedMotion ? t.staticPreview : t.interactivePreview} onDragStart={(event) => event.preventDefault()} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel}>
+            <div className={`certificate-stage${certificateDragging ? " is-dragging" : ""}${reducedMotion ? " is-static" : ""}`} tabIndex={reducedMotion ? -1 : 0} role="group" aria-label={reducedMotion ? t.staticPreview : t.interactivePreview} onDragStart={(event) => event.preventDefault()} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel}>
               <div className="certificate-plane" style={{ transform: `rotateX(2deg) rotateY(${rotation}deg)` }}>
                 <img src={withAssetBasePath(selected.images[activeImage].src)} alt={selected.images[activeImage].alt} draggable={false} />
               </div>

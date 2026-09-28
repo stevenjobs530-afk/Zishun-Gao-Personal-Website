@@ -71,6 +71,12 @@ $line: rgba($ink, 0.12);
   display: block;
 }
 
+/* Keep the pause control above the metrics strip at the bottom of the hero. */
+.aep-hero .aep-video-control {
+  right: 40px;
+  bottom: 140px;
+}
+
 .aep-hero-shade {
   z-index: 1;
   background:
@@ -260,7 +266,7 @@ $line: rgba($ink, 0.12);
   }
 
   dd {
-    color: rgba(255, 255, 255, 0.56);
+    color: rgba(255, 255, 255, 0.62);
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.14em;
@@ -307,7 +313,7 @@ $line: rgba($ink, 0.12);
   text-align: center;
 
   > p {
-    color: rgba($ink, 0.55);
+    color: rgba($ink, 0.68);
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.18em;
@@ -407,7 +413,7 @@ $line: rgba($ink, 0.12);
   }
 
   .aep-heading > p {
-    color: rgba(255, 255, 255, 0.52);
+    color: rgba(255, 255, 255, 0.62);
   }
 }
 
@@ -463,7 +469,7 @@ $line: rgba($ink, 0.12);
     box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
 
     > span {
-      color: rgba(255, 255, 255, 0.48);
+      color: rgba(255, 255, 255, 0.62);
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.18em;
@@ -557,7 +563,7 @@ $line: rgba($ink, 0.12);
       inset-block-start: 24px;
       inset-inline-start: 24px;
       display: inline-block;
-      color: rgba($ink, 0.43);
+      color: rgba($ink, 0.68);
       font-size: 10px;
       letter-spacing: 0.16em;
     }
@@ -573,7 +579,7 @@ $line: rgba($ink, 0.12);
 
     p {
       margin-top: 15px;
-      color: rgba($ink, 0.64);
+      color: rgba($ink, 0.68);
       font-size: 13px;
       line-height: 1.65;
     }
@@ -633,7 +639,7 @@ $line: rgba($ink, 0.12);
 
     > span {
       margin-top: 19px;
-      color: rgba(255, 255, 255, 0.43);
+      color: rgba(255, 255, 255, 0.62);
       font-size: 10px;
       letter-spacing: 0.16em;
     }
@@ -650,7 +656,7 @@ $line: rgba($ink, 0.12);
 
     p {
       margin-top: 15px;
-      color: rgba(255, 255, 255, 0.58);
+      color: rgba(255, 255, 255, 0.62);
       font-size: 12px;
       line-height: 1.7;
     }
@@ -712,7 +718,7 @@ $line: rgba($ink, 0.12);
     p {
       max-width: 48ch;
       margin-top: 16px;
-      color: rgba($ink, 0.65);
+      color: rgba($ink, 0.68);
       font-size: 13px;
       line-height: 1.72;
     }
@@ -782,9 +788,9 @@ $line: rgba($ink, 0.12);
       padding: 0 18px;
       overflow-x: auto;
       border-bottom: 1px solid rgba(255, 255, 255, 0.11);
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.62);
       font-family: "Inter", sans-serif;
-      font-size: 9px;
+      font-size: 10px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       white-space: nowrap;
@@ -821,7 +827,7 @@ $line: rgba($ink, 0.12);
     border-bottom: 1px solid $line;
 
     > span {
-      color: rgba($ink, 0.45);
+      color: rgba($ink, 0.68);
       font-size: 10px;
       letter-spacing: 0.16em;
     }
@@ -835,7 +841,7 @@ $line: rgba($ink, 0.12);
 
     p {
       max-width: 530px;
-      color: rgba($ink, 0.65);
+      color: rgba($ink, 0.68);
       font-size: 14px;
       line-height: 1.7;
     }
@@ -878,7 +884,7 @@ $line: rgba($ink, 0.12);
     linear-gradient(160deg, #0a272d, $night 72%);
 
   > p {
-    color: rgba(255, 255, 255, 0.48);
+    color: rgba(255, 255, 255, 0.62);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.18em;

@@ -1,4 +1,4 @@
-import { access, readdir, readFile, writeFile } from "node:fs/promises";
+import { access, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
 const outputDirectory = resolve("dist/client");
@@ -96,6 +96,43 @@ for (const file of files) {
   const updated = prefixRootPaths(contents, extension);
   if (updated !== contents) await writeFile(file, updated);
 }
+
+// Original high-resolution sources kept in public/ for the author, but never
+// referenced by the site (the pages use the WebP/other derivatives). They are
+// left out of the deployed artifact only; the build fails if one becomes referenced.
+const sourceOnlyAssets = [
+  "backgrounds/ai-workflow-laboratory.png",
+  "backgrounds/apple-park-card.png",
+  "backgrounds/method-evidence.png",
+  "backgrounds/method.jpg",
+  "backgrounds/personal-training-runner.png",
+  "backgrounds/project-1.jpg",
+  "backgrounds/project-2.jpg",
+  "case-studies/apple-app-store/apple-construction-grid.png",
+  "case-studies/uk-retail/cleaning-decisions-background.png",
+  "case-studies/uk-retail/evidence-trail-background.png",
+  "case-studies/uk-retail/method-background.png",
+  "case-studies/uk-retail/results-background.png",
+  "case-studies/uk-retail/uk-retail-hero-clean-data.png",
+];
+
+const exportedTextFiles = files.filter((file) => textExtensions.has(extname(file)));
+const exportedText = await Promise.all(exportedTextFiles.map((file) => readFile(file, "utf8")));
+let excludedBytes = 0;
+for (const asset of sourceOnlyAssets) {
+  const referencedBy = exportedTextFiles.filter((_, index) => exportedText[index].includes(asset));
+  if (referencedBy.length) {
+    throw new Error(`Source-only asset ${asset} is referenced by ${referencedBy.join(", ")}; remove it from sourceOnlyAssets`);
+  }
+  const exportedPath = join(outputDirectory, asset);
+  try {
+    excludedBytes += (await stat(exportedPath)).size;
+    await rm(exportedPath);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+}
+console.log(`Excluded ${sourceOnlyAssets.length} unreferenced source images (${(excludedBytes / 1024 / 1024).toFixed(1)} MB) from the export`);
 
 await writeFile(join(outputDirectory, ".nojekyll"), "");
 await writeFile(

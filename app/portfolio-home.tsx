@@ -496,7 +496,7 @@ function Navigation({
         </span>
         <span className="personal-language-toggle" role="group" aria-label={language === "en" ? "Language" : "语言"}>
           <button type="button" aria-pressed={language === "en"} onClick={language === "zh" ? toggleLanguage : undefined}>EN</button>
-          <button type="button" aria-pressed={language === "zh"} onClick={language === "en" ? toggleLanguage : undefined}>中文</button>
+          <button type="button" aria-pressed={language === "zh"} onClick={language === "en" ? toggleLanguage : undefined} lang="zh-CN">中文</button>
         </span>
       </div>
     </nav>
@@ -523,6 +523,8 @@ function Hero({ language }: { language: Language }) {
         poster={`${mediaBasePath}/posters/homepage-hero.jpg`}
         staticOnMobile
         priority
+        language={language}
+        controlClassName="personal-hero-video-control"
       />
       <div className="hero-nav-spacer" aria-hidden="true" />
       <div className="personal-hero-content">
@@ -612,7 +614,7 @@ function ProjectsSection({ language }: { language: Language }) {
               <div className="project-number">{project.index}<span>{project.tools}</span></div>
               <div className="project-copy"><p>{project.type}</p><h3>{project.title}</h3><p className="project-description">{project.description}</p></div>
               <div className="project-details">
-                <div className="project-path" aria-label={t.workflowLabel}>{project.path.map((step, stepIndex) => <span key={step}>{step}{stepIndex < project.path.length - 1 ? <i>→</i> : null}</span>)}</div>
+                <div className="project-path" role="group" aria-label={t.workflowLabel}>{project.path.map((step, stepIndex) => <span key={step}>{step}{stepIndex < project.path.length - 1 ? <i>→</i> : null}</span>)}</div>
                 <p>{project.value}</p><strong>{project.metric}</strong>
                 {project.slug === "early-career-wellbeing" && <a className="project-questionnaire-link" href={aepQuestionnaireUrl} target="_blank" rel="noreferrer">{aepResearchContent[language].questionnairePreview.cta} <ArrowIcon /></a>}
               </div>
@@ -628,7 +630,7 @@ function ProjectsSection({ language }: { language: Language }) {
           <div className="fitness-kicker"><span>{t.fitness.label}</span><span>React · Supabase · RLS</span></div>
           <div className="fitness-copy"><p>{t.fitness.title}</p><h3>{t.fitness.heading.map((line) => <span key={line}>{line}</span>)}</h3></div>
           <p className="fitness-description">{t.fitness.description}</p>
-          <div className="fitness-flow" aria-label={t.fitness.flowLabel}>{t.fitness.flow.map((step, index) => <span key={step}>{step}{index < t.fitness.flow.length - 1 ? <i>→</i> : null}</span>)}</div>
+          <div className="fitness-flow" role="group" aria-label={t.fitness.flowLabel}>{t.fitness.flow.map((step, index) => <span key={step}>{step}{index < t.fitness.flow.length - 1 ? <i>→</i> : null}</span>)}</div>
           <div className="fitness-links">
             <a href={`${appBasePath}/personal-projects/personal-training/?lang=${language}`}>{t.fitness.view} <ArrowIcon /></a>
             <a href="https://github.com/stevenjobs530-afk/personal-training-website-v2" target="_blank" rel="noreferrer">GitHub <ArrowIcon /></a>
@@ -677,7 +679,7 @@ function MethodSection({ language }: { language: Language }) {
     <section id="method" className="framework-section framework-method image-backed-section method-photo">
       <SectionBlend />
       <SectionHeading number="05" label={t.label} title={t.title} italic={t.italic} summary={t.summary} keepItalicTogether={language === "zh"} />
-      <div className="method-flow" aria-label={t.flowLabel}>
+      <div className="method-flow" role="group" aria-label={t.flowLabel}>
         {t.stages.map(([stage, detail, output], index) => (
           <div className="method-stage-wrap" key={stage}>
             <article className="method-stage">
@@ -741,13 +743,15 @@ function ContactSection({ language }: { language: Language }) {
         src={`${mediaBasePath}/video/homepage-contact.mp4`}
         poster={`${mediaBasePath}/posters/homepage-contact.jpg`}
         staticOnMobile
+        language={language}
+        controlClassName="contact-video-control"
       />
       <div className="contact-topline"><span>07</span><a href="#home">{t.top}</a></div>
       <div className="contact-content">
         <p className="contact-eyebrow">{t.eyebrow}</p>
         <h2>{t.title}<br /><em>{t.italic}</em></h2>
         <p className="contact-intro">{t.intro}</p>
-        <div className="contact-buttons" aria-label={t.optionsLabel}>
+        <div className="contact-buttons" role="group" aria-label={t.optionsLabel}>
           {contacts.map(([label, href], index) => <a key={label} href={href} className={index === 0 ? "contact-button contact-button-primary" : "contact-button"} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined}><span>{label}</span><ArrowIcon /></a>)}
         </div>
       </div>
@@ -874,7 +878,7 @@ export default function PortfolioHome({ initialLanguage }: { initialLanguage: La
     document.title = copy[language].documentTitle;
     document.querySelector('meta[name="description"]')?.setAttribute("content", copy[language].documentDescription);
     url.searchParams.set("lang", language);
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
   }, [language]);
 
   useEffect(() => {

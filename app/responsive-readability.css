@@ -231,6 +231,14 @@ main .ai-concept-primary { min-height: 48px; height: auto; padding: 12px 20px; w
   main .apple-hero-video,
   main .aep-hero-video,
   main .ai-concept-hero-video { object-fit: contain; position: absolute; inset: 0; }
+  /* Pin the video pause control to the top-right corner of the 16:9 media card. */
+  main .apple-hero .apple-video-control,
+  main .aep-hero .aep-video-control,
+  main .ai-concept-hero .ai-concept-video-control {
+    top: 108px;
+    right: 32px;
+    bottom: auto;
+  }
   main .apple-hero-shade,
   main .aep-hero-shade { display: none; }
   main .apple-hero-copy,

@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PortfolioBackLink from "../../components/portfolio-back-link";
+import { readStoredMotionPause, storeMotionPause, VideoPauseButton } from "../../components/resilient-background-video";
 import styles from "./personal-training.module.css";
 import StrengthDemo from "./strength-demo";
 import type { StrengthDemoCopy } from "./strength-demo";
@@ -15,7 +16,7 @@ const HERO_VIDEO_URL = `${appBasePath}/personal-projects/personal-training/video
 const HERO_VIDEO_POSTER = `${appBasePath}/personal-projects/personal-training/backgrounds/personal-training-motivation.webp`;
 
 export type Language = "en" | "zh";
-type HeroVideoState = "loading" | "playing" | "poster" | "reduced-motion";
+type HeroVideoState = "loading" | "playing" | "poster" | "paused" | "reduced-motion";
 
 const COPY = {
   en: {
@@ -342,7 +343,7 @@ function FleetVideo({ item, index, onNavigate }: { item: FleetItem; index: numbe
       data-video-state={videoState}
       style={fleetStyle}
     >
-      <video ref={videoRef} className={styles.fleetVideo} muted loop playsInline preload="metadata" poster={item.poster} onPlaying={() => setVideoState("playing")} onWaiting={() => setVideoState("poster")} onStalled={() => setVideoState("poster")} onError={() => setVideoState("poster")}>
+      <video ref={videoRef} className={styles.fleetVideo} muted loop playsInline preload="metadata" aria-hidden="true" poster={item.poster} onPlaying={() => setVideoState("playing")} onWaiting={() => setVideoState("poster")} onStalled={() => setVideoState("poster")} onError={() => setVideoState("poster")}>
         <source src={item.src} type="video/mp4" />
       </video>
       <div className={styles.fleetShade} />
@@ -427,6 +428,8 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const [isFleetOpen, setIsFleetOpen] = useState(false);
   const [heroVideoState, setHeroVideoState] = useState<HeroVideoState>("loading");
+  const [heroUserPaused, setHeroUserPaused] = useState(false);
+  const heroUserPausedRef = useRef(false);
   const resolvedUrlLanguage = useRef(false);
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
@@ -468,7 +471,7 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
 
   const requestHeroPlayback = useCallback(async () => {
     const video = backgroundVideoRef.current;
-    if (!video || prefersReducedMotion || document.visibilityState !== "visible") return;
+    if (!video || prefersReducedMotion || heroUserPausedRef.current || document.visibilityState !== "visible") return;
     if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) { setHeroVideoState("playing"); return; }
     video.muted = true;
     video.defaultMuted = true;
@@ -484,10 +487,35 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
 
   const handleHeroVideoPlaying = useCallback(() => {
     if (prefersReducedMotion) { backgroundVideoRef.current?.pause(); setHeroVideoState("reduced-motion"); }
+    else if (heroUserPausedRef.current) { backgroundVideoRef.current?.pause(); setHeroVideoState("paused"); }
     else setHeroVideoState("playing");
   }, [prefersReducedMotion]);
 
-  const showHeroPoster = useCallback(() => { if (!prefersReducedMotion) setHeroVideoState("poster"); }, [prefersReducedMotion]);
+  const showHeroPoster = useCallback(() => { if (!prefersReducedMotion) setHeroVideoState(heroUserPausedRef.current ? "paused" : "poster"); }, [prefersReducedMotion]);
+
+  const toggleHeroPlayback = useCallback(() => {
+    const nextPaused = !heroUserPausedRef.current;
+    heroUserPausedRef.current = nextPaused;
+    setHeroUserPaused(nextPaused);
+    storeMotionPause(nextPaused);
+    if (nextPaused) {
+      backgroundVideoRef.current?.pause();
+      setHeroVideoState("paused");
+    } else {
+      void requestHeroPlayback();
+    }
+  }, [requestHeroPlayback]);
+
+  useEffect(() => {
+    heroUserPausedRef.current = readStoredMotionPause();
+    if (!heroUserPausedRef.current) return;
+    backgroundVideoRef.current?.pause();
+    const frame = window.requestAnimationFrame(() => {
+      setHeroUserPaused(true);
+      setHeroVideoState((current) => current === "reduced-motion" ? current : "paused");
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -503,9 +531,9 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
     let isHeroVisible = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
     const updatePlayback = () => {
       if (isHeroVisible && document.visibilityState === "visible") void requestHeroPlayback();
-      else { video.pause(); setHeroVideoState("poster"); }
+      else { video.pause(); setHeroVideoState(heroUserPausedRef.current ? "paused" : "poster"); }
     };
-    const retryFromUserGesture = () => { if (isHeroVisible && video.paused) void requestHeroPlayback(); };
+    const retryFromUserGesture = () => { if (isHeroVisible && video.paused && !heroUserPausedRef.current) void requestHeroPlayback(); };
     const observer = new IntersectionObserver(([entry]) => { isHeroVisible = entry.isIntersecting && entry.intersectionRatio >= 0.05; updatePlayback(); }, { threshold: [0, 0.05, 0.25] });
     observer.observe(hero);
     document.addEventListener("visibilitychange", updatePlayback);
@@ -578,6 +606,7 @@ export default function PersonalTrainingHero({ initialLanguage = "en" }: { initi
             <video ref={backgroundVideoRef} src={HERO_VIDEO_URL} poster={HERO_VIDEO_POSTER} className={styles.backgroundVideo} autoPlay muted loop playsInline preload="auto" aria-hidden="true" onLoadedData={() => void requestHeroPlayback()} onCanPlay={() => void requestHeroPlayback()} onPlaying={handleHeroVideoPlaying} onWaiting={showHeroPoster} onStalled={showHeroPoster} onError={showHeroPoster} />
           </div>
           <div className={styles.loadingShade} />
+          {!prefersReducedMotion ? <VideoPauseButton language={language} paused={heroUserPaused} onToggle={toggleHeroPlayback} className={styles.heroVideoControl} /> : null}
           <div className={styles.heroMediaFooter}>
             <p className={styles.heroDescription}>{copy.hero.description}</p>
             <button ref={exploreButtonRef} type="button" className={styles.exploreButton} onClick={() => setIsFleetOpen(true)}>{copy.hero.explore} <span aria-hidden="true">↗</span></button>

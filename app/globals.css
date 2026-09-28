@@ -615,6 +615,13 @@ a {
   display: block;
 }
 
+/* Background-video pause controls sit in empty corners of the hero and contact sections. */
+.personal-hero .personal-hero-video-control {
+  right: auto;
+  bottom: 57px;
+  left: 40px;
+}
+
 .personal-navbar {
   position: fixed;
   top: 18px;
@@ -1130,7 +1137,8 @@ a {
 
 .framework-kicker span:last-child,
 .framework-heading > p {
-  opacity: 0.48;
+  /* 0.64 keeps the muted hierarchy while meeting WCAG AA (≈5:1) on the paper background. */
+  opacity: 0.64;
 }
 
 .framework-heading h2 {
@@ -1426,7 +1434,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
 }
 
 .honour-carousel-controls span {
-  color: rgba(255, 255, 255, 0.46);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 9px;
   letter-spacing: 0.14em;
 }
@@ -1554,7 +1562,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
 .honour-open-label {
   display: block;
   margin: 11px 3px 0;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1582,13 +1590,13 @@ main[lang="zh-CN"] .framework-heading h2 em {
 
 .honour-meta p {
   margin-top: 6px;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 11px;
   line-height: 1.45;
 }
 
 .honour-meta span {
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1625,7 +1633,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
 }
 
 .honour-dialog-header span {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1734,7 +1742,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
 
 .certificate-counter {
   width: 100%;
-  color: rgba(255, 255, 255, 0.46);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 9px;
   letter-spacing: 0.12em;
   text-align: right;
@@ -1765,6 +1773,12 @@ main[lang="zh-CN"] .framework-heading h2 em {
 .ai-workflow-feature:focus {
   outline: 2px solid rgba(23, 22, 20, 0.72);
   outline-offset: 5px;
+}
+
+/* The AI feature is a full-bleed dark section: a dark ring outside it is invisible. */
+.ai-workflow-feature:focus {
+  outline-color: var(--glass-focus-ring);
+  outline-offset: -6px;
 }
 
 .project-list {
@@ -2093,7 +2107,7 @@ main[lang="zh-CN"] .framework-heading h2 em {
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -2185,7 +2199,7 @@ main[lang="en"] .ai-feature-copy h2 em {
 .ai-feature-stages li:last-child { border-right: 0; }
 
 .ai-feature-stages span {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 9px;
   letter-spacing: 0.14em;
 }
@@ -2201,7 +2215,7 @@ main[lang="en"] .ai-feature-copy h2 em {
 .ai-feature-stages p {
   max-width: 33ch;
   margin-top: 10px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -2510,6 +2524,11 @@ main[lang="en"] .ai-feature-copy h2 em {
   display: block;
 }
 
+.contact-section .contact-video-control {
+  right: 40px;
+  bottom: 100px;
+}
+
 .contact-topline,
 .contact-content,
 .contact-footer {
@@ -2686,7 +2705,7 @@ main[lang="zh-CN"] .contact-content h2 em {
 .contact-footer {
   padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 /* Phase 2: one Liquid Glass material language for actual controls. */

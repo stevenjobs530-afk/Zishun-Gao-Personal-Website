@@ -488,7 +488,16 @@ test("uses resilient local background videos and posters across the portfolio", 
     assert.doesNotMatch(source, /d8j0ntlcm91z4\.cloudfront\.net|app-uploads\.krea\.ai/);
   }
 
-  assert.match(shared, /type VideoState = "loading" \| "playing" \| "poster" \| "reduced-motion"/);
+  assert.match(shared, /type VideoState = "loading" \| "playing" \| "poster" \| "paused" \| "reduced-motion"/);
+  // WCAG 2.2.2: autoplaying background video has a visible, labelled pause control.
+  assert.match(shared, /export function VideoPauseButton/);
+  assert.match(shared, /pause: "Pause background video", play: "Play background video"/);
+  assert.match(shared, /pause: "暂停背景视频", play: "播放背景视频"/);
+  assert.match(shared, /userPausedRef\.current \|\| !isVisibleRef\.current/);
+  // The reduced-motion effect is registered before the playback effect.
+  assert.ok(shared.indexOf('matchMedia("(prefers-reduced-motion: reduce)")') < shared.indexOf("const updatePlayback"));
+  for (const component of [home, apple, aep, aiWorkflow]) assert.match(component, /language=\{language\}\s+controlClassName=/);
+  assert.match(personalTraining, /<VideoPauseButton language=\{language\} paused=\{heroUserPaused\}/);
   assert.match(shared, /poster=\{poster\}/);
   assert.match(shared, /<source src=\{src\} type="video\/mp4"/);
   assert.match(shared, /video\.defaultMuted = true/);
@@ -724,7 +733,7 @@ test("keeps the project interaction and demo privacy boundaries explicit", async
   assert.match(stylesheet, /overflow-x:\s*clip/);
   assert.match(stylesheet, /background:\s*var\(--paper,\s*#f0ece4\)/);
   assert.match(stylesheet, /\.heroMedia\s*\{[\s\S]*border-radius:\s*28px/s);
-  assert.match(stylesheet, /\.heroMedia\[data-video-state="playing"\] \.backgroundVideo\s*\{[^}]*opacity:\s*1/s);
+  assert.match(stylesheet, /\.heroMedia\[data-video-state="playing"\] \.backgroundVideo,\s*\.heroMedia\[data-video-state="paused"\] \.backgroundVideo\s*\{[^}]*opacity:\s*1/s);
   assert.doesNotMatch(stylesheet, /videoPlayFallback/);
   assert.match(stylesheet, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.backgroundVideo\s*\{\s*display:\s*none;/s);
   assert.match(stylesheet, /\.story\s*\{[\s\S]*gap:\s*32px;[\s\S]*background:\s*var\(--paper,\s*#f0ece4\)/s);
@@ -768,7 +777,7 @@ test("server-renders the complete English portfolio homepage by default", async 
   assert.match(html, /class="brand-orb"/);
   assert.match(html, /role="group" aria-label="Language"/);
   assert.match(html, /aria-pressed="true">EN/);
-  assert.match(html, /aria-pressed="false">中文/);
+  assert.match(html, /aria-pressed="false" lang="zh-CN">中文/);
   assert.doesNotMatch(html, /Vertex Sci|deep-structure research lab/i);
 });
 
@@ -1001,8 +1010,11 @@ test("keeps Apple motion preferences and local navigation explicit", async () =>
   assert.match(component, /apple-construction-grid\.webp[^>]+unoptimized/);
   assert.match(component, /View repository/);
   assert.match(component, /aria-expanded=\{isActive\}/);
-  assert.match(component, /event\.key === "Enter" \|\| event\.key === " "/);
-  assert.match(component, /onKeyDown=\{\(event\) => \{/);
+  // Native buttons already activate on Enter/Space; the cards hold only phrasing content.
+  assert.doesNotMatch(component, /event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(component, /<span className="apple-pipeline-title">\{title\}<\/span>/);
+  assert.doesNotMatch(component, /<button[^>]*apple-pipeline-trigger[\s\S]*?<h3>[\s\S]*?<\/button>/);
+  assert.match(component, /<pre role="region" tabIndex=\{0\} aria-label=\{t\.sections\.code\.filename\}>/);
   assert.doesNotMatch(component, /portfolio-v3-public|early-career-wellbeing/i);
   assert.match(stylesheet, /apple-hero-video/);
   assert.match(stylesheet, /max-width:\s*580px.+max-height:\s*720px/s);
@@ -1129,4 +1141,63 @@ test("shares the Liquid Glass interaction language across homepage controls", as
 
   assert.match(stylesheet, /\.contact-button-disabled::before\s*\{[^}]*display:\s*none;/s);
   assert.match(stylesheet, /\.contact-button-disabled,[\s\S]*?-webkit-backdrop-filter:\s*none;[^}]*backdrop-filter:\s*none;/s);
+});
+
+test("ships favicon, Chinese pre-hydration metadata and valid grouping semantics", async () => {
+  const html = await (await render("/?lang=en")).text();
+  assert.match(html, /<link rel="icon" href="\/favicon\.svg" type="image\/svg\+xml"/);
+  assert.match(html, /<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/);
+  // The inline bootstrap sets lang/title/description before hydration for ?lang=zh.
+  assert.match(html, /get\("lang"\)!=="zh"/);
+  assert.match(html, /document\.documentElement\.lang="zh-CN"/);
+  assert.match(html, /高子舜 — 个人作品集/);
+  assert.match(html, /<html lang="en"/);
+  for (const label of ["Project workflow", "Contact options"]) {
+    assert.doesNotMatch(html, new RegExp(`<div class="[^"]*"\\s+aria-label="${label}"`));
+  }
+  assert.match(html, /class="contact-buttons" role="group"/);
+
+  const [bootstrap, uk, aep, apple, ai, home, honours, exportScript, ciWorkflow, deployWorkflow] = await Promise.all([
+    "app/language-bootstrap.ts",
+    "app/case-studies/uk-retail/uk-retail-case-study.tsx",
+    "app/case-studies/early-career-wellbeing/aep-case-study.tsx",
+    "app/case-studies/apple-app-store/apple-case-study.tsx",
+    "app/case-studies/ai-assisted-job-workflow/ai-workflow-concept.tsx",
+    "app/portfolio-home.tsx",
+    "app/honours-exhibition.tsx",
+    "scripts/prepare-static-export.mjs",
+    ".github/workflows/ci.yml",
+    ".github/workflows/deploy-pages.yml",
+  ].map((path) => readFile(new URL(path, projectRoot), "utf8")));
+
+  for (const key of ["case-studies/uk-retail", "case-studies/apple-app-store", "case-studies/early-career-wellbeing", "case-studies/ai-assisted-job-workflow", "personal-projects/personal-training"]) {
+    assert.match(bootstrap, new RegExp(`"${key}": \\{`));
+  }
+  // History updates keep any router state instead of discarding it.
+  for (const source of [uk, aep, apple, ai, home]) {
+    assert.doesNotMatch(source, /history\.replaceState\((\{\}|null),/);
+    assert.match(source, /history\.replaceState\(window\.history\.state,/);
+  }
+  assert.match(ai, /documentDescription: "这套流程使用 AI/);
+  assert.match(ai, /setAttribute\("content", t\.documentDescription\)/);
+
+  // Carousel thumbnails use WebP derivatives; the dialog keeps the original certificate.
+  assert.match(honours, /src=\{withAssetBasePath\(thumbnailSrc\(honour\.images\[0\]\.src\)\)\}/);
+  assert.match(honours, /src=\{withAssetBasePath\(selected\.images\[activeImage\]\.src\)\}/);
+  for (const name of ["three-good-student-2023", "comprehensive-development-scholarship-second-prize-2022", "ecommerce-entrepreneurship-2023-redacted", "ecommerce-creativity-2023-redacted", "ecommerce-innovation-2023-redacted", "market-research-second-prize-2023-redacted"]) {
+    await access(new URL(`public/achievements/${name}.png`, projectRoot));
+    const thumb = await stat(new URL(`public/achievements/thumbs/${name}.webp`, projectRoot));
+    assert.ok(thumb.size < 260_000, `${name} thumbnail should stay small`);
+  }
+
+  // Unused originals stay in public/ but are excluded from the deployed export only.
+  assert.match(exportScript, /const sourceOnlyAssets = \[/);
+  assert.match(exportScript, /is referenced by .*remove it from sourceOnlyAssets/);
+
+  assert.match(ciWorkflow, /on:\s*\n\s*pull_request:/);
+  assert.match(ciWorkflow, /npm ci --include=optional/);
+  assert.match(ciWorkflow, /npm run test:browser/);
+  assert.doesNotMatch(ciWorkflow, /actions\/deploy-pages|pages: write|id-token: write/);
+  assert.match(deployWorkflow, /cancel-in-progress: false/);
+  assert.match(deployWorkflow, /npm ci --include=optional/);
 });

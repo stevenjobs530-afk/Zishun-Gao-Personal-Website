@@ -26,6 +26,7 @@ const heroPoster = `${appBasePath}/media/posters/ai-workflow-hero.jpg`;
 const copy = {
   en: {
     documentTitle: "AI-Assisted Job Workflow Concept — Zishun Gao",
+    documentDescription: "A human-controlled workflow concept for discovering, validating, comparing and tracking UK early-career opportunities with AI assistance.",
     system: "System",
     responsibilities: "Responsibilities",
     safeguardsNav: "Safeguards",
@@ -153,6 +154,7 @@ const copy = {
   },
   zh: {
     documentTitle: "AI 辅助求职工作流概念 — 高子舜",
+    documentDescription: "这套流程使用 AI 辅助发现、核验、比较和跟踪初级职业机会；个人决定、账户变更与申请仍由人工完成。",
     system: "系统",
     responsibilities: "职责边界",
     safeguardsNav: "保护措施",
@@ -286,9 +288,10 @@ export default function AiWorkflowConcept({ initialLanguage }: { initialLanguage
 
     document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
     document.title = t.documentTitle;
+    document.querySelector('meta[name="description"]')?.setAttribute("content", t.documentDescription);
     url.searchParams.set("lang", language);
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
-  }, [language, t.documentTitle]);
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [language, t.documentTitle, t.documentDescription]);
 
   function toggleLanguage() {
     setLanguage((current) => current === "en" ? "zh" : "en");
@@ -304,6 +307,8 @@ export default function AiWorkflowConcept({ initialLanguage }: { initialLanguage
           src={heroVideo}
           poster={heroPoster}
           priority
+          language={language}
+          controlClassName="ai-concept-video-control"
         />
         <div className="ai-concept-frame">
           <nav className="ai-concept-nav" aria-label={t.navLabel}>

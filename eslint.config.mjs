@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Build and tool output, so `npx eslint .` matches `npm run lint`.
+    "dist/**",
+    ".wrangler/**",
+    ".vinext/**",
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

@@ -386,7 +386,8 @@ test.describe("bilingual cross-browser layout", () => {
 
           for (const [id, label] of [["contact", labels.contact], ["projects", labels.projects], ["ai-workflow", labels.ai], ["method", labels.method]] as const) {
             await resetNavigationProbe(page);
-            const link = page.getByRole("link", { name: label, exact: true });
+            // The mobile menu closes after navigating, so find the link even while it is hidden.
+            const link = page.getByRole("link", { includeHidden: true, name: label, exact: true });
             await openMobileMenu(page);
             await link.click();
             await expect(page).toHaveURL(new RegExp(`#${id}$`));

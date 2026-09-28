@@ -29,7 +29,7 @@ The GitHub Pages deployment is built by the workflow in
 
 ## Technology
 
-Next.js, React, TypeScript, Sass, Motion, GSAP, vinext, and GitHub Actions.
+Next.js, React, TypeScript, Sass, Motion, vinext, and GitHub Actions.
 
 ## Access note
 

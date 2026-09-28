@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./responsive-readability.css";
+import { LANGUAGE_BOOTSTRAP } from "./language-bootstrap";
 
 export const metadata: Metadata = {
   title: "Zishun Gao — Personal Portfolio",
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
   authors: [{ name: "Zishun Gao" }],
   creator: "Zishun Gao",
   category: "Personal portfolio",
+  // Prefixed here because the RSC payload (re-rendered after hydration) is not path-rewritten by the export script.
+  icons: { icon: [{ url: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`, type: "image/svg+xml" }] },
   openGraph: {
     type: "website",
     title: "Zishun Gao — Personal Portfolio",
@@ -25,7 +28,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    // LANGUAGE_BOOTSTRAP may switch lang to zh-CN before hydration.
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Stylesheets @import these font hosts; opening the connections early shortens the render-blocking chain. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script dangerouslySetInnerHTML={{ __html: LANGUAGE_BOOTSTRAP }} />
+      </head>
       <body>{children}</body>
     </html>
   );

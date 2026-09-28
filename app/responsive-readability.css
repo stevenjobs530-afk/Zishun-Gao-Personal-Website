@@ -1,7 +1,33 @@
 /* Readable shared surfaces; mobile heroes show the artwork and copy in separate rows. */
+/* Floating nav: translucent Liquid Glass. The 0.62 tint keeps white labels at
+   WCAG AA even over the white/paper sections that scroll beneath the fixed bar;
+   blur + saturation let the scenery read through. */
+.personal-navbar {
+  --nav-glass-tint: rgba(22, 24, 26, 0.62);
+  --nav-glass-highlight: linear-gradient(170deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03) 38%, transparent 62%, rgba(255, 255, 255, 0.06));
+}
 .personal-nav-main.glass-panel {
-  background: #292824;
-  border-color: #625e56;
+  background: var(--nav-glass-highlight), var(--nav-glass-tint);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 30px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+}
+.personal-nav-main.glass-panel:is(:hover, :focus-within) {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .personal-nav-main.glass-panel { background: var(--glass-tint-solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .personal-nav-main.glass-panel {
+    background: var(--glass-tint-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 .personal-menu-toggle { display: none; }
 .menu-discovery-hint { display: none; }
@@ -133,7 +159,8 @@ main .ai-concept-primary { min-height: 48px; height: auto; padding: 12px 20px; w
     right: 0;
     padding: 7px 12px;
     border-radius: 12px;
-    background: #292824;
+    /* Same backdrop-root limit as the dropdown, so this small hint stays opaque. */
+    background: #1e2022;
     color: #f4f0e8;
     font-size: 12px;
     line-height: 1.4;
@@ -152,10 +179,13 @@ main .ai-concept-primary { min-height: 48px; height: auto; padding: 12px 20px; w
     flex-direction: column;
     align-items: stretch;
     padding: 12px;
-    border: 1px solid #625e56;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
-    background: #292824;
-    box-shadow: 0 16px 30px #0005;
+    /* Opaque on purpose: the bar's own backdrop-filter makes it the backdrop
+       root, so this dropdown cannot blur the page behind it; even a 4% gap
+       ghosts large headings through the link list. */
+    background: var(--nav-glass-highlight), #1e2022;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 16px 30px #0005;
   }
   main[lang] .personal-nav-link { font-size: 16px; min-height: 44px; padding: 12px; }
   main[lang] .personal-nav-label-full { display: inline; }
